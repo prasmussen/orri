@@ -1,4 +1,6 @@
 use actix_web::{web, App, HttpRequest, HttpServer, Responder};
+use actix_files::{Files, NamedFile};
+use std::io;
 
 
 #[derive(Clone)]
@@ -23,7 +25,7 @@ impl Host {
         let value = req.headers().get("host")?;
         let host = value.to_str().ok()?;
 
-        // TODO: make sure host only contains allowed characters
+        // TODO: make sure host only contains allowed characters (add newtype?)
         if host == main_domain {
             Some(Host::Main())
 
@@ -45,16 +47,17 @@ async fn index(req: HttpRequest, state: web::Data<AppState>) -> impl Responder {
             index_main(req),
 
         Host::Domain(domain) =>
-            index_domain(req, domain),
+            index_domain(req, &domain),
     }
 }
 
-fn index_main(req: HttpRequest) -> String {
-    format!("main!")
+
+fn index_main(req: HttpRequest) -> Result<NamedFile, io::Error> {
+    NamedFile::open("../frontend/index.html")
 }
 
-fn index_domain(req: HttpRequest, domain: String) -> String {
-    format!("domain: {}", domain)
+fn index_domain(req: HttpRequest, domain: &str) -> Result<NamedFile, io::Error> {
+    NamedFile::open("../frontend/index.html")
 }
 
 
@@ -81,6 +84,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .data(state.clone())
             .route("/", web::get().to(index))
+            .service(Files::new("/static", "../frontend/static"))
     })
     .bind("127.0.0.1:8000")?
     .run()
