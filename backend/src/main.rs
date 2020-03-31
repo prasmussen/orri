@@ -11,6 +11,19 @@ struct Config {
 #[derive(Clone)]
 struct ServerConfig {
     domain: String,
+    frontend_root: String,
+}
+
+impl ServerConfig {
+    pub fn static_path(&self) -> String {
+        // TODO: use path type
+        format!("{}/static", self.frontend_root)
+    }
+
+    pub fn frontend_file_path(&self, name: &str) -> String {
+        // TODO: use path type
+        format!("{}/{}", self.frontend_root, name)
+    }
 }
 
 
@@ -44,21 +57,26 @@ async fn index(req: HttpRequest, state: web::Data<AppState>) -> impl Responder {
 
     match host {
         Host::Main() =>
-            index_main(req),
+            index_main(req, state),
 
         Host::Domain(domain) =>
-            index_domain(req, &domain),
+            index_domain(req, state, &domain),
     }
 }
 
 
-fn index_main(req: HttpRequest) -> Result<NamedFile, io::Error> {
-    NamedFile::open("../frontend/index.html")
+fn index_main(req: HttpRequest, state: web::Data<AppState>) -> Result<NamedFile, io::Error> {
+    NamedFile::open(state.config.server.frontend_file_path("index.html"))
 }
 
-fn index_domain(req: HttpRequest, domain: &str) -> Result<NamedFile, io::Error> {
-    NamedFile::open("../frontend/index.html")
+fn index_domain(req: HttpRequest, state: web::Data<AppState>, domain: &str) -> Result<NamedFile, io::Error> {
+    NamedFile::open(state.config.server.frontend_file_path("index.html"))
 }
+
+async fn new_handler(req: HttpRequest, state: web::Data<AppState>) -> impl Responder {
+    NamedFile::open(state.config.server.frontend_file_path("new.html"))
+}
+
 
 
 
@@ -76,6 +94,7 @@ async fn main() -> std::io::Result<()> {
         config: Config{
             server: ServerConfig{
                 domain: "zait.io".to_string(),
+                frontend_root: "../frontend".to_string(),
             }
         }
     };
@@ -84,7 +103,8 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .data(state.clone())
             .route("/", web::get().to(index))
-            .service(Files::new("/static", "../frontend/static"))
+            .route("/new", web::get().to(new_handler))
+            .service(Files::new("/static", state.config.server.static_path()))
     })
     .bind("127.0.0.1:8000")?
     .run()
