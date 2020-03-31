@@ -1550,4 +1550,6 @@ dependencies = [
  "actix-files",
  "actix-rt",
  "actix-web",
+ "serde",
+ "serde_json",
 ]

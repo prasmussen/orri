@@ -1,5 +1,6 @@
 use actix_web::{web, App, HttpRequest, HttpServer, Responder};
 use actix_files::{Files, NamedFile};
+use serde::Deserialize;
 use std::io;
 
 
@@ -78,6 +79,17 @@ async fn new_handler(req: HttpRequest, state: web::Data<AppState>) -> impl Respo
 }
 
 
+#[derive(Deserialize)]
+struct NewDomainRequest {
+    source: String,
+    domain: String,
+    path: String,
+}
+
+async fn new_document_handler(req: HttpRequest, state: web::Data<AppState>, payload: web::Json<NewDomainRequest>) -> impl Responder {
+    "ok"
+}
+
 
 
 #[derive(Clone)]
@@ -104,6 +116,7 @@ async fn main() -> std::io::Result<()> {
             .data(state.clone())
             .route("/", web::get().to(index))
             .route("/new", web::get().to(new_handler))
+            .route("/api/documents", web::post().to(new_document_handler))
             .service(Files::new("/static", state.config.server.static_path()))
     })
     .bind("127.0.0.1:8000")?

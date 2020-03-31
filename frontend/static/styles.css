@@ -1,0 +1,22 @@
+form .label {
+   display: block;
+   font-size: 24px;
+}
+
+form input {
+    height: 30px;
+    min-width: 600px;
+    font-size: 20px;
+}
+
+#source {
+    height: 600px;
+    min-width: 600px;
+    font-size: 20px;
+}
+
+button {
+    height: 40px;
+    font-size: 20px;
+    min-width: 120px;
+}
