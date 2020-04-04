@@ -1,6 +1,7 @@
 use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Responder};
 use actix_files::{Files, NamedFile};
 use serde::{Deserialize, Serialize};
+use serde::de::DeserializeOwned;
 use serde_json;
 use std::io;
 use std::fs;
@@ -165,7 +166,7 @@ enum CreateSiteError {
     SiteAlreadyExist(),
     FailedToCreateDomainDir(io::Error),
     FailedToWriteSourceFile(WriteFileError),
-    FailedToSaveConfig(WriteConfigError),
+    FailedToSaveConfig(WriteJsonFileError),
 }
 
 
@@ -208,7 +209,7 @@ fn create_site(root_path: &str, payload: &NewSiteRequest) -> Result<SiteConfig, 
         routes: routes,
     };
 
-    write_config(&config_path, &config)
+    write_json_file(&config_path, &config)
         .map_err(CreateSiteError::FailedToSaveConfig)?;
 
     Ok(config)
@@ -236,42 +237,42 @@ struct RouteInfo {
     source_last_modified: u64,
 }
 
-enum ReadConfigError {
+enum ReadJsonFileError {
     FailedToOpen(io::Error),
     FailedToDeserialize(serde_json::error::Error),
 }
 
-fn read_config(path: &Path) -> Result<SiteConfig, ReadConfigError> {
+fn read_json_file<T: DeserializeOwned>(path: &Path) -> Result<T, ReadJsonFileError> {
     let file = File::open(path)
-        .map_err(ReadConfigError::FailedToOpen)?;
+        .map_err(ReadJsonFileError::FailedToOpen)?;
 
     let reader = BufReader::new(file);
 
     serde_json::from_reader(reader)
-        .map_err(ReadConfigError::FailedToDeserialize)
+        .map_err(ReadJsonFileError::FailedToDeserialize)
 }
 
 
-enum WriteConfigError {
+enum WriteJsonFileError {
     FailedToDetermineDir(),
     FailedToCreateTempFile(io::Error),
     FailedToSerialize(serde_json::error::Error),
     FailedToPersist(io::Error),
 }
 
-impl fmt::Display for WriteConfigError {
+impl fmt::Display for WriteJsonFileError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            WriteConfigError::FailedToDetermineDir() =>
+            WriteJsonFileError::FailedToDetermineDir() =>
                 write!(f, "Invalid file path"),
 
-            WriteConfigError::FailedToCreateTempFile(err) =>
+            WriteJsonFileError::FailedToCreateTempFile(err) =>
                 write!(f, "Failed to create temp file: {}", err),
 
-            WriteConfigError::FailedToSerialize(err) =>
+            WriteJsonFileError::FailedToSerialize(err) =>
                 write!(f, "Failed to serialize config: {}", err),
 
-            WriteConfigError::FailedToPersist(err) =>
+            WriteJsonFileError::FailedToPersist(err) =>
                 write!(f, "Failed to persist file: {}", err),
 
         }
@@ -279,19 +280,18 @@ impl fmt::Display for WriteConfigError {
 }
 
 
-fn write_config(path: &Path, config: &SiteConfig) -> Result<(), WriteConfigError> {
+fn write_json_file<T: Serialize>(path: &Path, value: &T) -> Result<(), WriteJsonFileError> {
     let dir = path.parent()
-        .ok_or(WriteConfigError::FailedToDetermineDir())?;
+        .ok_or(WriteJsonFileError::FailedToDetermineDir())?;
 
     let file = NamedTempFile::new_in(dir)
-        .map_err(WriteConfigError::FailedToCreateTempFile)?;
+        .map_err(WriteJsonFileError::FailedToCreateTempFile)?;
 
-    serde_json::to_writer_pretty(&file, config)
-        .map_err(WriteConfigError::FailedToSerialize)?;
+    serde_json::to_writer_pretty(&file, value)
+        .map_err(WriteJsonFileError::FailedToSerialize)?;
 
-    // TODO: do we need to close/flush the file?
     file.persist(path)
-        .map_err(|err| WriteConfigError::FailedToPersist(err.error))?;
+        .map_err(|err| WriteJsonFileError::FailedToPersist(err.error))?;
 
     Ok(())
 }
