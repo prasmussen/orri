@@ -20,7 +20,9 @@ pub struct Response {
 
 pub async fn handler(req: HttpRequest, state: web::Data<AppState>, payload: web::Json<Request>) -> HttpResponse {
 
-    match site::create(&state.config.server.sites_root, &payload.domain, &payload.source) {
+    let site_root = site::SiteRoot::new(&state.config.server.sites_root, &payload.domain);
+
+    match site::create(site_root, &payload.source) {
         Ok(site) =>
             HttpResponse::Ok()
                 .json(Response{

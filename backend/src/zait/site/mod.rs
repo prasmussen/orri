@@ -32,22 +32,15 @@ pub enum CreateSiteError {
 
 
 // TODO: Two users can create the same site at the same time
-pub fn create(root_path: &str, domain: &str, source: &str) -> Result<Site, CreateSiteError> {
-    let domain_path = Path::new(root_path)
-        .join(PathBuf::from(domain));
-
-    let data_path = domain_path.join(PathBuf::from("data"));
-
-    fs::create_dir_all(&data_path)
+pub fn create(site_root: SiteRoot, source: &str) -> Result<Site, CreateSiteError> {
+    site_root.prepare_directories()
         .map_err(CreateSiteError::FailedToCreateDomainDir)?;
 
-    let config_path = domain_path.join(PathBuf::from("site.json"));
+    util::err_if_false(site_root.site_json_path().exists() == false, CreateSiteError::SiteAlreadyExist())?;
+
     let source_hash = util::sha256(&source);
-    let source_path = data_path.join(PathBuf::from(&source_hash));
 
-    util::err_if_false(config_path.exists() == false, CreateSiteError::SiteAlreadyExist())?;
-
-    file::write(&source_path, &source)
+    file::write(&site_root.data_file_path(&source_hash), &source)
         .map_err(CreateSiteError::FailedToWriteSourceFile)?;
 
     let key = util::random_string(32);
@@ -68,8 +61,39 @@ pub fn create(root_path: &str, domain: &str, source: &str) -> Result<Site, Creat
         routes: routes,
     };
 
-    file::write_json(&config_path, &site)
+    file::write_json(&site_root.site_json_path(), &site)
         .map_err(CreateSiteError::FailedToSaveSiteJson)?;
 
     Ok(site)
 }
+
+
+pub struct SiteRoot {
+    site_root: PathBuf,
+}
+
+impl SiteRoot {
+    pub fn new(root_path: &str, domain: &str) -> SiteRoot {
+        SiteRoot{
+            site_root: Path::new(root_path).join(PathBuf::from(domain)),
+        }
+    }
+
+    pub fn site_json_path(&self) -> PathBuf {
+        self.site_root.join(PathBuf::from("site.json"))
+    }
+
+    pub fn data_path(&self) -> PathBuf {
+        self.site_root.join(PathBuf::from("data"))
+    }
+
+
+    pub fn data_file_path(&self, data_hash: &str) -> PathBuf {
+        self.data_path().join(PathBuf::from(data_hash))
+    }
+
+    pub fn prepare_directories(&self) -> Result<(), io::Error> {
+        fs::create_dir_all(self.data_path())
+    }
+}
+
