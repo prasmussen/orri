@@ -46,7 +46,7 @@ function Api() {
 (function() {
 
     Form().onSubmit(document.getElementById('document'), data => {
-        Api().post("/api/documents", data).then(res => {
+        Api().post("/api/sites", data).then(res => {
             console.log(res);
         });
     });
