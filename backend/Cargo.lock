@@ -1686,6 +1686,7 @@ dependencies = [
  "actix-rt",
  "actix-web",
  "hex",
+ "http",
  "rand",
  "ring",
  "serde",

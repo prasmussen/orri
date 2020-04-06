@@ -7,6 +7,7 @@ use std::path::{Path, PathBuf};
 use std::collections::HashMap;
 use crate::zait::file;
 use crate::zait::util;
+use crate::zait::domain::Domain;
 
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -16,11 +17,22 @@ pub struct Site {
 }
 
 
+
+impl Site {
+    pub fn read_route_data(&self, site_root: &SiteRoot, route: &RouteInfo) -> Result<String, io::Error> {
+        let path = site_root.data_file_path(&route.source_hash);
+        fs::read_to_string(path)
+    }
+}
+
+
 #[derive(Deserialize, Serialize, Clone)]
 pub struct RouteInfo {
     pub source_hash: String,
     pub source_last_modified: u64,
 }
+
+
 
 
 pub enum CreateSiteError {
@@ -68,14 +80,31 @@ pub fn create(site_root: SiteRoot, source: &str) -> Result<Site, CreateSiteError
 }
 
 
+pub enum GetSiteError {
+    SiteNotFound(),
+    FailedToReadSiteJson(file::ReadJsonError),
+}
+
+pub fn get(site_root: &SiteRoot) -> Result<Site, GetSiteError> {
+    util::err_if_false(site_root.site_json_path().exists(), GetSiteError::SiteNotFound())?;
+
+    file::read_json(&site_root.site_json_path())
+        .map_err(GetSiteError::FailedToReadSiteJson)
+}
+
+
+
 pub struct SiteRoot {
     site_root: PathBuf,
 }
 
 impl SiteRoot {
-    pub fn new(root_path: &str, domain: &str) -> SiteRoot {
+    pub fn new(root_path: &str, domain: Domain) -> SiteRoot {
+        let site_root = Path::new(root_path)
+            .join(PathBuf::from(domain.to_string()));
+
         SiteRoot{
-            site_root: Path::new(root_path).join(PathBuf::from(domain)),
+            site_root: site_root,
         }
     }
 

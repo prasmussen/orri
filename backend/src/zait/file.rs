@@ -72,7 +72,6 @@ impl fmt::Display for WriteJsonError {
 
             WriteJsonError::FailedToPersist(err) =>
                 write!(f, "Failed to persist file: {}", err),
-
         }
     }
 }
@@ -101,6 +100,18 @@ pub enum ReadJsonError {
     FailedToDeserialize(serde_json::error::Error),
 }
 
+impl fmt::Display for ReadJsonError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            ReadJsonError::FailedToOpen(err) =>
+                write!(f, "Failed to open file: {}", err),
+
+            ReadJsonError::FailedToDeserialize(err) =>
+                write!(f, "Failed to deserialize: {}", err),
+        }
+    }
+}
+
 pub fn read_json<T: DeserializeOwned>(path: &Path) -> Result<T, ReadJsonError> {
     let file = File::open(path)
         .map_err(ReadJsonError::FailedToOpen)?;
@@ -110,5 +121,3 @@ pub fn read_json<T: DeserializeOwned>(path: &Path) -> Result<T, ReadJsonError> {
     serde_json::from_reader(reader)
         .map_err(ReadJsonError::FailedToDeserialize)
 }
-
-
