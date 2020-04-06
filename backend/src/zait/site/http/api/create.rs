@@ -9,7 +9,7 @@ use crate::zait::domain::{Domain, ParseDomainError};
 #[derive(Deserialize)]
 pub struct Request {
     domain: String,
-    source: String,
+    data: String,
 }
 
 
@@ -37,7 +37,7 @@ fn handle(state: &AppState, payload: &Request) -> Result<Site, Error> {
 
     let site_root = site::SiteRoot::new(&state.config.server.sites_root, domain);
 
-    site::create(site_root, &payload.source)
+    site::create(site_root, &payload.data)
         .map_err(Error::CreateSiteError)
 }
 
@@ -95,10 +95,10 @@ fn handle_create_site_error(err: CreateSiteError) -> HttpResponse {
                 .json(http::Error::from_str("Failed to create domain dir"))
         },
 
-        CreateSiteError::FailedToWriteSourceFile(err) => {
-            println!("Failed to write source file: {}", err);
+        CreateSiteError::FailedToWriteFile(err) => {
+            println!("Failed to write file: {}", err);
             HttpResponse::InternalServerError()
-                .json(http::Error::from_str("Failed to write source file"))
+                .json(http::Error::from_str("Failed to write file"))
         }
 
         CreateSiteError::FailedToSaveSiteJson(err) => {

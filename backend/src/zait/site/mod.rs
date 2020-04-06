@@ -18,8 +18,8 @@ pub struct Site {
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct RouteInfo {
-    pub source_hash: String,
-    pub source_last_modified: u64,
+    pub file_hash: String,
+    pub file_last_modified: u64,
 }
 
 
@@ -28,29 +28,29 @@ pub struct RouteInfo {
 pub enum CreateSiteError {
     SiteAlreadyExist(),
     FailedToCreateDomainDir(io::Error),
-    FailedToWriteSourceFile(file::WriteError),
+    FailedToWriteFile(file::WriteError),
     FailedToSaveSiteJson(file::WriteJsonError),
 }
 
 
 // TODO: Two users can create the same site at the same time
-pub fn create(site_root: SiteRoot, source: &str) -> Result<Site, CreateSiteError> {
+pub fn create(site_root: SiteRoot, file_data: &str) -> Result<Site, CreateSiteError> {
     site_root.prepare_directories()
         .map_err(CreateSiteError::FailedToCreateDomainDir)?;
 
     util::err_if_false(site_root.site_json_path().exists() == false, CreateSiteError::SiteAlreadyExist())?;
 
-    let source_hash = util::sha256(&source);
+    let file_hash = util::sha256(&file_data);
 
-    file::write(&site_root.data_file_path(&source_hash), &source)
-        .map_err(CreateSiteError::FailedToWriteSourceFile)?;
+    file::write(&site_root.data_file_path(&file_hash), &file_data)
+        .map_err(CreateSiteError::FailedToWriteFile)?;
 
     let key = util::random_string(32);
     let timestamp = util::unix_timestamp();
 
     let route_info = RouteInfo{
-        source_hash: source_hash,
-        source_last_modified: timestamp,
+        file_hash: file_hash,
+        file_last_modified: timestamp,
     };
 
     let routes: HashMap<String, RouteInfo> = [("/".to_string(), route_info)]
@@ -123,11 +123,11 @@ pub struct FileInfo {
 }
 
 pub fn read_route_file(site_root: &SiteRoot, route: &RouteInfo) -> Result<FileInfo, io::Error> {
-    let path = site_root.data_file_path(&route.source_hash);
+    let path = site_root.data_file_path(&route.file_hash);
     let data = fs::read_to_string(path)?;
 
     Ok(FileInfo{
         data: data,
-        hash: route.source_hash.clone(),
+        hash: route.file_hash.clone(),
     })
 }
