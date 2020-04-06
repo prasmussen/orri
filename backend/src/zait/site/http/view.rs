@@ -97,8 +97,18 @@ fn get_host_header_string(req: &HttpRequest) -> Result<String, HostHeaderError> 
         .get("host")
         .map_or(Err(HostHeaderError::NotFound()), Ok)?;
 
-    value
+    let host = value
         .to_str()
         .map(|s| s.to_string())
-        .map_err(HostHeaderError::ToStrError)
+        .map_err(HostHeaderError::ToStrError)?;
+
+    let parts = host.split(":")
+        .collect::<Vec<&str>>();
+
+    if parts.len() > 0 {
+        Ok(parts[0].to_string())
+    } else {
+        Ok(host)
+    }
+
 }
