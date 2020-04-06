@@ -16,16 +16,6 @@ pub struct Site {
     pub routes: HashMap<String, RouteInfo>,
 }
 
-
-
-impl Site {
-    pub fn read_route_data(&self, site_root: &SiteRoot, route: &RouteInfo) -> Result<String, io::Error> {
-        let path = site_root.data_file_path(&route.source_hash);
-        fs::read_to_string(path)
-    }
-}
-
-
 #[derive(Deserialize, Serialize, Clone)]
 pub struct RouteInfo {
     pub source_hash: String,
@@ -126,3 +116,18 @@ impl SiteRoot {
     }
 }
 
+
+pub struct FileInfo {
+    data: String,
+    hash: String,
+}
+
+pub fn read_route_file(site_root: &SiteRoot, route: &RouteInfo) -> Result<FileInfo, io::Error> {
+    let path = site_root.data_file_path(&route.source_hash);
+    let data = fs::read_to_string(path)?;
+
+    Ok(FileInfo{
+        data: data,
+        hash: route.source_hash.clone(),
+    })
+}
