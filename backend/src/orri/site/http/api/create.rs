@@ -1,15 +1,17 @@
 use actix_web::{web, HttpRequest, HttpResponse};
 use serde::{Deserialize, Serialize};
 use crate::orri::app_state::AppState;
-use crate::orri::site::{self, Site, CreateSiteError};
+use crate::orri::site::{self, Site, CreateSiteError, FileInfo};
 use crate::orri::http;
 use crate::orri::domain::{Domain, ParseDomainError};
+use data_url::{DataUrl, DataUrlError, mime, forgiving_base64};
 
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Request {
     domain: String,
-    data: String,
+    data_url: String,
 }
 
 
@@ -19,6 +21,8 @@ pub struct Response {
 }
 
 enum Error {
+    FailedToProcessDataUrl(DataUrlError),
+    FailedToDecodeDataUrl(forgiving_base64::InvalidBase64),
     ParseDomainError(ParseDomainError),
     CreateSiteError(CreateSiteError),
 }
@@ -35,9 +39,17 @@ fn handle(state: &AppState, payload: &Request) -> Result<Site, Error> {
     let domain = Domain::from_str(&payload.domain)
         .map_err(Error::ParseDomainError)?;
 
+    let url = DataUrl::process(&payload.data_url)
+        .map_err(Error::FailedToProcessDataUrl)?;
+
+    let (file_data, _) = url.decode_to_vec()
+        .map_err(Error::FailedToDecodeDataUrl)?;
+
+    let mime_type = format!("{}", url.mime_type());
+    let file_info = FileInfo::new(&file_data, mime_type);
     let site_root = site::SiteRoot::new(&state.config.server.sites_root, domain);
 
-    site::create(site_root, &payload.data)
+    site::create(site_root, file_info, &file_data)
         .map_err(Error::CreateSiteError)
 }
 
@@ -50,6 +62,14 @@ fn handle_site(site: Site) -> HttpResponse {
 
 fn handle_error(err: Error) -> HttpResponse {
     match err {
+        Error::FailedToProcessDataUrl(_) =>
+            HttpResponse::BadRequest()
+                .json(http::Error::from_str("Failed to parse data url")),
+
+        Error::FailedToDecodeDataUrl(_) =>
+            HttpResponse::BadRequest()
+                .json(http::Error::from_str("Failed to decode base64 in data url")),
+
         Error::ParseDomainError(err) =>
             handle_parse_domain_error(err),
 

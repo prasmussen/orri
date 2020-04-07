@@ -16,7 +16,7 @@ function Form() {
         form.addEventListener('submit', event => {
             event.preventDefault();
 
-            var data = getData(form);
+            const data = getData(form);
             callback(data);
         });
 
@@ -24,6 +24,33 @@ function Form() {
 
     return {
         onSubmit: onSubmit,
+    };
+}
+
+function File() {
+
+    function onLoad(elem, callback) {
+        if (!elem.files || elem.files.length === 0) {
+            callback(null);
+            return;
+        }
+
+        const file = elem.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            callback({
+                name: file.name,
+                size: file.size,
+                dataUrl: e.target.result,
+            });
+        };
+
+        reader.readAsDataURL(file);
+    }
+
+    return {
+        onLoad: onLoad,
     };
 }
 
@@ -45,10 +72,20 @@ function Api() {
 
 (function() {
 
-    Form().onSubmit(document.getElementById('document'), data => {
-        Api().post("/api/sites", data).then(res => {
-            console.log(res);
+    Form().onSubmit(document.getElementById("document"), data => {
+        File().onLoad(document.getElementById("file"), file => {
+            if (!file) {
+                console.log("Empty file");
+                return;
+            }
+
+            data.dataUrl = file.dataUrl;
+
+            Api().post("/api/sites", data).then(res => {
+                console.log(res);
+            });
         });
+
     });
 
 })();

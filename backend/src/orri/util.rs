@@ -22,8 +22,8 @@ pub fn err_if_false<E>(value: bool, err: E) -> Result<(), E> {
 }
 
 
-pub fn sha256(str: &str) -> String {
-    let digest = digest::digest(&digest::SHA256, str.as_bytes());
+pub fn sha256(bytes: &[u8]) -> String {
+    let digest = digest::digest(&digest::SHA256, bytes);
     hex::encode(digest.as_ref())
 }
 

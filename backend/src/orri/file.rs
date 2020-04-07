@@ -35,14 +35,14 @@ impl fmt::Display for WriteError {
 }
 
 
-pub fn write(path: &Path, data: &str) -> Result<(), WriteError> {
+pub fn write(path: &Path, data: &[u8]) -> Result<(), WriteError> {
     let dir = path.parent()
         .ok_or(WriteError::FailedToDetermineDir())?;
 
     let mut file = NamedTempFile::new_in(dir)
         .map_err(WriteError::FailedToCreateTempFile)?;
 
-    file.write_all(data.as_bytes())
+    file.write_all(data)
         .map_err(WriteError::FailedToWriteFile)?;
 
     file.persist(path)

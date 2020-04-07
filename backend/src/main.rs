@@ -16,6 +16,7 @@ use orri::domain::Domain;
 
 
 
+
 async fn index_handler(req: HttpRequest, state: web::Data<AppState>) -> impl Responder {
     NamedFile::open(state.config.server.frontend_file_path("index.html"))
 }
@@ -53,7 +54,7 @@ async fn main() -> std::io::Result<()> {
     let state = app_state::AppState{
         config: app_state::Config{
             server: app_state::ServerConfig{
-                main_domain: "orri.local:8000".to_string(),
+                main_domain: "orri.loc:8000".to_string(),
                 frontend_root: "../frontend".to_string(),
                 sites_root: "../sites".to_string(),
             }

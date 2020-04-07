@@ -1,7 +1,7 @@
 use actix_web::{web, HttpRequest, HttpResponse};
 use crate::orri::app_state::AppState;
 use crate::orri::domain::{Domain, ParseDomainError};
-use crate::orri::site::{self, Site, GetSiteError, FileInfo};
+use crate::orri::site::{self, Site, GetSiteError, File};
 use http::header;
 use std::path::PathBuf;
 use std::io;
@@ -23,7 +23,7 @@ pub async fn handler(req: HttpRequest, state: web::Data<AppState>) -> HttpRespon
 }
 
 
-fn handle(req: &HttpRequest, state: &AppState) -> Result<FileInfo, Error> {
+fn handle(req: &HttpRequest, state: &AppState) -> Result<File, Error> {
     let path = req.uri().path();
     let host = get_host_header_string(&req)
         .unwrap_or(String::new());
@@ -43,9 +43,9 @@ fn handle(req: &HttpRequest, state: &AppState) -> Result<FileInfo, Error> {
         .map_err(Error::FailedToReadRouteData)
 }
 
-fn handle_file(file: site::FileInfo) -> HttpResponse {
+fn handle_file(file: site::File) -> HttpResponse {
     HttpResponse::Ok()
-        .set_header(header::ETAG, file.hash)
+        .set_header(header::ETAG, file.metadata.hash)
         .set_header(header::CACHE_CONTROL, "no-cache")
         .set_header(header::PRAGMA, "no-cache")
         .body(file.data)

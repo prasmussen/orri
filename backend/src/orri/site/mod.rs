@@ -18,8 +18,7 @@ pub struct Site {
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct RouteInfo {
-    pub file_hash: String,
-    pub file_last_modified: u64,
+    pub file_info: FileInfo,
 }
 
 
@@ -34,23 +33,19 @@ pub enum CreateSiteError {
 
 
 // TODO: Two users can create the same site at the same time
-pub fn create(site_root: SiteRoot, file_data: &str) -> Result<Site, CreateSiteError> {
+pub fn create(site_root: SiteRoot, file_info: FileInfo, file_data: &[u8]) -> Result<Site, CreateSiteError> {
     site_root.prepare_directories()
         .map_err(CreateSiteError::FailedToCreateDomainDir)?;
 
     util::err_if_false(site_root.site_json_path().exists() == false, CreateSiteError::SiteAlreadyExist())?;
 
-    let file_hash = util::sha256(&file_data);
-
-    file::write(&site_root.data_file_path(&file_hash), &file_data)
+    file::write(&site_root.data_file_path(&file_info.hash), file_data)
         .map_err(CreateSiteError::FailedToWriteFile)?;
 
     let key = util::random_string(32);
-    let timestamp = util::unix_timestamp();
 
     let route_info = RouteInfo{
-        file_hash: file_hash,
-        file_last_modified: timestamp,
+        file_info: file_info,
     };
 
     let routes: HashMap<String, RouteInfo> = [("/".to_string(), route_info)]
@@ -117,17 +112,41 @@ impl SiteRoot {
 }
 
 
+#[derive(Deserialize, Serialize, Clone)]
 pub struct FileInfo {
-    data: String,
+    mime: String,
     hash: String,
+    size: usize,
+    timestamp: u64,
 }
 
-pub fn read_route_file(site_root: &SiteRoot, route: &RouteInfo) -> Result<FileInfo, io::Error> {
-    let path = site_root.data_file_path(&route.file_hash);
-    let data = fs::read_to_string(path)?;
+impl FileInfo {
+    pub fn new(data: &[u8], mime: String) -> FileInfo {
+        let file_hash = util::sha256(&data);
+        let timestamp = util::unix_timestamp();
 
-    Ok(FileInfo{
+        FileInfo{
+            mime: mime,
+            hash: file_hash,
+            size: data.len(),
+            timestamp: timestamp,
+        }
+    }
+}
+
+
+pub struct File {
+    pub metadata: FileInfo,
+    pub data: Vec<u8>,
+}
+
+pub fn read_route_file(site_root: &SiteRoot, route: &RouteInfo) -> Result<File, io::Error> {
+    let path = site_root.data_file_path(&route.file_info.hash);
+    let data = fs::read(path)?;
+
+    Ok(File{
+        metadata: route.file_info.clone(),
         data: data,
-        hash: route.file_hash.clone(),
     })
+
 }
