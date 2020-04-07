@@ -67,6 +67,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .data(state.clone())
+            .app_data(web::JsonConfig::default().limit(1024 * 1024 * 10))
             .configure(|cfg| main_domain_routes(cfg, &state, main_domain))
             .configure(other_domains_routes)
     })
