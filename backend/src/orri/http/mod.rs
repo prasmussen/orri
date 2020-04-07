@@ -1,5 +1,8 @@
 use serde::Serialize;
 
+pub mod index;
+
+
 #[derive(Serialize)]
 pub struct Error {
     error: String,
