@@ -4,6 +4,7 @@
 mod orri;
 
 use std::io;
+use std::path::PathBuf;
 use actix_web::{web, App, HttpServer, guard};
 use actix_files::Files;
 use orri::app_state::{self, AppState};
@@ -47,8 +48,8 @@ async fn main() -> Result<(), io::Error> {
         config: app_state::Config{
             server: app_state::ServerConfig{
                 main_domain: "orri.loc:8000".to_string(),
-                frontend_root: "../frontend".to_string(),
-                sites_root: "../sites".to_string(),
+                frontend_root: PathBuf::from("../frontend"),
+                sites_root: PathBuf::from("../sites"),
             }
         }
     };

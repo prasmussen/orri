@@ -84,9 +84,8 @@ pub struct SiteRoot {
 }
 
 impl SiteRoot {
-    pub fn new(root_path: &str, domain: Domain) -> SiteRoot {
-        let site_root = Path::new(root_path)
-            .join(PathBuf::from(domain.to_string()));
+    pub fn new(root_path: &PathBuf, domain: Domain) -> SiteRoot {
+        let site_root = root_path.join(PathBuf::from(domain.to_string()));
 
         SiteRoot{
             site_root: site_root,

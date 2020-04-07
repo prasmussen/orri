@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 #[derive(Clone)]
 pub struct AppState {
     pub config: Config,
@@ -13,18 +15,16 @@ pub struct Config {
 #[derive(Clone)]
 pub struct ServerConfig {
     pub main_domain: String,
-    pub frontend_root: String,
-    pub sites_root: String,
+    pub frontend_root: PathBuf,
+    pub sites_root: PathBuf,
 }
 
 impl ServerConfig {
-    pub fn static_path(&self) -> String {
-        // TODO: use path type
-        format!("{}/static", self.frontend_root)
+    pub fn static_path(&self) -> PathBuf {
+        self.frontend_root.join(PathBuf::from("static"))
     }
 
-    pub fn frontend_file_path(&self, name: &str) -> String {
-        // TODO: use path type
-        format!("{}/{}", self.frontend_root, name)
+    pub fn frontend_file_path(&self, name: &'static str) -> PathBuf {
+        self.frontend_root.join(PathBuf::from(name))
     }
 }
