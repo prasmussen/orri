@@ -5,9 +5,9 @@ use std::io;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::collections::HashMap;
-use crate::zait::file;
-use crate::zait::util;
-use crate::zait::domain::Domain;
+use crate::orri::file;
+use crate::orri::util;
+use crate::orri::domain::Domain;
 
 
 #[derive(Deserialize, Serialize, Clone)]

@@ -1,7 +1,7 @@
 use actix_web::{web, HttpRequest, HttpResponse};
-use crate::zait::app_state::AppState;
-use crate::zait::domain::{Domain, ParseDomainError};
-use crate::zait::site::{self, Site, GetSiteError, FileInfo};
+use crate::orri::app_state::AppState;
+use crate::orri::domain::{Domain, ParseDomainError};
+use crate::orri::site::{self, Site, GetSiteError, FileInfo};
 use http::header;
 use std::path::PathBuf;
 use std::io;

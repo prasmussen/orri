@@ -1001,6 +1001,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "orri"
+version = "0.1.0"
+dependencies = [
+ "actix-files",
+ "actix-rt",
+ "actix-web",
+ "hex",
+ "http",
+ "rand",
+ "ring",
+ "serde",
+ "serde_json",
+ "tempfile",
+]
+
+[[package]]
 name = "parking_lot"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1676,20 +1692,4 @@ checksum = "d59cefebd0c892fa2dd6de581e937301d8552cb44489cdff035c6187cb63fa5e"
 dependencies = [
  "winapi 0.2.8",
  "winapi-build",
-]
-
-[[package]]
-name = "zait"
-version = "0.1.0"
-dependencies = [
- "actix-files",
- "actix-rt",
- "actix-web",
- "hex",
- "http",
- "rand",
- "ring",
- "serde",
- "serde_json",
- "tempfile",
 ]

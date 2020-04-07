@@ -1,18 +1,18 @@
 // TODO: enable warnings
 #![allow(warnings)]
 
-mod zait;
+mod orri;
 
 use actix_web::{web, App, HttpRequest, HttpServer, Responder, guard};
 use actix_files::{Files, NamedFile};
 use std::io;
 use http::header;
-use zait::app_state::{self, AppState};
-use zait::site::http::api as site_api;
-use zait::site::http as site_http;
-use zait::site;
-use zait::file;
-use zait::domain::Domain;
+use orri::app_state::{self, AppState};
+use orri::site::http::api as site_api;
+use orri::site::http as site_http;
+use orri::site;
+use orri::file;
+use orri::domain::Domain;
 
 
 
@@ -53,7 +53,7 @@ async fn main() -> std::io::Result<()> {
     let state = app_state::AppState{
         config: app_state::Config{
             server: app_state::ServerConfig{
-                main_domain: "zait.io:8000".to_string(),
+                main_domain: "orri.local:8000".to_string(),
                 frontend_root: "../frontend".to_string(),
                 sites_root: "../sites".to_string(),
             }

@@ -1,9 +1,9 @@
 use actix_web::{web, HttpRequest, HttpResponse};
 use serde::{Deserialize, Serialize};
-use crate::zait::app_state::AppState;
-use crate::zait::site::{self, Site, CreateSiteError};
-use crate::zait::http;
-use crate::zait::domain::{Domain, ParseDomainError};
+use crate::orri::app_state::AppState;
+use crate::orri::site::{self, Site, CreateSiteError};
+use crate::orri::http;
+use crate::orri::domain::{Domain, ParseDomainError};
 
 
 #[derive(Deserialize)]
