@@ -12,6 +12,7 @@ use crate::orri::domain::Domain;
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Site {
+    pub domain: Domain,
     pub key: String,
     pub routes: HashMap<String, RouteInfo>,
 }
@@ -54,6 +55,7 @@ pub fn create(site_root: SiteRoot, file_info: FileInfo, file_data: &[u8]) -> Res
         .collect();
 
     let site = Site{
+        domain: site_root.domain.clone(),
         key: key,
         routes: routes,
     };
@@ -80,24 +82,26 @@ pub fn get(site_root: &SiteRoot) -> Result<Site, GetSiteError> {
 
 
 pub struct SiteRoot {
-    site_root: PathBuf,
+    domain: Domain,
+    root: PathBuf,
 }
 
 impl SiteRoot {
     pub fn new(root_path: &PathBuf, domain: Domain) -> SiteRoot {
-        let site_root = root_path.join(PathBuf::from(domain.to_string()));
+        let root = root_path.join(PathBuf::from(domain.to_string()));
 
         SiteRoot{
-            site_root: site_root,
+            domain: domain,
+            root: root,
         }
     }
 
     pub fn site_json_path(&self) -> PathBuf {
-        self.site_root.join(PathBuf::from("site.json"))
+        self.root.join(PathBuf::from("site.json"))
     }
 
     pub fn data_path(&self) -> PathBuf {
-        self.site_root.join(PathBuf::from("data"))
+        self.root.join(PathBuf::from("data"))
     }
 
 
@@ -113,10 +117,10 @@ impl SiteRoot {
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct FileInfo {
-    mime: String,
-    hash: String,
-    size: usize,
-    timestamp: u64,
+    pub mime: String,
+    pub hash: String,
+    pub size: usize,
+    pub timestamp: u64,
 }
 
 impl FileInfo {

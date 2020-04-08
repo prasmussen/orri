@@ -741,6 +741,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "htmlescape"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e9025058dae765dee5070ec375f591e2ba14638c63feff74f13805a72e523163"
+
+[[package]]
 name = "http"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1018,6 +1024,7 @@ dependencies = [
  "actix-web",
  "data-url",
  "hex",
+ "htmlescape",
  "http",
  "rand",
  "ring",

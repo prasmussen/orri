@@ -1,6 +1,9 @@
+use std::fmt;
+use serde::{Deserialize, Serialize};
 use crate::orri::util;
 
 
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Domain(String);
 
 
@@ -13,6 +16,12 @@ pub enum ParseDomainError {
     OnlyOneSubdomainAllowed(),
 }
 
+
+impl fmt::Display for Domain {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
 
 impl Domain {
     pub fn from_str(s: &str) -> Result<Domain, ParseDomainError> {
@@ -49,9 +58,5 @@ impl Domain {
             _ =>
                 Err(ParseDomainError::OnlyOneSubdomainAllowed()),
         }
-    }
-
-    pub fn to_string(self) -> String {
-        self.0
     }
 }

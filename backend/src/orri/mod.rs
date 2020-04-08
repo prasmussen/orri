@@ -4,3 +4,4 @@ pub mod domain;
 pub mod util;
 pub mod http;
 pub mod app_state;
+pub mod slowhtml;
