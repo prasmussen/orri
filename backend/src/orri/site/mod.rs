@@ -17,6 +17,24 @@ pub struct Site {
     pub routes: HashMap<String, RouteInfo>,
 }
 
+impl Site {
+    pub fn add_route(&mut self, site_root: &SiteRoot, path: &str, file_info: FileInfo, file_data: &[u8]) -> Result<&Site, file::WriteError> {
+        file::write(&site_root.data_file_path(&file_info.hash), file_data)?;
+
+        self.routes.insert(path.to_string(), RouteInfo{
+            file_info: file_info,
+        });
+
+        Ok(self)
+    }
+
+    pub fn persist(&self, site_root: &SiteRoot) -> Result<&Site, file::WriteJsonError> {
+        file::write_json(&site_root.site_json_path(), self)?;
+
+        Ok(self)
+    }
+}
+
 #[derive(Deserialize, Serialize, Clone)]
 pub struct RouteInfo {
     pub file_info: FileInfo,
@@ -40,27 +58,18 @@ pub fn create(site_root: SiteRoot, file_info: FileInfo, file_data: &[u8]) -> Res
 
     util::err_if_false(site_root.site_json_path().exists() == false, CreateSiteError::SiteAlreadyExist())?;
 
-    file::write(&site_root.data_file_path(&file_info.hash), file_data)
-        .map_err(CreateSiteError::FailedToWriteFile)?;
-
     let key = util::random_string(32);
 
-    let route_info = RouteInfo{
-        file_info: file_info,
-    };
-
-    let routes: HashMap<String, RouteInfo> = [("/".to_string(), route_info)]
-        .iter()
-        .cloned()
-        .collect();
-
-    let site = Site{
+    let mut site = Site{
         domain: site_root.domain.clone(),
         key: key,
-        routes: routes,
+        routes: HashMap::new(),
     };
 
-    file::write_json(&site_root.site_json_path(), &site)
+    site.add_route(&site_root, "/", file_info, file_data)
+        .map_err(CreateSiteError::FailedToWriteFile)?;
+
+    site.persist(&site_root)
         .map_err(CreateSiteError::FailedToSaveSiteJson)?;
 
     Ok(site)

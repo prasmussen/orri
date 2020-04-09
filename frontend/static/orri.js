@@ -1,4 +1,3 @@
-
 function Form() {
 
     function getData(elem) {
@@ -56,8 +55,16 @@ function File() {
 
 function Api() {
     function post(url, data) {
+        return request(url, "POST", data);
+    }
+
+    function put(url, data) {
+        return request(url, "PUT", data);
+    }
+
+    function request(url, method, data) {
         return fetch(url, {
-            method: "POST",
+            method: method,
             headers: {
               "Content-Type": "application/json",
             },
@@ -67,25 +74,6 @@ function Api() {
 
     return {
         post: post,
+        put: put,
     };
 }
-
-(function() {
-
-    Form().onSubmit(document.getElementById("document"), data => {
-        File().onLoad(document.getElementById("file"), file => {
-            if (!file) {
-                console.log("Empty file");
-                return;
-            }
-
-            data.dataUrl = file.dataUrl;
-
-            Api().post("/api/sites", data).then(res => {
-                console.log(res);
-            });
-        });
-
-    });
-
-})();

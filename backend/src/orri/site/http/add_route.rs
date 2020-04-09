@@ -8,6 +8,7 @@ use crate::orri::slowhtml::attributes as attrs;
 use http::header;
 use std::path::PathBuf;
 use std::io;
+use serde::Deserialize;
 use std::time::{Duration, Instant};
 
 
@@ -16,9 +17,7 @@ enum Error {
     GetSiteError(GetSiteError),
 }
 
-
 pub async fn handler(state: web::Data<AppState>, domain: web::Path<String>) -> HttpResponse {
-
     handle(&state, &domain)
         .map(handle_site)
         .unwrap_or_else(handle_error)
@@ -26,11 +25,13 @@ pub async fn handler(state: web::Data<AppState>, domain: web::Path<String>) -> H
 
 
 fn handle(state: &AppState, domain_str: &str) -> Result<Site, Error> {
-    let domain = Domain::from_str(&domain_str)
+
+    let domain = Domain::from_str(domain_str)
         .map_err(Error::ParseDomainError)?;
 
     let site_root = site::SiteRoot::new(&state.config.server.sites_root, domain);
 
+    // TODO: check if route exist
     site::get(&site_root)
         .map_err(Error::GetSiteError)
 }
@@ -48,7 +49,8 @@ fn handle_site(site: Site) -> HttpResponse {
 
 fn render(site: &Site) -> String {
     let now = Instant::now();
-    let html = page_html(site);
+    let body = build_body(site);
+    let html = page_html(body);
     let html_string = &html.to_string();
     println!("{}", now.elapsed().as_micros());
     html_string.to_string()
@@ -80,15 +82,15 @@ fn handle_get_site_error(err: GetSiteError) -> HttpResponse {
     }
 }
 
-fn page_html(site: &Site) -> Html {
+fn page_html(body: Vec<Html>) -> Html {
     let head_elements = &[
         vec![
-            html::node("title", &[], &[html::text("Orri")])
+            html::node_no_end("meta", &[attrs::attribute("charset", "utf-8")]),
+            html::node("title", &[], &[html::text("Orri")]),
+            html::node("script", &[attrs::attribute("src", "/static/orri.js")], &[]),
         ],
         milligram_styles(),
     ].concat();
-
-    let body = build_body(site);
 
     html::node("html",
         &[attrs::attribute("lang", "en")],
@@ -117,38 +119,66 @@ fn milligram_styles() -> Vec<Html> {
 }
 
 fn build_body(site: &Site) -> Vec<Html> {
-    let rows = site.routes
-        .iter()
-        .map(|(route, route_info)| table_row(site, route, route_info))
-        .collect::<Vec<Html>>();
-
-    let new_route_url = format!("/sites/{}/new", site.domain);
-
     vec![
-        html::node("table", &[], &[
-            html::node("thead", &[], &[
-                html::node("tr", &[], &[
-                    html::node("th", &[], &[html::text("Route")]),
-                    html::node("th", &[], &[html::text("Mime")]),
-                    html::node("th", &[], &[html::text("Size")]),
-                    html::node("th", &[], &[html::text("Delete")]),
+        html::node("div", &[attrs::attribute("class", "container")], &[
+            html::node("form", &[attrs::attribute("id", "site")], &[
+                html::node("div", &[attrs::attribute("class", "row")], &[
+                    html::node("div", &[attrs::attribute("class", "column")], &[
+                        html::node("label", &[], &[
+                            html::node("div", &[], &[html::text("Domain")]),
+                            html::node_no_end("input", &[
+                                attrs::attribute("type", "text"),
+                                attrs::attribute("name", "domain"),
+                                attrs::attribute("value", &site.domain.to_string()),
+                                attrs::bool_attribute("readonly"),
+                            ]),
+                        ]),
+                    ]),
+                ]),
+                html::node("div", &[attrs::attribute("class", "row")], &[
+                    html::node("div", &[attrs::attribute("class", "column")], &[
+                        html::node("label", &[], &[
+                            html::node("div", &[], &[html::text("Route")]),
+                            html::node_no_end("input", &[
+                                attrs::attribute("type", "text"),
+                                attrs::attribute("name", "path"),
+                                attrs::attribute("placeholder", "i.e. /some-route or /app.js"),
+                            ]),
+                        ]),
+                    ]),
+                ]),
+                html::node("div", &[attrs::attribute("class", "row")], &[
+                    html::node("div", &[attrs::attribute("class", "column")], &[
+                        html::node("label", &[], &[
+                            html::node("div", &[], &[html::text("File")]),
+                            html::node_no_end("input", &[
+                                attrs::attribute("type", "file"),
+                                attrs::attribute("id", "file"),
+                            ]),
+                        ]),
+                    ]),
+                ]),
+                html::node("div", &[attrs::attribute("class", "row")], &[
+                    html::node("div", &[attrs::attribute("class", "column column-25")], &[
+                        html::node("button", &[ attrs::attribute("type", "submit")], &[html::text("Save route")]),
+                    ]),
                 ]),
             ]),
-            html::node("tbody", &[], &rows),
         ]),
-        html::node("a", &[
-            attrs::attribute("href", &new_route_url),
-            attrs::attribute("class", "button"),
-        ],
-        &[html::text("Add route")]),
+        html::node("script", &[attrs::attribute("src", "/static/add_route.js")], &[]),
     ]
 }
 
 fn table_row(site: &Site, route: &str, route_info: &RouteInfo) -> Html {
+    let edit_url = format!("/sites/{}/edit{}", site.domain, route);
+
     html::node("tr", &[], &[
         html::node("td", &[], &[html::text(route)]),
         html::node("td", &[], &[html::text(&route_info.file_info.mime)]),
         html::node("td", &[], &[html::text(&route_info.file_info.size.to_string())]),
+        html::node("td", &[], &[
+            html::node("a", &[attrs::attribute("href", &edit_url)], &[html::text("Edit")]),
+        ]),
         html::node("td", &[], &[
             html::node("a", &[attrs::attribute("href", "#")], &[html::text("Delete")]),
         ]),
