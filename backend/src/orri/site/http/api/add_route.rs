@@ -6,6 +6,7 @@ use crate::orri::http;
 use crate::orri::file;
 use crate::orri::domain::{Domain, ParseDomainError};
 use data_url::{DataUrl, DataUrlError, mime, forgiving_base64};
+use std::time::SystemTime;
 
 
 #[derive(Deserialize)]
@@ -50,8 +51,9 @@ fn handle(state: &AppState, request_data: &Request) -> Result<Site, Error> {
     let (file_data, _) = url.decode_to_vec()
         .map_err(Error::FailedToDecodeDataUrl)?;
 
+    let time = SystemTime::now();
     let mime_type = format!("{}", url.mime_type());
-    let file_info = FileInfo::new(&file_data, mime_type);
+    let file_info = FileInfo::new(&file_data, mime_type, time);
     let site_root = site::SiteRoot::new(&state.config.server.sites_root, domain);
 
     // TODO: check if route exist

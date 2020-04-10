@@ -1,3 +1,4 @@
+use std::time::SystemTime;
 use actix_web::{web, HttpRequest, HttpResponse};
 use serde::{Deserialize, Serialize};
 use crate::orri::app_state::AppState;
@@ -46,8 +47,9 @@ fn handle(state: &AppState, request_data: &Request) -> Result<Site, Error> {
     let (file_data, _) = url.decode_to_vec()
         .map_err(Error::FailedToDecodeDataUrl)?;
 
+    let time = SystemTime::now();
     let mime_type = format!("{}", url.mime_type());
-    let file_info = FileInfo::new(&file_data, mime_type);
+    let file_info = FileInfo::new(&file_data, mime_type, time);
     let site_root = site::SiteRoot::new(&state.config.server.sites_root, domain);
 
     site::create(site_root, &request_data.key, file_info, &file_data)

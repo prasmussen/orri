@@ -8,6 +8,7 @@ use std::collections::BTreeMap;
 use crate::orri::file;
 use crate::orri::util;
 use crate::orri::domain::Domain;
+use std::time::SystemTime;
 
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -131,9 +132,9 @@ pub struct FileInfo {
 }
 
 impl FileInfo {
-    pub fn new(data: &[u8], mime: String) -> FileInfo {
+    pub fn new(data: &[u8], mime: String, time: SystemTime) -> FileInfo {
         let file_hash = util::sha256(&data);
-        let timestamp = util::unix_timestamp();
+        let timestamp = util::unix_timestamp(time);
 
         FileInfo{
             mime: mime,

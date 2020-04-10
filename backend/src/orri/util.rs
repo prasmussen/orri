@@ -5,8 +5,8 @@ use rand::{Rng};
 use rand::distributions;
 
 
-pub fn unix_timestamp() -> u64 {
-    SystemTime::now()
+pub fn unix_timestamp(time: SystemTime) -> u64 {
+    time
         .duration_since(UNIX_EPOCH)
         .map(|duration| duration.as_secs())
         .unwrap_or(0)
