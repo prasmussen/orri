@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::io;
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use crate::orri::file;
 use crate::orri::util;
 use crate::orri::domain::Domain;
@@ -14,7 +14,7 @@ use crate::orri::domain::Domain;
 pub struct Site {
     pub domain: Domain,
     pub key: String,
-    pub routes: HashMap<String, RouteInfo>,
+    pub routes: BTreeMap<String, RouteInfo>,
 }
 
 impl Site {
@@ -63,7 +63,7 @@ pub fn create(site_root: SiteRoot, file_info: FileInfo, file_data: &[u8]) -> Res
     let mut site = Site{
         domain: site_root.domain.clone(),
         key: key,
-        routes: HashMap::new(),
+        routes: BTreeMap::new(),
     };
 
     site.add_route(&site_root, "/", file_info, file_data)

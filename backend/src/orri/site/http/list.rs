@@ -94,13 +94,12 @@ fn build_page(site: &Site) -> Page {
 }
 
 fn build_body(site: &Site) -> Vec<Html> {
-    // TODO: sort by timestamp
+    let new_route_url = format!("/sites/{}/add-route", site.domain);
+
     let rows = site.routes
         .iter()
         .map(|(route, route_info)| table_row(site, route, route_info))
         .collect::<Vec<Html>>();
-
-    let new_route_url = format!("/sites/{}/add-route", site.domain);
 
     vec![
         html::node("div", &[attrs::attribute("class", "container")], &[
