@@ -1,4 +1,4 @@
-Form().onSubmit(document.getElementById("document"), data => {
+Form().onSubmit(document.getElementById("site"), data => {
     File().onLoad(document.getElementById("file"), file => {
         if (!file) {
             console.log("Empty file");
