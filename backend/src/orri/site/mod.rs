@@ -52,17 +52,15 @@ pub enum CreateSiteError {
 
 
 // TODO: Two users can create the same site at the same time
-pub fn create(site_root: SiteRoot, file_info: FileInfo, file_data: &[u8]) -> Result<Site, CreateSiteError> {
+pub fn create(site_root: SiteRoot, key: &str, file_info: FileInfo, file_data: &[u8]) -> Result<Site, CreateSiteError> {
     site_root.prepare_directories()
         .map_err(CreateSiteError::FailedToCreateDomainDir)?;
 
     util::err_if_false(site_root.site_json_path().exists() == false, CreateSiteError::SiteAlreadyExist())?;
 
-    let key = util::random_string(32);
-
     let mut site = Site{
         domain: site_root.domain.clone(),
-        key: key,
+        key: key.to_string(),
         routes: BTreeMap::new(),
     };
 

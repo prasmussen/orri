@@ -5,7 +5,12 @@ Form().onSubmit(document.getElementById("site"), data => {
             return;
         }
 
-        data.dataUrl = file.dataUrl;
+        var key = Crypto().randomString(32);
+
+        Object.assign(data, {
+            key: key,
+            dataUrl: file.dataUrl,
+        });
 
         Api().post("/api/sites", data).then(res => {
             console.log(res);

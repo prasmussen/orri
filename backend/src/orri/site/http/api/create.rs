@@ -11,6 +11,7 @@ use data_url::{DataUrl, DataUrlError, mime, forgiving_base64};
 #[serde(rename_all = "camelCase")]
 pub struct Request {
     domain: String,
+    key: String,
     data_url: String,
 }
 
@@ -27,19 +28,19 @@ enum Error {
     CreateSiteError(CreateSiteError),
 }
 
-pub async fn handler(state: web::Data<AppState>, payload: web::Json<Request>) -> HttpResponse {
+pub async fn handler(state: web::Data<AppState>, request_data: web::Json<Request>) -> HttpResponse {
 
-    handle(&state, &payload)
+    handle(&state, &request_data)
         .map(handle_site)
         .unwrap_or_else(handle_error)
 }
 
-fn handle(state: &AppState, payload: &Request) -> Result<Site, Error> {
+fn handle(state: &AppState, request_data: &Request) -> Result<Site, Error> {
     // TODO: check minimum subdomain length
-    let domain = Domain::from_str(&payload.domain)
+    let domain = Domain::from_str(&request_data.domain)
         .map_err(Error::ParseDomainError)?;
 
-    let url = DataUrl::process(&payload.data_url)
+    let url = DataUrl::process(&request_data.data_url)
         .map_err(Error::FailedToProcessDataUrl)?;
 
     let (file_data, _) = url.decode_to_vec()
@@ -49,7 +50,7 @@ fn handle(state: &AppState, payload: &Request) -> Result<Site, Error> {
     let file_info = FileInfo::new(&file_data, mime_type);
     let site_root = site::SiteRoot::new(&state.config.server.sites_root, domain);
 
-    site::create(site_root, file_info, &file_data)
+    site::create(site_root, &request_data.key, file_info, &file_data)
         .map_err(Error::CreateSiteError)
 }
 

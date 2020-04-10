@@ -77,3 +77,19 @@ function Api() {
         put: put,
     };
 }
+
+function Crypto() {
+    function randomString(length) {
+        var randomNumbers = new Uint8Array(length);
+        crypto.getRandomValues(randomNumbers);
+
+        return Array.from(randomNumbers)
+            .map(x => x.toString(16))
+            .join("")
+            .slice(0, length);
+    }
+
+    return {
+        randomString: randomString,
+    };
+}

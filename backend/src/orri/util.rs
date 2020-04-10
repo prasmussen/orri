@@ -26,11 +26,3 @@ pub fn sha256(bytes: &[u8]) -> String {
     let digest = digest::digest(&digest::SHA256, bytes);
     hex::encode(digest.as_ref())
 }
-
-
-pub fn random_string(len: usize) -> String {
-    rand::thread_rng()
-        .sample_iter(&distributions::Alphanumeric)
-        .take(len)
-        .collect()
-}
