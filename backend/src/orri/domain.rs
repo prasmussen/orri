@@ -39,7 +39,7 @@ impl Domain {
             .map(|part| part.chars().all(char::is_alphabetic))
             .all(std::convert::identity);
 
-        util::err_if_false(parts_are_alphabetic, ParseDomainError::NotAlphabetic())?;
+        util::ensure(parts_are_alphabetic, ParseDomainError::NotAlphabetic())?;
 
         // TODO: add setting subdomain setting: OnlyOne | OneOrMore | NoneOrOne | NoLimit
         match *reversed_parts.as_slice() {

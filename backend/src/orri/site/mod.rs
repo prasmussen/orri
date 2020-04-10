@@ -56,7 +56,7 @@ pub fn create(site_root: SiteRoot, key: &str, file_info: FileInfo, file_data: &[
     site_root.prepare_directories()
         .map_err(CreateSiteError::FailedToCreateDomainDir)?;
 
-    util::err_if_false(site_root.site_json_path().exists() == false, CreateSiteError::SiteAlreadyExist())?;
+    util::ensure(site_root.site_json_path().exists() == false, CreateSiteError::SiteAlreadyExist())?;
 
     let mut site = Site{
         domain: site_root.domain.clone(),
@@ -80,7 +80,7 @@ pub enum GetSiteError {
 }
 
 pub fn get(site_root: &SiteRoot) -> Result<Site, GetSiteError> {
-    util::err_if_false(site_root.site_json_path().exists(), GetSiteError::SiteNotFound())?;
+    util::ensure(site_root.site_json_path().exists(), GetSiteError::SiteNotFound())?;
 
     file::read_json(&site_root.site_json_path())
         .map_err(GetSiteError::FailedToReadSiteJson)

@@ -13,7 +13,7 @@ pub fn unix_timestamp() -> u64 {
 }
 
 
-pub fn err_if_false<E>(value: bool, err: E) -> Result<(), E> {
+pub fn ensure<E>(value: bool, err: E) -> Result<(), E> {
     if value {
         Ok(())
     } else {
