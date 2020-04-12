@@ -2,8 +2,8 @@ use actix_web::{web, HttpResponse};
 use http::header;
 use crate::orri::app_state::AppState;
 use crate::orri::page::{Page, Head};
-use crate::orri::slowhtml as html;
-use crate::orri::slowhtml::Html;
+use crate::orri::slowhtml::html::Html;
+use crate::orri::slowhtml::html;
 use crate::orri::slowhtml::attributes as attrs;
 
 
