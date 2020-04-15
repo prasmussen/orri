@@ -86,7 +86,7 @@ fn build_page(site: &Site) -> Page {
         head: Head{
             title: format!("orri.list_routes(\"{}\")", &site.domain),
             elements: vec![
-                html::node("script", &[attrs::attribute("src", "/static/orri.js")], &[]),
+                html::script(&[attrs::src("/static/orri.js")], &[]),
             ]
         },
         body: build_body(site)
@@ -102,23 +102,25 @@ fn build_body(site: &Site) -> Vec<Html> {
         .collect::<Vec<Html>>();
 
     vec![
-        html::node("div", &[attrs::attribute("class", "container")], &[
-            html::node("table", &[], &[
-                html::node("thead", &[], &[
-                    html::node("tr", &[], &[
-                        html::node("th", &[], &[html::text("Route")]),
-                        html::node("th", &[], &[html::text("Mime")]),
-                        html::node("th", &[], &[html::text("Size")]),
-                        html::node("th", &[], &[html::text("Delete")]),
+        html::div(&[attrs::class("container")], &[
+            html::table(&[], &[
+                html::thead(&[], &[
+                    html::tr(&[], &[
+                        html::th(&[], &[html::text("Route")]),
+                        html::th(&[], &[html::text("Mime")]),
+                        html::th(&[], &[html::text("Size")]),
+                        html::th(&[], &[html::text("Delete")]),
                     ]),
                 ]),
-                html::node("tbody", &[], &rows),
+                html::tbody(&[], &rows),
             ]),
-            html::node("a", &[
-                attrs::attribute("href", &new_route_url),
-                attrs::attribute("class", "button"),
-            ],
-            &[html::text("Add route")]),
+            html::a(
+                &[
+                    attrs::href(&new_route_url),
+                    attrs::class("button"),
+                ],
+                &[html::text("Add route")]
+            ),
         ]),
     ]
 }
@@ -127,14 +129,14 @@ fn table_row(site: &Site, route: &str, route_info: &RouteInfo) -> Html {
     // TODO: get protocol and port from ServerConfig
     let route_url = format!("https://{}{}", site.domain, route);
 
-    html::node("tr", &[], &[
-        html::node("td", &[], &[
-            html::node("a", &[attrs::attribute("href", &route_url)], &[html::text(route)]),
+    html::tr(&[], &[
+        html::td(&[], &[
+            html::a(&[attrs::href(&route_url)], &[html::text(route)]),
         ]),
-        html::node("td", &[], &[html::text(&route_info.file_info.mime)]),
-        html::node("td", &[], &[html::text(&route_info.file_info.size.to_string())]),
-        html::node("td", &[], &[
-            html::node("a", &[attrs::attribute("href", "#")], &[html::text("Delete")]),
+        html::td(&[], &[html::text(&route_info.file_info.mime)]),
+        html::td(&[], &[html::text(&route_info.file_info.size.to_string())]),
+        html::td(&[], &[
+            html::a(&[attrs::href("#")], &[html::text("Delete")]),
         ]),
     ])
 }

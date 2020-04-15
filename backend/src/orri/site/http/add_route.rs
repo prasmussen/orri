@@ -93,7 +93,7 @@ fn build_page(site: &Site, client_provided_key: bool) -> Page {
         head: Head{
             title: format!("orri.add_route(\"{}\")", &site.domain),
             elements: vec![
-                html::node("script", &[attrs::attribute("src", "/static/orri.js")], &[]),
+                html::script(&[attrs::src("/static/orri.js")], &[]),
             ]
         },
         body: build_body(site, client_provided_key),
@@ -103,69 +103,69 @@ fn build_page(site: &Site, client_provided_key: bool) -> Page {
 
 fn build_body(site: &Site, client_provided_key: bool) -> Vec<Html> {
     vec![
-        html::node("div", &[attrs::attribute("class", "container")], &[
-            html::node("form", &[attrs::attribute("id", "site")], &[
-                html::node("div", &[attrs::attribute("class", "row")], &[
-                    html::node("div", &[attrs::attribute("class", "column")], &[
-                        html::node("label", &[], &[
-                            html::node("div", &[], &[html::text("Domain")]),
-                            html::node_no_end("input", &[
-                                attrs::attribute("type", "text"),
-                                attrs::attribute("name", "domain"),
-                                attrs::attribute("value", &site.domain.to_string()),
-                                attrs::bool_attribute("readonly"),
+        html::div(&[attrs::class("container")], &[
+            html::form(&[attrs::id("site")], &[
+                html::div(&[attrs::class("row")], &[
+                    html::div(&[attrs::class("column")], &[
+                        html::label(&[], &[
+                            html::div(&[], &[html::text("Domain")]),
+                            html::input(&[
+                                attrs::type_("text"),
+                                attrs::name("domain"),
+                                attrs::value(&site.domain.to_string()),
+                                attrs::readonly(),
                             ]),
                         ]),
                     ]),
                 ]),
-                html::node("div", &[attrs::attribute("class", "row")], &[
-                    html::node("div", &[attrs::attribute("class", "column")], &[
-                        html::node("label", &[], &[
-                            html::node("div", &[], &[html::text("Route")]),
-                            html::node_no_end("input", &[
-                                attrs::attribute("type", "text"),
-                                attrs::attribute("name", "path"),
-                                attrs::attribute("placeholder", "i.e. /some-page or /some-styles.css"),
-                                attrs::attribute("title", "The path to the file, it must start with a slash"),
-                                attrs::attribute("pattern", "/.+"),
-                                attrs::bool_attribute("required"),
+                html::div(&[attrs::class("row")], &[
+                    html::div(&[attrs::class("column")], &[
+                        html::label(&[], &[
+                            html::div(&[], &[html::text("Route")]),
+                            html::input(&[
+                                attrs::type_("text"),
+                                attrs::name("path"),
+                                attrs::placeholder("i.e. /some-page or /some-styles.css"),
+                                attrs::title("The path to the file, it must start with a slash"),
+                                attrs::pattern("/.+"),
+                                attrs::required(),
                             ]),
                         ]),
                     ]),
                 ]),
                 html::conditional(client_provided_key == false,
-                    html::node("div", &[attrs::attribute("class", "row")], &[
-                        html::node("div", &[attrs::attribute("class", "column")], &[
-                            html::node("label", &[], &[
-                                html::node("div", &[], &[html::text("Site key")]),
-                                html::node_no_end("input", &[
-                                    attrs::attribute("type", "password"),
-                                    attrs::attribute("name", "key"),
-                                    attrs::bool_attribute("required"),
+                    html::div(&[attrs::class("row")], &[
+                        html::div(&[attrs::class("column")], &[
+                            html::label(&[], &[
+                                html::div(&[], &[html::text("Site key")]),
+                                html::input(&[
+                                    attrs::type_("password"),
+                                    attrs::name("key"),
+                                    attrs::required(),
                                 ]),
                             ]),
                         ]),
                     ])
                 ),
-                html::node("div", &[attrs::attribute("class", "row")], &[
-                    html::node("div", &[attrs::attribute("class", "column")], &[
-                        html::node("label", &[], &[
-                            html::node("div", &[], &[html::text("File")]),
-                            html::node_no_end("input", &[
-                                attrs::attribute("type", "file"),
-                                attrs::attribute("id", "file"),
-                                attrs::bool_attribute("required"),
+                html::div(&[attrs::class("row")], &[
+                    html::div(&[attrs::class("column")], &[
+                        html::label(&[], &[
+                            html::div(&[], &[html::text("File")]),
+                            html::input(&[
+                                attrs::type_("file"),
+                                attrs::id("file"),
+                                attrs::required(),
                             ]),
                         ]),
                     ]),
                 ]),
-                html::node("div", &[attrs::attribute("class", "row")], &[
-                    html::node("div", &[attrs::attribute("class", "column column-25")], &[
-                        html::node("button", &[ attrs::attribute("type", "submit")], &[html::text("Save route")]),
+                html::div(&[attrs::class("row")], &[
+                    html::div(&[attrs::class("column column-25")], &[
+                        html::button(&[attrs::type_("submit")], &[html::text("Save route")]),
                     ]),
                 ]),
             ]),
         ]),
-        html::node("script", &[attrs::attribute("src", "/static/add_route.js")], &[]),
+        html::script(&[attrs::src("/static/add_route.js")], &[]),
     ]
 }

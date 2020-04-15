@@ -28,7 +28,7 @@ fn build_page() -> Page {
         head: Head{
             title: format!("orri.new_site()"),
             elements: vec![
-                html::node("script", &[attrs::attribute("src", "/static/orri.js")], &[]),
+                html::script(&[attrs::src("/static/orri.js")], &[]),
             ]
         },
         body: build_body()
@@ -38,42 +38,42 @@ fn build_page() -> Page {
 
 fn build_body() -> Vec<Html> {
     vec![
-        html::node("div", &[attrs::attribute("class", "container")], &[
-            html::node("form", &[attrs::attribute("id", "site")], &[
-                html::node("div", &[attrs::attribute("class", "row")], &[
-                    html::node("div", &[attrs::attribute("class", "column")], &[
-                        html::node("label", &[], &[
-                            html::node("div", &[], &[html::text("Domain")]),
-                            html::node_no_end("input", &[
-                                attrs::attribute("type", "text"),
-                                attrs::attribute("name", "domain"),
-                                attrs::attribute("placeholder", "i.e. name.orri.dev"),
-                                attrs::attribute("title", "Please provide a valid domain name, the subdomain must be at least 3 characters"),
-                                attrs::attribute("pattern", "[a-z-]{3,}[.][a-z]+[.][a-z]+"),
-                                attrs::bool_attribute("required"),
+        html::div(&[attrs::class("container")], &[
+            html::form(&[attrs::id("site")], &[
+                html::div(&[attrs::class("row")], &[
+                    html::div(&[attrs::class("column")], &[
+                        html::label(&[], &[
+                            html::div(&[], &[html::text("Domain")]),
+                            html::input(&[
+                                attrs::type_("text"),
+                                attrs::name("domain"),
+                                attrs::placeholder("i.e. name.orri.dev"),
+                                attrs::title("Please provide a valid domain name, the subdomain must be at least 3 characters"),
+                                attrs::pattern("[a-z-]{3,}[.][a-z]+[.][a-z]+"),
+                                attrs::required(),
                             ]),
                         ]),
                     ]),
                 ]),
-                html::node("div", &[attrs::attribute("class", "row")], &[
-                    html::node("div", &[attrs::attribute("class", "column")], &[
-                        html::node("label", &[], &[
-                            html::node("div", &[], &[html::text("File")]),
-                            html::node_no_end("input", &[
-                                attrs::attribute("type", "file"),
-                                attrs::attribute("id", "file"),
-                                attrs::bool_attribute("required"),
+                html::div(&[attrs::class("row")], &[
+                    html::div(&[attrs::class("column")], &[
+                        html::label(&[], &[
+                            html::div(&[], &[html::text("File")]),
+                            html::input(&[
+                                attrs::type_("file"),
+                                attrs::id("file"),
+                                attrs::required(),
                             ]),
                         ]),
                     ]),
                 ]),
-                html::node("div", &[attrs::attribute("class", "row")], &[
-                    html::node("div", &[attrs::attribute("class", "column column-25")], &[
-                        html::node("button", &[ attrs::attribute("type", "submit")], &[html::text("Create site")]),
+                html::div(&[attrs::class("row")], &[
+                    html::div(&[attrs::class("column column-25")], &[
+                        html::button(&[ attrs::type_("submit")], &[html::text("Create site")]),
                     ]),
                 ]),
             ]),
         ]),
-        html::node("script", &[attrs::attribute("src", "/static/new_site.js")], &[]),
+        html::script(&[attrs::src("/static/new_site.js")], &[]),
     ]
 }

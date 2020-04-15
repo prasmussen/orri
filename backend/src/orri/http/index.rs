@@ -30,8 +30,8 @@ fn build_page() -> Page {
 
 fn build_body() -> Vec<Html> {
     vec![
-        html::node("div", &[attrs::attribute("class", "container")], &[
-            html::node("a", &[attrs::attribute("href", "/new"), attrs::attribute("class", "button")], &[html::text("New site")]),
+        html::div(&[attrs::class("container")], &[
+            html::a(&[attrs::href("/new"), attrs::class("button")], &[html::text("New site")]),
         ]),
     ]
 }
