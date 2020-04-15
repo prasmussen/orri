@@ -48,6 +48,9 @@ fn build_body() -> Vec<Html> {
                                 attrs::attribute("type", "text"),
                                 attrs::attribute("name", "domain"),
                                 attrs::attribute("placeholder", "i.e. name.orri.dev"),
+                                attrs::attribute("title", "Please provide a valid domain name, the subdomain must be at least 3 characters"),
+                                attrs::attribute("pattern", "[a-z-]{3,}[.][a-z]+[.][a-z]+"),
+                                attrs::bool_attribute("required"),
                             ]),
                         ]),
                     ]),
@@ -59,6 +62,7 @@ fn build_body() -> Vec<Html> {
                             html::node_no_end("input", &[
                                 attrs::attribute("type", "file"),
                                 attrs::attribute("id", "file"),
+                                attrs::bool_attribute("required"),
                             ]),
                         ]),
                     ]),

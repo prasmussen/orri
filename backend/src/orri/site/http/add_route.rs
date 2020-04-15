@@ -125,7 +125,10 @@ fn build_body(site: &Site, client_provided_key: bool) -> Vec<Html> {
                             html::node_no_end("input", &[
                                 attrs::attribute("type", "text"),
                                 attrs::attribute("name", "path"),
-                                attrs::attribute("placeholder", "i.e. /some-route or /app.js"),
+                                attrs::attribute("placeholder", "i.e. /some-page or /some-styles.css"),
+                                attrs::attribute("title", "The path to the file, it must start with a slash"),
+                                attrs::attribute("pattern", "/.+"),
+                                attrs::bool_attribute("required"),
                             ]),
                         ]),
                     ]),
@@ -138,6 +141,7 @@ fn build_body(site: &Site, client_provided_key: bool) -> Vec<Html> {
                                 html::node_no_end("input", &[
                                     attrs::attribute("type", "password"),
                                     attrs::attribute("name", "key"),
+                                    attrs::bool_attribute("required"),
                                 ]),
                             ]),
                         ]),
@@ -150,6 +154,7 @@ fn build_body(site: &Site, client_provided_key: bool) -> Vec<Html> {
                             html::node_no_end("input", &[
                                 attrs::attribute("type", "file"),
                                 attrs::attribute("id", "file"),
+                                attrs::bool_attribute("required"),
                             ]),
                         ]),
                     ]),
