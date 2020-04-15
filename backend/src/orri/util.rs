@@ -1,8 +1,6 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 use ring::digest;
 use hex;
-use rand::{Rng};
-use rand::distributions;
 
 
 pub fn unix_timestamp(time: SystemTime) -> u64 {

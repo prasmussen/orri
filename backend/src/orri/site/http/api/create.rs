@@ -1,5 +1,6 @@
 use std::time::SystemTime;
 use actix_web::{web, HttpRequest, HttpResponse};
+use actix_session::Session;
 use serde::{Deserialize, Serialize};
 use crate::orri::app_state::AppState;
 use crate::orri::site::{self, Site, CreateSiteError, FileInfo};
@@ -29,10 +30,10 @@ enum Error {
     CreateSiteError(CreateSiteError),
 }
 
-pub async fn handler(state: web::Data<AppState>, request_data: web::Json<Request>) -> HttpResponse {
+pub async fn handler(state: web::Data<AppState>, session: Session, request_data: web::Json<Request>) -> HttpResponse {
 
     handle(&state, &request_data)
-        .map(handle_site)
+        .map(|site| handle_site(session, site))
         .unwrap_or_else(handle_error)
 }
 
@@ -56,7 +57,9 @@ fn handle(state: &AppState, request_data: &Request) -> Result<Site, Error> {
         .map_err(Error::CreateSiteError)
 }
 
-fn handle_site(site: Site) -> HttpResponse {
+fn handle_site(session: Session, site: Site) -> HttpResponse {
+    session.set(&site.domain.to_string(), &site.key);
+
     HttpResponse::Ok()
         .json(Response{
             key: site.key,

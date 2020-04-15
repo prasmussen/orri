@@ -6,20 +6,28 @@ mod orri;
 
 use std::io;
 use std::path::PathBuf;
+use std::str::FromStr;
 use actix_web::{web, App, HttpServer, guard};
 use actix_files::Files;
+use actix_session::CookieSession;
 use orri::app_state::{self, AppState};
 use orri::http::index;
 use orri::site::http::api as site_api;
 use orri::site::http as site_http;
+use crate::orri::encryption_key::EncryptionKey;
 
 
 
 
 fn main_domain_routes(config: &mut web::ServiceConfig, state: &AppState, host: &'static str) {
+    // TODO: set SameSite, etc
+    let cookie_session = CookieSession::private(state.config.encryption_key.as_bytes())
+        .secure(state.config.cookie.secure);
+
     config.service(
         web::scope("/")
             .guard(guard::Header("Host", host))
+            .wrap(cookie_session)
             .route("", web::get().to(index::handler))
             .route("/new", web::get().to(site_http::create::handler))
             .route("/sites/{domain}", web::get().to(site_http::list::handler))
@@ -50,11 +58,15 @@ async fn main() -> Result<(), io::Error> {
 
     let state = app_state::AppState{
         config: app_state::Config{
+            encryption_key: "YdotmVZtV5R3PRnzfCiKBV3gtitSFg70".parse().unwrap(),
             server: app_state::ServerConfig{
                 main_domain: "orri.loc:8000".to_string(),
                 frontend_root: PathBuf::from("../frontend"),
                 sites_root: PathBuf::from("../sites"),
-            }
+            },
+            cookie: app_state::CookieConfig{
+                secure: false,
+            },
         }
     };
 

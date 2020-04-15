@@ -1,9 +1,11 @@
 use actix_web::{web, HttpRequest, HttpResponse};
+use actix_session::Session;
 use serde::{Deserialize, Serialize};
 use crate::orri::app_state::AppState;
 use crate::orri::site::{self, Site, CreateSiteError, FileInfo, GetSiteError};
 use crate::orri::http;
 use crate::orri::file;
+use crate::orri::util;
 use crate::orri::domain::{Domain, ParseDomainError};
 use data_url::{DataUrl, DataUrlError, mime, forgiving_base64};
 use std::time::SystemTime;
@@ -15,6 +17,7 @@ pub struct Request {
     domain: String,
     path: String,
     data_url: String,
+    key: Option<String>,
 }
 
 
@@ -28,20 +31,21 @@ enum Error {
     FailedToDecodeDataUrl(forgiving_base64::InvalidBase64),
     ParseDomainError(ParseDomainError),
     GetSiteError(GetSiteError),
+    InvalidKey(),
     PersistFileError(file::WriteError),
     PersistSiteError(file::WriteJsonError),
 }
 
-pub async fn handler(state: web::Data<AppState>, request_data: web::Json<Request>) -> HttpResponse {
+pub async fn handler(state: web::Data<AppState>, session: Session, request_data: web::Json<Request>) -> HttpResponse {
 
-    handle(&state, &request_data)
+    handle(&state, session, &request_data)
         .map(handle_site)
         .unwrap_or_else(handle_error)
 }
 
 // TODO: validate path (add newtype?)
 // TODO: check minimum subdomain length
-fn handle(state: &AppState, request_data: &Request) -> Result<Site, Error> {
+fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<Site, Error> {
     let domain = Domain::from_str(&request_data.domain)
         .map_err(Error::ParseDomainError)?;
 
@@ -60,6 +64,10 @@ fn handle(state: &AppState, request_data: &Request) -> Result<Site, Error> {
     let mut site = site::get(&site_root)
         .map_err(Error::GetSiteError)?;
 
+    let provided_key = get_provided_key(&request_data, session);
+
+    util::ensure(provided_key == Some(site.key.clone()), Error::InvalidKey())?;
+
     site.add_route(&site_root, &request_data.path, file_info, &file_data)
         .map_err(Error::PersistFileError);
 
@@ -68,6 +76,13 @@ fn handle(state: &AppState, request_data: &Request) -> Result<Site, Error> {
 
     Ok(site)
 }
+
+fn get_provided_key(request_data: &Request, session: Session) -> Option<String> {
+    let key_from_session: Option<String> = session.get(&request_data.domain).unwrap_or(None);
+
+    request_data.key.clone().or(key_from_session)
+}
+
 
 fn handle_site(site: Site) -> HttpResponse {
     HttpResponse::Ok().finish()
@@ -88,6 +103,10 @@ fn handle_error(err: Error) -> HttpResponse {
 
         Error::GetSiteError(err) =>
             handle_get_site_error(err),
+
+        Error::InvalidKey() =>
+            HttpResponse::Unauthorized()
+                .json(http::Error::from_str("Missing or invalid site key provided")),
 
         Error::PersistFileError(err) => {
             println!("Failed to persist file: {}", err);

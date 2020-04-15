@@ -76,3 +76,17 @@ pub fn node_no_end(name: &str, attributes: &[Attribute]) -> Html {
         has_end_tag: false,
     })
 }
+
+
+pub fn empty() -> Html {
+    Html::Text("".to_string())
+}
+
+
+pub fn conditional(condition: bool, html: Html) -> Html{
+    if condition {
+        html
+    } else {
+        empty()
+    }
+}

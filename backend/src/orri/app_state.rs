@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use crate::orri::encryption_key::EncryptionKey;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -8,7 +9,9 @@ pub struct AppState {
 
 #[derive(Clone)]
 pub struct Config {
+    pub encryption_key: EncryptionKey,
     pub server: ServerConfig,
+    pub cookie: CookieConfig,
 }
 
 
@@ -27,4 +30,10 @@ impl ServerConfig {
     pub fn frontend_file_path(&self, name: &'static str) -> PathBuf {
         self.frontend_root.join(PathBuf::from(name))
     }
+}
+
+
+#[derive(Clone)]
+pub struct CookieConfig {
+    pub secure: bool,
 }

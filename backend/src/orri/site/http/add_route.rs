@@ -1,4 +1,5 @@
 use actix_web::{web, HttpRequest, HttpResponse};
+use actix_session::Session;
 use crate::orri::app_state::AppState;
 use crate::orri::domain::{Domain, ParseDomainError};
 use crate::orri::site::{self, Site, GetSiteError, File, RouteInfo};
@@ -18,9 +19,12 @@ enum Error {
     GetSiteError(GetSiteError),
 }
 
-pub async fn handler(state: web::Data<AppState>, domain: web::Path<String>) -> HttpResponse {
+pub async fn handler(state: web::Data<AppState>, session: Session, domain: web::Path<String>) -> HttpResponse {
+    let site_key: Option<String> = session.get(&domain)
+        .unwrap_or(None);
+
     handle(&state, &domain)
-        .map(handle_site)
+        .map(|site| handle_site(site, site_key))
         .unwrap_or_else(handle_error)
 }
 
@@ -38,8 +42,10 @@ fn handle(state: &AppState, domain_str: &str) -> Result<Site, Error> {
 }
 
 
-fn handle_site(site: Site) -> HttpResponse {
-    let html = render(&site);
+fn handle_site(site: Site, site_key: Option<String>) -> HttpResponse {
+
+    let client_provided_key = site_key == Some(site.key.clone());
+    let html = render(&site, client_provided_key);
 
     HttpResponse::Ok()
         .set_header(header::CONTENT_TYPE, "text/html")
@@ -48,9 +54,9 @@ fn handle_site(site: Site) -> HttpResponse {
         .body(html)
 }
 
-fn render(site: &Site) -> String {
+fn render(site: &Site, client_provided_key: bool) -> String {
     let now = Instant::now();
-    let page = build_page(site);
+    let page = build_page(site, client_provided_key);
     let html_string = page.to_html().to_string();
     println!("{}", now.elapsed().as_micros());
     html_string
@@ -82,7 +88,7 @@ fn handle_get_site_error(err: GetSiteError) -> HttpResponse {
     }
 }
 
-fn build_page(site: &Site) -> Page {
+fn build_page(site: &Site, client_provided_key: bool) -> Page {
     Page{
         head: Head{
             title: format!("orri.add_route(\"{}\")", &site.domain),
@@ -90,12 +96,12 @@ fn build_page(site: &Site) -> Page {
                 html::node("script", &[attrs::attribute("src", "/static/orri.js")], &[]),
             ]
         },
-        body: build_body(site)
+        body: build_body(site, client_provided_key),
     }
 }
 
 
-fn build_body(site: &Site) -> Vec<Html> {
+fn build_body(site: &Site, client_provided_key: bool) -> Vec<Html> {
     vec![
         html::node("div", &[attrs::attribute("class", "container")], &[
             html::node("form", &[attrs::attribute("id", "site")], &[
@@ -124,6 +130,19 @@ fn build_body(site: &Site) -> Vec<Html> {
                         ]),
                     ]),
                 ]),
+                html::conditional(client_provided_key == false,
+                    html::node("div", &[attrs::attribute("class", "row")], &[
+                        html::node("div", &[attrs::attribute("class", "column")], &[
+                            html::node("label", &[], &[
+                                html::node("div", &[], &[html::text("Site key")]),
+                                html::node_no_end("input", &[
+                                    attrs::attribute("type", "password"),
+                                    attrs::attribute("name", "key"),
+                                ]),
+                            ]),
+                        ]),
+                    ])
+                ),
                 html::node("div", &[attrs::attribute("class", "row")], &[
                     html::node("div", &[attrs::attribute("class", "column")], &[
                         html::node("label", &[], &[

@@ -6,3 +6,4 @@ pub mod http;
 pub mod app_state;
 pub mod slowhtml;
 pub mod page;
+pub mod encryption_key;
