@@ -1,5 +1,5 @@
 use actix_web::{web, HttpRequest, HttpResponse};
-use crate::orri::app_state::AppState;
+use crate::orri::app_state::{AppState, ServerConfig};
 use crate::orri::domain::{Domain, ParseDomainError};
 use crate::orri::site::{self, Site, GetSiteError, File, RouteInfo};
 use crate::orri::slowhtml::html::Html;
@@ -19,9 +19,10 @@ enum Error {
 
 
 pub async fn handler(state: web::Data<AppState>, domain: web::Path<String>) -> HttpResponse {
+    let base_url = &state.config.server.other_base_url(&domain);
 
     handle(&state, &domain)
-        .map(handle_site)
+        .map(|site| handle_site(site, base_url))
         .unwrap_or_else(handle_error)
 }
 
@@ -37,8 +38,8 @@ fn handle(state: &AppState, domain_str: &str) -> Result<Site, Error> {
 }
 
 
-fn handle_site(site: Site) -> HttpResponse {
-    let html = render(&site);
+fn handle_site(site: Site, base_url: &str) -> HttpResponse {
+    let html = render(&site, base_url);
 
     HttpResponse::Ok()
         .set_header(header::CONTENT_TYPE, "text/html")
@@ -47,9 +48,9 @@ fn handle_site(site: Site) -> HttpResponse {
         .body(html)
 }
 
-fn render(site: &Site) -> String {
+fn render(site: &Site, base_url: &str) -> String {
     let now = Instant::now();
-    let page = build_page(site);
+    let page = build_page(site, base_url);
     let html_string = page.to_html().to_string();
     println!("{}", now.elapsed().as_micros());
     html_string
@@ -81,7 +82,7 @@ fn handle_get_site_error(err: GetSiteError) -> HttpResponse {
     }
 }
 
-fn build_page(site: &Site) -> Page {
+fn build_page(site: &Site, base_url: &str) -> Page {
     Page{
         head: Head{
             title: format!("orri.list_routes(\"{}\")", &site.domain),
@@ -89,16 +90,16 @@ fn build_page(site: &Site) -> Page {
                 html::script(&[attrs::src("/static/orri.js")], &[]),
             ]
         },
-        body: build_body(site)
+        body: build_body(site, base_url)
     }
 }
 
-fn build_body(site: &Site) -> Vec<Html> {
+fn build_body(site: &Site, base_url: &str) -> Vec<Html> {
     let new_route_url = format!("/sites/{}/add-route", site.domain);
 
     let rows = site.routes
         .iter()
-        .map(|(route, route_info)| table_row(site, route, route_info))
+        .map(|(route, route_info)| table_row(site, route, route_info, base_url))
         .collect::<Vec<Html>>();
 
     vec![
@@ -125,9 +126,8 @@ fn build_body(site: &Site) -> Vec<Html> {
     ]
 }
 
-fn table_row(site: &Site, route: &str, route_info: &RouteInfo) -> Html {
-    // TODO: get protocol and port from ServerConfig
-    let route_url = format!("https://{}{}", site.domain, route);
+fn table_row(site: &Site, route: &str, route_info: &RouteInfo, base_url: &str) -> Html {
+    let route_url = format!("{}{}", base_url, route);
 
     html::tr(&[], &[
         html::td(&[], &[

@@ -60,7 +60,10 @@ async fn main() -> Result<(), io::Error> {
         config: app_state::Config{
             encryption_key: "YdotmVZtV5R3PRnzfCiKBV3gtitSFg70".parse().unwrap(),
             server: app_state::ServerConfig{
-                main_domain: "orri.loc:8000".to_string(),
+                domain: "orri.loc".to_string(),
+                protocol: "http".to_string(),
+                listen_addr: "127.0.0.1".to_string(),
+                listen_port: 8000,
                 frontend_root: PathBuf::from("../frontend"),
                 sites_root: PathBuf::from("../sites"),
             },
@@ -71,16 +74,17 @@ async fn main() -> Result<(), io::Error> {
     };
 
     // TODO: This is probably ok, but is it possible to have a 'static String in the config?
-    let main_domain = to_static_str(state.config.server.main_domain.clone());
+    let domain = to_static_str(state.config.server.domain_with_port());
+    let listen_addr = &state.config.server.listen_addr_with_port();
 
     HttpServer::new(move || {
         App::new()
             .data(state.clone())
             .app_data(web::JsonConfig::default().limit(1024 * 1024 * 10))
-            .configure(|cfg| main_domain_routes(cfg, &state, main_domain))
+            .configure(|cfg| main_domain_routes(cfg, &state, domain))
             .configure(other_domains_routes)
     })
-    .bind("127.0.0.1:8000")?
+    .bind(listen_addr)?
     .run()
     .await
 }
