@@ -39,7 +39,6 @@ pub async fn handler(state: web::Data<AppState>, session: Session, request_data:
 }
 
 fn handle(state: &AppState, request_data: &Request) -> Result<Site, Error> {
-    // TODO: check minimum subdomain length
     let domain = Domain::from_str(&request_data.domain)
         .map_err(Error::ParseDomainError)?;
 
@@ -90,6 +89,10 @@ fn handle_parse_domain_error(err: domain::Error) -> HttpResponse {
         domain::Error::TooLong() =>
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("The domain is too long")),
+
+        domain::Error::SubdomainTooShort() =>
+            HttpResponse::BadRequest()
+                .json(http::Error::from_str("The subdomain is too short")),
 
         domain::Error::NotAlphanumeric() =>
             HttpResponse::BadRequest()

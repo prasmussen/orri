@@ -11,6 +11,7 @@ pub struct Domain(String);
 #[derive(Debug)]
 pub enum Error {
     TooLong(),
+    SubdomainTooShort(),
     NotAlphanumeric(),
     EmptyDomainValue(),
     MissingSecondLevelDomain(),
@@ -57,8 +58,10 @@ impl FromStr for Domain {
             [tld, sld] =>
                 Err(Error::MissingSubDomain()),
 
-            [tld, sld, subdomain] =>
-                Ok(Domain(host)),
+            [tld, sld, subdomain] => {
+                util::ensure(subdomain.len() > 3, Error::SubdomainTooShort())?;
+                Ok(Domain(host))
+            },
 
             _ =>
                 Err(Error::OnlyOneSubdomainAllowed()),
