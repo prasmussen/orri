@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::orri::app_state::AppState;
 use crate::orri::site::{self, Site, CreateSiteError, FileInfo};
 use crate::orri::http;
-use crate::orri::domain::{Domain, ParseDomainError};
+use crate::orri::domain::{self, Domain};
 use data_url::{DataUrl, DataUrlError, mime, forgiving_base64};
 
 
@@ -26,7 +26,7 @@ pub struct Response {
 enum Error {
     FailedToProcessDataUrl(DataUrlError),
     FailedToDecodeDataUrl(forgiving_base64::InvalidBase64),
-    ParseDomainError(ParseDomainError),
+    ParseDomainError(domain::Error),
     CreateSiteError(CreateSiteError),
 }
 
@@ -84,25 +84,25 @@ fn handle_error(err: Error) -> HttpResponse {
     }
 }
 
-fn handle_parse_domain_error(err: ParseDomainError) -> HttpResponse {
+fn handle_parse_domain_error(err: domain::Error) -> HttpResponse {
     match err {
-        ParseDomainError::NotAlphabetic() =>
+        domain::Error::NotAlphabetic() =>
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("The domain can only contain characters in the range a-z")),
 
-        ParseDomainError::EmptyDomainValue() =>
+        domain::Error::EmptyDomainValue() =>
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("The domain cannot be empty")),
 
-        ParseDomainError::MissingSecondLevelDomain() =>
+        domain::Error::MissingSecondLevelDomain() =>
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("A second level domain is required")),
 
-        ParseDomainError::MissingSubDomain() =>
+        domain::Error::MissingSubDomain() =>
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("A sub domain is required")),
 
-        ParseDomainError::OnlyOneSubdomainAllowed() =>
+        domain::Error::OnlyOneSubdomainAllowed() =>
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("Only one subdomain is allowed")),
     }

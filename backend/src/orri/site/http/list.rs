@@ -1,6 +1,6 @@
 use actix_web::{web, HttpRequest, HttpResponse};
 use crate::orri::app_state::{AppState, ServerConfig};
-use crate::orri::domain::{Domain, ParseDomainError};
+use crate::orri::domain::{self, Domain};
 use crate::orri::site::{self, Site, GetSiteError, File, RouteInfo};
 use crate::orri::slowhtml::html::Html;
 use crate::orri::slowhtml::html;
@@ -13,7 +13,7 @@ use std::time::{Duration, Instant};
 
 
 enum Error {
-    ParseDomainError(ParseDomainError),
+    ParseDomainError(domain::Error),
     GetSiteError(GetSiteError),
 }
 

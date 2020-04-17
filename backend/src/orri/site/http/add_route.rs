@@ -1,7 +1,7 @@
 use actix_web::{web, HttpRequest, HttpResponse};
 use actix_session::Session;
 use crate::orri::app_state::AppState;
-use crate::orri::domain::{Domain, ParseDomainError};
+use crate::orri::domain::{self, Domain};
 use crate::orri::site::{self, Site, GetSiteError, File, RouteInfo};
 use crate::orri::slowhtml::html::Html;
 use crate::orri::slowhtml::html;
@@ -15,7 +15,7 @@ use std::time::{Duration, Instant};
 
 
 enum Error {
-    ParseDomainError(ParseDomainError),
+    ParseDomainError(domain::Error),
     GetSiteError(GetSiteError),
 }
 
@@ -36,7 +36,6 @@ fn handle(state: &AppState, domain_str: &str) -> Result<Site, Error> {
 
     let site_root = site::SiteRoot::new(&state.config.server.sites_root, domain);
 
-    // TODO: check if route exist
     site::get(&site_root)
         .map_err(Error::GetSiteError)
 }

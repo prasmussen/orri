@@ -6,7 +6,7 @@ use crate::orri::site::{self, Site, CreateSiteError, FileInfo, GetSiteError};
 use crate::orri::http;
 use crate::orri::file;
 use crate::orri::util;
-use crate::orri::domain::{Domain, ParseDomainError};
+use crate::orri::domain::{self, Domain};
 use data_url::{DataUrl, DataUrlError, mime, forgiving_base64};
 use std::time::SystemTime;
 
@@ -29,8 +29,9 @@ pub struct Request {
 enum Error {
     FailedToProcessDataUrl(DataUrlError),
     FailedToDecodeDataUrl(forgiving_base64::InvalidBase64),
-    ParseDomainError(ParseDomainError),
+    ParseDomainError(domain::Error),
     GetSiteError(GetSiteError),
+    RouteAlreadyExist(),
     InvalidKey(),
     PersistFileError(file::WriteError),
     PersistSiteError(file::WriteJsonError),
@@ -60,12 +61,12 @@ fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<
     let file_info = FileInfo::new(&file_data, mime_type, time);
     let site_root = site::SiteRoot::new(&state.config.server.sites_root, domain);
 
-    // TODO: check if route exist
     let mut site = site::get(&site_root)
         .map_err(Error::GetSiteError)?;
 
     let provided_key = get_provided_key(&request_data, session);
 
+    util::ensure(site.routes.contains_key(&request_data.path) == false, Error::RouteAlreadyExist())?;
     util::ensure(provided_key == Some(site.key.clone()), Error::InvalidKey())?;
 
     site.add_route(&site_root, &request_data.path, file_info, &file_data)
@@ -104,6 +105,10 @@ fn handle_error(err: Error) -> HttpResponse {
         Error::GetSiteError(err) =>
             handle_get_site_error(err),
 
+        Error::RouteAlreadyExist() =>
+            HttpResponse::Conflict()
+                .json(http::Error::from_str("Route already exists")),
+
         Error::InvalidKey() =>
             HttpResponse::Unauthorized()
                 .json(http::Error::from_str("Missing or invalid site key provided")),
@@ -122,25 +127,25 @@ fn handle_error(err: Error) -> HttpResponse {
     }
 }
 
-fn handle_parse_domain_error(err: ParseDomainError) -> HttpResponse {
+fn handle_parse_domain_error(err: domain::Error) -> HttpResponse {
     match err {
-        ParseDomainError::NotAlphabetic() =>
+        domain::Error::NotAlphabetic() =>
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("The domain can only contain characters in the range a-z")),
 
-        ParseDomainError::EmptyDomainValue() =>
+        domain::Error::EmptyDomainValue() =>
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("The domain cannot be empty")),
 
-        ParseDomainError::MissingSecondLevelDomain() =>
+        domain::Error::MissingSecondLevelDomain() =>
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("A second level domain is required")),
 
-        ParseDomainError::MissingSubDomain() =>
+        domain::Error::MissingSubDomain() =>
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("A sub domain is required")),
 
-        ParseDomainError::OnlyOneSubdomainAllowed() =>
+        domain::Error::OnlyOneSubdomainAllowed() =>
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("Only one subdomain is allowed")),
     }

@@ -8,7 +8,7 @@ pub struct Domain(String);
 
 
 #[derive(Debug)]
-pub enum ParseDomainError {
+pub enum Error {
     NotAlphabetic(),
     EmptyDomainValue(),
     MissingSecondLevelDomain(),
@@ -24,7 +24,7 @@ impl fmt::Display for Domain {
 }
 
 impl Domain {
-    pub fn from_str(s: &str) -> Result<Domain, ParseDomainError> {
+    pub fn from_str(s: &str) -> Result<Domain, Error> {
         let host = s.to_lowercase();
 
         let reversed_parts = host.split(".")
@@ -39,24 +39,24 @@ impl Domain {
             .map(|part| part.chars().all(char::is_alphabetic))
             .all(std::convert::identity);
 
-        util::ensure(parts_are_alphabetic, ParseDomainError::NotAlphabetic())?;
+        util::ensure(parts_are_alphabetic, Error::NotAlphabetic())?;
 
         // TODO: add setting subdomain setting: OnlyOne | OneOrMore | NoneOrOne | NoLimit
         match *reversed_parts.as_slice() {
             [] =>
-                Err(ParseDomainError::EmptyDomainValue()),
+                Err(Error::EmptyDomainValue()),
 
             [tld] =>
-                Err(ParseDomainError::MissingSecondLevelDomain()),
+                Err(Error::MissingSecondLevelDomain()),
 
             [tld, sld] =>
-                Err(ParseDomainError::MissingSubDomain()),
+                Err(Error::MissingSubDomain()),
 
             [tld, sld, subdomain] =>
                 Ok(Domain(host)),
 
             _ =>
-                Err(ParseDomainError::OnlyOneSubdomainAllowed()),
+                Err(Error::OnlyOneSubdomainAllowed()),
         }
     }
 }

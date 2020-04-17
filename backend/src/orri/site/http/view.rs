@@ -1,6 +1,6 @@
 use actix_web::{web, HttpRequest, HttpResponse};
 use crate::orri::app_state::AppState;
-use crate::orri::domain::{Domain, ParseDomainError};
+use crate::orri::domain::{self, Domain};
 use crate::orri::site::{self, Site, GetSiteError, File};
 use http::header;
 use std::path::PathBuf;
@@ -8,7 +8,7 @@ use std::io;
 
 
 enum Error {
-    ParseDomainError(ParseDomainError),
+    ParseDomainError(domain::Error),
     GetSiteError(GetSiteError),
     RouteNotFound(),
     FailedToReadRouteData(io::Error),
