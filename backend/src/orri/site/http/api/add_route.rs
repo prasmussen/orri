@@ -129,6 +129,10 @@ fn handle_error(err: Error) -> HttpResponse {
 
 fn handle_parse_domain_error(err: domain::Error) -> HttpResponse {
     match err {
+        domain::Error::TooLong() =>
+            HttpResponse::BadRequest()
+                .json(http::Error::from_str("The domain is too long")),
+
         domain::Error::NotAlphanumeric() =>
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("The domain can only contain alphanumeric characters")),

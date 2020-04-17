@@ -9,6 +9,7 @@ pub struct Domain(String);
 
 #[derive(Debug)]
 pub enum Error {
+    TooLong(),
     NotAlphanumeric(),
     EmptyDomainValue(),
     MissingSecondLevelDomain(),
@@ -25,6 +26,8 @@ impl fmt::Display for Domain {
 
 impl Domain {
     pub fn from_str(s: &str) -> Result<Domain, Error> {
+        util::ensure(s.len() < 100, Error::TooLong())?;
+
         let host = s.to_lowercase();
 
         let reversed_parts = host.split(".")
