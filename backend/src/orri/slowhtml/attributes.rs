@@ -21,84 +21,92 @@ impl fmt::Display for Attribute {
 }
 
 pub fn attribute(name: &str, value: &str) -> Attribute {
+    attribute_trusted_name(&htmlescape::encode_attribute(name), value)
+}
+
+pub fn attribute_trusted_name(name: &str, value: &str) -> Attribute {
     Attribute{
-        name: htmlescape::encode_attribute(name),
+        name: name.to_string(),
         value: Some(htmlescape::encode_attribute(value)),
     }
 }
 
 pub fn bool_attribute(name: &str) -> Attribute {
+    bool_attribute_trusted(&htmlescape::encode_attribute(name))
+}
+
+pub fn bool_attribute_trusted(name: &str) -> Attribute {
     Attribute{
-        name: htmlescape::encode_attribute(name),
+        name: name.to_string(),
         value: None,
     }
 }
 
 
 pub fn lang(value: &str) -> Attribute {
-    attribute("lang", value)
+    attribute_trusted_name("lang", value)
 }
 
 pub fn charset(value: &str) -> Attribute {
-    attribute("charset", value)
+    attribute_trusted_name("charset", value)
 }
 
 pub fn http_equiv(value: &str) -> Attribute {
-    attribute("http-equiv", value)
+    attribute_trusted_name("http-equiv", value)
 }
 
 pub fn content(value: &str) -> Attribute {
-    attribute("content", value)
+    attribute_trusted_name("content", value)
 }
 
 pub fn name(value: &str) -> Attribute {
-    attribute("name", value)
+    attribute_trusted_name("name", value)
 }
 
 pub fn rel(value: &str) -> Attribute {
-    attribute("rel", value)
+    attribute_trusted_name("rel", value)
 }
 
 pub fn id(value: &str) -> Attribute {
-    attribute("id", value)
+    attribute_trusted_name("id", value)
 }
 
 pub fn class(value: &str) -> Attribute {
-    attribute("class", value)
+    attribute_trusted_name("class", value)
 }
 
 pub fn href(value: &str) -> Attribute {
-    attribute("href", value)
+    attribute_trusted_name("href", value)
 }
 
 pub fn src(value: &str) -> Attribute {
-    attribute("src", value)
+    attribute_trusted_name("src", value)
 }
 
 pub fn type_(value: &str) -> Attribute {
-    attribute("type", value)
+    attribute_trusted_name("type", value)
 }
 
 pub fn value(value: &str) -> Attribute {
-    attribute("value", value)
+    attribute_trusted_name("value", value)
 }
 
 pub fn placeholder(value: &str) -> Attribute {
-    attribute("placeholder", value)
+    attribute_trusted_name("placeholder", value)
 }
 
 pub fn title(value: &str) -> Attribute {
-    attribute("title", value)
+    attribute_trusted_name("title", value)
 }
 
 pub fn pattern(value: &str) -> Attribute {
-    attribute("pattern", value)
+    attribute_trusted_name("pattern", value)
 }
 
 pub fn readonly() -> Attribute {
-    bool_attribute("readonly")
+    bool_attribute_trusted("readonly")
 }
 
 pub fn required() -> Attribute {
-    bool_attribute("required")
+    bool_attribute_trusted("required")
 }

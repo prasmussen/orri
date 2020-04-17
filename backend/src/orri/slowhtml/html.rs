@@ -59,18 +59,25 @@ pub fn text(text: &str) -> Html {
 }
 
 pub fn node(name: &str, attributes: &[Attribute], children: &[Html]) -> Html {
+    node_trusted_name(&htmlescape::encode_minimal(name), attributes, children)
+}
+
+pub fn node_trusted_name(name: &str, attributes: &[Attribute], children: &[Html]) -> Html {
     Html::Tag(HtmlTag{
-        name: htmlescape::encode_minimal(name),
+        name: name.to_string(),
         attributes: attributes.to_vec(),
         children: children.to_vec(),
         has_end_tag: true,
     })
 }
 
-
 pub fn node_no_end(name: &str, attributes: &[Attribute]) -> Html {
+    node_no_end_trusted_name(&htmlescape::encode_minimal(name), attributes)
+}
+
+pub fn node_no_end_trusted_name(name: &str, attributes: &[Attribute]) -> Html {
     Html::Tag(HtmlTag{
-        name: htmlescape::encode_minimal(name),
+        name: name.to_string(),
         attributes: attributes.to_vec(),
         children: vec![],
         has_end_tag: false,
@@ -93,77 +100,77 @@ pub fn conditional(condition: bool, html: Html) -> Html{
 
 
 pub fn html(attributes: &[Attribute], children: &[Html]) -> Html {
-    node("html", attributes, children)
+    node_trusted_name("html", attributes, children)
 }
 
 pub fn head(attributes: &[Attribute], children: &[Html]) -> Html {
-    node("head", attributes, children)
+    node_trusted_name("head", attributes, children)
 }
 
 pub fn body(attributes: &[Attribute], children: &[Html]) -> Html {
-    node("body", attributes, children)
+    node_trusted_name("body", attributes, children)
 }
 
 pub fn title(attributes: &[Attribute], children: &[Html]) -> Html {
-    node("title", attributes, children)
+    node_trusted_name("title", attributes, children)
 }
 
 pub fn div(attributes: &[Attribute], children: &[Html]) -> Html {
-    node("div", attributes, children)
+    node_trusted_name("div", attributes, children)
 }
 
 pub fn a(attributes: &[Attribute], children: &[Html]) -> Html {
-    node("a", attributes, children)
+    node_trusted_name("a", attributes, children)
 }
 
 pub fn form(attributes: &[Attribute], children: &[Html]) -> Html {
-    node("form", attributes, children)
+    node_trusted_name("form", attributes, children)
 }
 
 pub fn label(attributes: &[Attribute], children: &[Html]) -> Html {
-    node("label", attributes, children)
+    node_trusted_name("label", attributes, children)
 }
 
 pub fn button(attributes: &[Attribute], children: &[Html]) -> Html {
-    node("button", attributes, children)
+    node_trusted_name("button", attributes, children)
 }
 
 pub fn table(attributes: &[Attribute], children: &[Html]) -> Html {
-    node("table", attributes, children)
+    node_trusted_name("table", attributes, children)
 }
 
 pub fn thead(attributes: &[Attribute], children: &[Html]) -> Html {
-    node("thead", attributes, children)
+    node_trusted_name("thead", attributes, children)
 }
 
 pub fn tbody(attributes: &[Attribute], children: &[Html]) -> Html {
-    node("tbody", attributes, children)
+    node_trusted_name("tbody", attributes, children)
 }
 
 pub fn th(attributes: &[Attribute], children: &[Html]) -> Html {
-    node("th", attributes, children)
+    node_trusted_name("th", attributes, children)
 }
 
 pub fn tr(attributes: &[Attribute], children: &[Html]) -> Html {
-    node("tr", attributes, children)
+    node_trusted_name("tr", attributes, children)
 }
 
 pub fn td(attributes: &[Attribute], children: &[Html]) -> Html {
-    node("td", attributes, children)
+    node_trusted_name("td", attributes, children)
 }
 
 pub fn input(attributes: &[Attribute]) -> Html {
-    node_no_end("input", attributes)
+    node_no_end_trusted_name("input", attributes)
 }
 
 pub fn meta(attributes: &[Attribute]) -> Html {
-    node_no_end("meta", attributes)
+    node_no_end_trusted_name("meta", attributes)
 }
 
 pub fn link(attributes: &[Attribute]) -> Html {
-    node_no_end("link", attributes)
+    node_no_end_trusted_name("link", attributes)
 }
 
 pub fn script(attributes: &[Attribute], children: &[Html]) -> Html {
-    node("script", attributes, children)
+    node_trusted_name("script", attributes, children)
 }
