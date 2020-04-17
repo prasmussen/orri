@@ -1,6 +1,7 @@
 use actix_web::{web, HttpRequest, HttpResponse};
 use crate::orri::app_state::{AppState, ServerConfig};
 use crate::orri::domain::{self, Domain};
+use crate::orri::url_path::{self, UrlPath};
 use crate::orri::site::{self, Site, GetSiteError, File, RouteInfo};
 use crate::orri::slowhtml::html::Html;
 use crate::orri::slowhtml::html;
@@ -126,12 +127,12 @@ fn build_body(site: &Site, base_url: &str) -> Vec<Html> {
     ]
 }
 
-fn table_row(site: &Site, route: &str, route_info: &RouteInfo, base_url: &str) -> Html {
+fn table_row(site: &Site, route: &UrlPath, route_info: &RouteInfo, base_url: &str) -> Html {
     let route_url = format!("{}{}", base_url, route);
 
     html::tr(&[], &[
         html::td(&[], &[
-            html::a(&[attrs::href(&route_url)], &[html::text(route)]),
+            html::a(&[attrs::href(&route_url)], &[html::text(&route.to_string())]),
         ]),
         html::td(&[], &[html::text(&route_info.file_info.mime)]),
         html::td(&[], &[html::text(&route_info.file_info.size.to_string())]),

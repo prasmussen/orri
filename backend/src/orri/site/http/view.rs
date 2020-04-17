@@ -1,14 +1,17 @@
 use actix_web::{web, HttpRequest, HttpResponse};
 use crate::orri::app_state::AppState;
 use crate::orri::domain::{self, Domain};
+use crate::orri::url_path::{self, UrlPath};
 use crate::orri::site::{self, Site, GetSiteError, File};
 use http::header;
 use std::path::PathBuf;
 use std::io;
+use std::str::FromStr;
 
 
 enum Error {
     ParseDomainError(domain::Error),
+    ParsePathError(url_path::Error),
     GetSiteError(GetSiteError),
     RouteNotFound(),
     FailedToReadRouteData(io::Error),
@@ -24,19 +27,21 @@ pub async fn handler(req: HttpRequest, state: web::Data<AppState>) -> HttpRespon
 
 
 fn handle(req: &HttpRequest, state: &AppState) -> Result<File, Error> {
-    let path = req.uri().path();
     let host = get_host_header_string(&req)
         .unwrap_or(String::new());
 
     let domain = Domain::from_str(&host)
         .map_err(Error::ParseDomainError)?;
 
+    let path = UrlPath::from_str(req.uri().path())
+        .map_err(Error::ParsePathError)?;
+
     let site_root = site::SiteRoot::new(&state.config.server.sites_root, domain);
 
     let site = site::get(&site_root)
         .map_err(Error::GetSiteError)?;
 
-    let route = site.routes.get(path)
+    let route = site.routes.get(&path)
         .ok_or(Error::RouteNotFound())?;
 
     site::read_route_file(&site_root, &route)
@@ -54,6 +59,10 @@ fn handle_file(file: site::File) -> HttpResponse {
 fn handle_error(err: Error) -> HttpResponse {
     match err {
         Error::ParseDomainError(err) => {
+            HttpResponse::BadRequest().finish()
+        },
+
+        Error::ParsePathError(err) => {
             HttpResponse::BadRequest().finish()
         },
 

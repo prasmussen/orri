@@ -6,21 +6,23 @@ use std::collections::BTreeMap;
 use crate::orri::file;
 use crate::orri::util;
 use crate::orri::domain::Domain;
+use crate::orri::url_path::UrlPath;
 use std::time::SystemTime;
+use std::str::FromStr;
 
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Site {
     pub domain: Domain,
     pub key: String,
-    pub routes: BTreeMap<String, RouteInfo>,
+    pub routes: BTreeMap<UrlPath, RouteInfo>,
 }
 
 impl Site {
-    pub fn add_route(&mut self, site_root: &SiteRoot, path: &str, file_info: FileInfo, file_data: &[u8]) -> Result<&Site, file::WriteError> {
+    pub fn add_route(&mut self, site_root: &SiteRoot, path: UrlPath, file_info: FileInfo, file_data: &[u8]) -> Result<&Site, file::WriteError> {
         file::write(&site_root.data_file_path(&file_info.hash), file_data)?;
 
-        self.routes.insert(path.to_string(), RouteInfo{
+        self.routes.insert(path, RouteInfo{
             file_info: file_info,
         });
 
@@ -63,7 +65,7 @@ pub fn create(site_root: SiteRoot, key: &str, file_info: FileInfo, file_data: &[
         routes: BTreeMap::new(),
     };
 
-    site.add_route(&site_root, "/", file_info, file_data)
+    site.add_route(&site_root, UrlPath::root(), file_info, file_data)
         .map_err(CreateSiteError::FailedToWriteFile)?;
 
     site.persist(&site_root)

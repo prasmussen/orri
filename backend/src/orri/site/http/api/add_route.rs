@@ -7,8 +7,10 @@ use crate::orri::http;
 use crate::orri::file;
 use crate::orri::util;
 use crate::orri::domain::{self, Domain};
+use crate::orri::url_path::{self, UrlPath};
 use data_url::{DataUrl, DataUrlError, mime, forgiving_base64};
 use std::time::SystemTime;
+use std::str::FromStr;
 
 
 #[derive(Deserialize)]
@@ -21,15 +23,11 @@ pub struct Request {
 }
 
 
-//#[derive(Serialize)]
-//pub struct Response {
-//    key: String,
-//}
-
 enum Error {
     FailedToProcessDataUrl(DataUrlError),
     FailedToDecodeDataUrl(forgiving_base64::InvalidBase64),
     ParseDomainError(domain::Error),
+    ParsePathError(url_path::Error),
     GetSiteError(GetSiteError),
     RouteAlreadyExist(),
     InvalidKey(),
@@ -44,11 +42,13 @@ pub async fn handler(state: web::Data<AppState>, session: Session, request_data:
         .unwrap_or_else(handle_error)
 }
 
-// TODO: validate path (add newtype?)
 // TODO: check minimum subdomain length
 fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<Site, Error> {
     let domain = Domain::from_str(&request_data.domain)
         .map_err(Error::ParseDomainError)?;
+
+    let path = UrlPath::from_str(&request_data.path)
+        .map_err(Error::ParsePathError)?;
 
     let url = DataUrl::process(&request_data.data_url)
         .map_err(Error::FailedToProcessDataUrl)?;
@@ -66,10 +66,10 @@ fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<
 
     let provided_key = get_provided_key(&request_data, session);
 
-    util::ensure(site.routes.contains_key(&request_data.path) == false, Error::RouteAlreadyExist())?;
+    util::ensure(site.routes.contains_key(&path) == false, Error::RouteAlreadyExist())?;
     util::ensure(provided_key == Some(site.key.clone()), Error::InvalidKey())?;
 
-    site.add_route(&site_root, &request_data.path, file_info, &file_data)
+    site.add_route(&site_root, path, file_info, &file_data)
         .map_err(Error::PersistFileError);
 
     site.persist(&site_root)
@@ -101,6 +101,9 @@ fn handle_error(err: Error) -> HttpResponse {
 
         Error::ParseDomainError(err) =>
             handle_parse_domain_error(err),
+
+        Error::ParsePathError(err) =>
+            handle_parse_path_error(err),
 
         Error::GetSiteError(err) =>
             handle_get_site_error(err),
@@ -152,6 +155,26 @@ fn handle_parse_domain_error(err: domain::Error) -> HttpResponse {
         domain::Error::OnlyOneSubdomainAllowed() =>
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("Only one subdomain is allowed")),
+    }
+}
+
+fn handle_parse_path_error(err: url_path::Error) -> HttpResponse {
+    match err {
+        url_path::Error::MustStartWithSlash() =>
+            HttpResponse::BadRequest()
+                .json(http::Error::from_str("The path must start with a slash")),
+
+        url_path::Error::TooLong() =>
+            HttpResponse::BadRequest()
+                .json(http::Error::from_str("The path is too long")),
+
+        url_path::Error::ContainsDisallowedChars() =>
+            HttpResponse::BadRequest()
+                .json(http::Error::from_str("The path contains disallowed characters")),
+
+        url_path::Error::ContainsDoubleDot() =>
+            HttpResponse::BadRequest()
+                .json(http::Error::from_str("The path contains double dots")),
     }
 }
 
