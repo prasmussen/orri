@@ -9,7 +9,7 @@ pub struct Domain(String);
 
 #[derive(Debug)]
 pub enum Error {
-    NotAlphabetic(),
+    NotAlphanumeric(),
     EmptyDomainValue(),
     MissingSecondLevelDomain(),
     MissingSubDomain(),
@@ -34,12 +34,12 @@ impl Domain {
             .rev()
             .collect::<Vec<&str>>();
 
-        let parts_are_alphabetic = reversed_parts
+        let parts_are_alphanumeric = reversed_parts
             .iter()
-            .map(|part| part.chars().all(char::is_alphabetic))
+            .map(|part| part.chars().all(|c| c.is_ascii_alphanumeric()))
             .all(std::convert::identity);
 
-        util::ensure(parts_are_alphabetic, Error::NotAlphabetic())?;
+        util::ensure(parts_are_alphanumeric, Error::NotAlphanumeric())?;
 
         // TODO: add setting subdomain setting: OnlyOne | OneOrMore | NoneOrOne | NoLimit
         match *reversed_parts.as_slice() {

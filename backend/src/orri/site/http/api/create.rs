@@ -86,9 +86,9 @@ fn handle_error(err: Error) -> HttpResponse {
 
 fn handle_parse_domain_error(err: domain::Error) -> HttpResponse {
     match err {
-        domain::Error::NotAlphabetic() =>
+        domain::Error::NotAlphanumeric() =>
             HttpResponse::BadRequest()
-                .json(http::Error::from_str("The domain can only contain characters in the range a-z")),
+                .json(http::Error::from_str("The domain can only contain alphanumeric characters")),
 
         domain::Error::EmptyDomainValue() =>
             HttpResponse::BadRequest()
