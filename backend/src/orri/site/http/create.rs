@@ -1,5 +1,5 @@
 use actix_web::{web, HttpRequest, HttpResponse};
-use crate::orri::app_state::AppState;
+use crate::orri::app_state::{AppState, ServerConfig};
 use crate::orri::domain::Domain;
 use crate::orri::site::{self, Site, GetSiteError, File, RouteInfo};
 use crate::orri::slowhtml::html::Html;
@@ -15,7 +15,9 @@ use std::str::FromStr;
 
 
 pub async fn handler(state: web::Data<AppState>) -> HttpResponse {
-    let html = build_page().to_html().to_string();
+    let html = build_page(&state.config.server)
+        .to_html()
+        .to_string();
 
     HttpResponse::Ok()
         .set_header(header::CONTENT_TYPE, "text/html")
@@ -24,7 +26,7 @@ pub async fn handler(state: web::Data<AppState>) -> HttpResponse {
         .body(html)
 }
 
-fn build_page() -> Page {
+fn build_page(server_config: &ServerConfig) -> Page {
     Page{
         head: Head{
             title: format!("orri.new_site()"),
@@ -32,25 +34,25 @@ fn build_page() -> Page {
                 html::script(&[attrs::src("/static/orri.js")], &[]),
             ]
         },
-        body: build_body()
+        body: build_body(server_config)
     }
 }
 
 
-fn build_body() -> Vec<Html> {
+fn build_body(server_config: &ServerConfig) -> Vec<Html> {
     vec![
         html::div(&[attrs::class("container")], &[
             html::form(&[attrs::id("site")], &[
                 html::div(&[attrs::class("row")], &[
                     html::div(&[attrs::class("column")], &[
                         html::label(&[], &[
-                            html::div(&[], &[html::text("Domain")]),
+                            html::div(&[], &[html::text("Subdomain")]),
                             html::input(&[
                                 attrs::type_("text"),
-                                attrs::name("domain"),
-                                attrs::placeholder("i.e. name.orri.dev"),
-                                attrs::title("Please provide a valid domain name, the subdomain must be at least 3 characters"),
-                                attrs::pattern("[a-z-]{3,}[.][a-z]+[.][a-z]+"),
+                                attrs::name("subdomain"),
+                                attrs::placeholder("i.e. mycoolsite"),
+                                attrs::title("Please provide a valid subdomain, at least 3 characters"),
+                                attrs::pattern("[a-z0-9]{4,}"),
                                 attrs::required(),
                             ]),
                         ]),
@@ -67,6 +69,11 @@ fn build_body() -> Vec<Html> {
                             ]),
                         ]),
                     ]),
+                ]),
+                html::input(&[
+                    attrs::type_("hidden"),
+                    attrs::name("mainDomain"),
+                    attrs::value(&server_config.domain),
                 ]),
                 html::div(&[attrs::class("row")], &[
                     html::div(&[attrs::class("column column-25")], &[
