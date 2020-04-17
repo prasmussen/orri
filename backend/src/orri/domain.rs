@@ -1,4 +1,5 @@
 use std::fmt;
+use std::str::FromStr;
 use serde::{Deserialize, Serialize};
 use crate::orri::util;
 
@@ -24,8 +25,10 @@ impl fmt::Display for Domain {
     }
 }
 
-impl Domain {
-    pub fn from_str(s: &str) -> Result<Domain, Error> {
+impl FromStr for Domain {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Error> {
         util::ensure(s.len() < 100, Error::TooLong())?;
 
         let host = s.to_lowercase();
@@ -44,7 +47,6 @@ impl Domain {
 
         util::ensure(parts_are_alphanumeric, Error::NotAlphanumeric())?;
 
-        // TODO: add setting subdomain setting: OnlyOne | OneOrMore | NoneOrOne | NoLimit
         match *reversed_parts.as_slice() {
             [] =>
                 Err(Error::EmptyDomainValue()),
@@ -62,4 +64,5 @@ impl Domain {
                 Err(Error::OnlyOneSubdomainAllowed()),
         }
     }
+
 }
