@@ -68,11 +68,11 @@ fn milligram_styles() -> Vec<Html> {
         ]),
         html::link(&[
             attrs::rel("stylesheet"),
-            attrs::href("https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css"),
+            attrs::href("/static/vendor/normalize.min.css"),
         ]),
         html::link(&[
             attrs::rel("stylesheet"),
-            attrs::href("https://cdnjs.cloudflare.com/ajax/libs/milligram/1.3.0/milligram.css"),
+            attrs::href("/static/vendor/milligram.min.css"),
         ]),
     ]
 }
