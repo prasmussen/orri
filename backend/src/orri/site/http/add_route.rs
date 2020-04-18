@@ -57,7 +57,7 @@ fn handle_site(site: Site, site_key: Option<String>) -> HttpResponse {
 fn render(site: &Site, client_provided_key: bool) -> String {
     let now = Instant::now();
     let page = build_page(site, client_provided_key);
-    let html_string = page.to_html().to_string();
+    let html_string = page.to_string();
     println!("{}", now.elapsed().as_micros());
     html_string
 }

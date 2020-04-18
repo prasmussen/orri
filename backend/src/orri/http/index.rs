@@ -8,7 +8,7 @@ use crate::orri::slowhtml::attributes as attrs;
 
 
 pub async fn handler(state: web::Data<AppState>) -> HttpResponse {
-    let html = build_page().to_html().to_string();
+    let html = build_page().to_string();
 
     HttpResponse::Ok()
         .set_header(header::CONTENT_TYPE, "text/html")

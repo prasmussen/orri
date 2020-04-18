@@ -1,6 +1,6 @@
 use std::fmt;
 use htmlescape;
-use crate::orri::slowhtml::attributes::Attribute;
+use crate::orri::slowhtml::attributes::{self, Attribute};
 
 #[derive(Clone, Debug)]
 pub enum Html {
@@ -98,6 +98,11 @@ pub fn conditional(condition: bool, html: Html) -> Html{
     }
 }
 
+pub fn doctype_html() -> Html {
+    node_no_end_trusted_name("!DOCTYPE", &[
+        attributes::bool_attribute_trusted("html"),
+    ])
+}
 
 pub fn html(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("html", attributes, children)

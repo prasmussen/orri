@@ -1,3 +1,4 @@
+use std::fmt;
 use crate::orri::slowhtml::html::Html;
 use crate::orri::slowhtml::html;
 use crate::orri::slowhtml::attributes as attrs;
@@ -9,14 +10,26 @@ pub struct Page {
 }
 
 impl Page {
-    pub fn to_html(self) -> Html {
-        html::html(
-            &[attrs::lang("en")],
-            &[
-                html::head(&[], &self.head.to_html()),
-                html::body(&[], &self.body),
-            ]
-        )
+    pub fn to_html(self) -> Vec<Html> {
+        vec![
+            html::doctype_html(),
+            html::html(
+                &[attrs::lang("en")],
+                &[
+                    html::head(&[], &self.head.to_html()),
+                    html::body(&[], &self.body),
+                ]
+            ),
+        ]
+    }
+
+    pub fn to_string(self) -> String {
+        self.to_html()
+            .iter()
+            .map(|html| html.to_string())
+            .collect::<Vec<String>>()
+            .join("")
+
     }
 }
 
