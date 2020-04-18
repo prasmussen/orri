@@ -21,10 +21,13 @@ impl fmt::Display for Attribute {
 }
 
 pub fn attribute(name: &str, value: &str) -> Attribute {
-    attribute_trusted_name(&htmlescape::encode_attribute(name), value)
+    Attribute{
+        name: htmlescape::encode_attribute(name),
+        value: Some(htmlescape::encode_minimal(value)),
+    }
 }
 
-pub fn attribute_trusted_name(name: &str, value: &str) -> Attribute {
+pub fn attribute_trusted_name(name: &'static str, value: &str) -> Attribute {
     Attribute{
         name: name.to_string(),
         value: Some(htmlescape::encode_minimal(value)),
@@ -32,10 +35,13 @@ pub fn attribute_trusted_name(name: &str, value: &str) -> Attribute {
 }
 
 pub fn bool_attribute(name: &str) -> Attribute {
-    bool_attribute_trusted(&htmlescape::encode_attribute(name))
+    Attribute{
+        name: htmlescape::encode_attribute(name),
+        value: None,
+    }
 }
 
-pub fn bool_attribute_trusted(name: &str) -> Attribute {
+pub fn bool_attribute_trusted(name: &'static str) -> Attribute {
     Attribute{
         name: name.to_string(),
         value: None,

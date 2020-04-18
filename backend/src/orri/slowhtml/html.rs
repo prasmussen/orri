@@ -59,10 +59,15 @@ pub fn text(text: &str) -> Html {
 }
 
 pub fn node(name: &str, attributes: &[Attribute], children: &[Html]) -> Html {
-    node_trusted_name(&htmlescape::encode_attribute(name), attributes, children)
+    Html::Tag(HtmlTag{
+        name: htmlescape::encode_attribute(name),
+        attributes: attributes.to_vec(),
+        children: children.to_vec(),
+        has_end_tag: true,
+    })
 }
 
-pub fn node_trusted_name(name: &str, attributes: &[Attribute], children: &[Html]) -> Html {
+pub fn node_trusted_name(name: &'static str, attributes: &[Attribute], children: &[Html]) -> Html {
     Html::Tag(HtmlTag{
         name: name.to_string(),
         attributes: attributes.to_vec(),
@@ -72,10 +77,15 @@ pub fn node_trusted_name(name: &str, attributes: &[Attribute], children: &[Html]
 }
 
 pub fn node_no_end(name: &str, attributes: &[Attribute]) -> Html {
-    node_no_end_trusted_name(&htmlescape::encode_attribute(name), attributes)
+    Html::Tag(HtmlTag{
+        name: htmlescape::encode_attribute(name),
+        attributes: attributes.to_vec(),
+        children: vec![],
+        has_end_tag: false,
+    })
 }
 
-pub fn node_no_end_trusted_name(name: &str, attributes: &[Attribute]) -> Html {
+pub fn node_no_end_trusted_name(name: &'static str, attributes: &[Attribute]) -> Html {
     Html::Tag(HtmlTag{
         name: name.to_string(),
         attributes: attributes.to_vec(),
