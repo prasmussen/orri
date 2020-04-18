@@ -28,24 +28,31 @@ function Form() {
 
 function File() {
 
-    function onLoad(elem, callback) {
+    function onLoad(elem) {
         if (!elem.files || elem.files.length === 0) {
-            callback(null);
-            return;
+            return Promise.reject("No file selected");
         }
 
         const file = elem.files[0];
         const reader = new FileReader();
 
-        reader.onload = function(e) {
-            callback({
-                name: file.name,
-                size: file.size,
-                dataUrl: e.target.result,
-            });
-        };
+        const promise = new Promise((resolve, reject) => {
+            reader.onload = (e) => {
+                resolve({
+                    name: file.name,
+                    size: file.size,
+                    dataUrl: e.target.result,
+                });
+            };
+
+            reader.onerror = (e) => {
+                reject(e);
+            };
+        });
 
         reader.readAsDataURL(file);
+
+        return promise;
     }
 
     return {
@@ -62,6 +69,14 @@ function Api() {
         return request(url, "PUT", data);
     }
 
+    function rejectErrors(res) {
+        if (res.ok) {
+            return res;
+        }
+
+        return Promise.reject(res);
+    }
+
     function request(url, method, data) {
         return fetch(url, {
             method: method,
@@ -75,12 +90,13 @@ function Api() {
     return {
         post: post,
         put: put,
+        rejectErrors: rejectErrors,
     };
 }
 
 function Crypto() {
     function randomString(length) {
-        var randomNumbers = new Uint8Array(length);
+        const randomNumbers = new Uint8Array(length);
         crypto.getRandomValues(randomNumbers);
 
         return Array.from(randomNumbers)
@@ -92,4 +108,41 @@ function Crypto() {
     return {
         randomString: randomString,
     };
+}
+
+function Page() {
+
+    function showAlert(elem, msg) {
+        elem.classList.remove("display-none");
+        elem.innerText = msg;
+    }
+
+    return {
+        showAlert: showAlert,
+    };
+}
+
+function ErrorMessage() {
+
+    function prepare(err) {
+        if (typeof err === "string") {
+            return Promise.resolve(err);
+        }
+
+        if (typeof err === "object" && err.json) {
+            return err.json().then(json => {
+                if (json && typeof json.error === "string") {
+                    return json.error;
+                }
+
+                return "Something went wrong";
+            });
+        }
+
+        return "Something went wrong";
+    }
+
+    return {
+        prepare: prepare,
+    }
 }

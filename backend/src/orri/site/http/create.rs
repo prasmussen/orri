@@ -5,7 +5,7 @@ use crate::orri::site::{self, Site, GetSiteError, File, RouteInfo};
 use crate::orri::slowhtml::html::Html;
 use crate::orri::slowhtml::html;
 use crate::orri::slowhtml::attributes as attrs;
-use crate::orri::page::{Page, Head};
+use crate::orri::page::{self, Page, Head};
 use http::header;
 use std::path::PathBuf;
 use std::io;
@@ -40,6 +40,7 @@ fn build_page(server_config: &ServerConfig) -> Page {
 fn build_body(server_config: &ServerConfig) -> Vec<Html> {
     vec![
         html::div(&[attrs::class("container"), attrs::id("content")], &[
+            page::error_alert(),
             html::form(&[attrs::id("site")], &[
                 html::div(&[attrs::class("row")], &[
                     html::div(&[attrs::class("column")], &[

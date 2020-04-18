@@ -19,11 +19,6 @@ pub struct Request {
 }
 
 
-#[derive(Serialize)]
-pub struct Response {
-    key: String,
-}
-
 enum Error {
     FailedToProcessDataUrl(DataUrlError),
     FailedToDecodeDataUrl(forgiving_base64::InvalidBase64),
@@ -60,10 +55,8 @@ fn handle(state: &AppState, request_data: &Request) -> Result<Site, Error> {
 fn handle_site(session: Session, site: Site) -> HttpResponse {
     session.set(&site.domain.to_string(), &site.key);
 
-    HttpResponse::Ok()
-        .json(Response{
-            key: site.key,
-        })
+    HttpResponse::NoContent()
+        .finish()
 }
 
 fn handle_error(err: Error) -> HttpResponse {

@@ -76,3 +76,11 @@ fn milligram_styles() -> Vec<Html> {
         ]),
     ]
 }
+
+pub fn error_alert() -> Html {
+    html::div(&[attrs::class("row")], &[
+        html::div(&[attrs::class("column")], &[
+            html::blockquote(&[attrs::class("alert display-none"), attrs::id("alert-error")], &[]),
+        ]),
+    ])
+}

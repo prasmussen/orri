@@ -214,6 +214,10 @@ pub fn em(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("em", attributes, children)
 }
 
+pub fn blockquote(attributes: &[Attribute], children: &[Html]) -> Html {
+    node_trusted_name("blockquote", attributes, children)
+}
+
 pub fn input(attributes: &[Attribute]) -> Html {
     node_no_end_trusted_name("input", attributes)
 }
