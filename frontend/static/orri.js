@@ -135,11 +135,15 @@ function ErrorMessage() {
                     return json.error;
                 }
 
-                return "Something went wrong";
+                return Promise.resolve("Something went wrong");
             });
         }
 
-        return "Something went wrong";
+        if (typeof err === "object" && err.message) {
+            return Promise.resolve(err.message);
+        }
+
+        return Promise.resolve("Something went wrong");
     }
 
     return {

@@ -14,22 +14,20 @@ Form().onSubmit(document.getElementById("site"), formData => {
     function createSite(data) {
         return Api().post("/api/sites", data)
             .then(Api().rejectErrors)
-            .then(res => data);
+            .then(res => res.json())
+            .then(json => Object.assign(data, json));
     }
 
-    function getSuccessHtml(data) {
-        return Api().post("/api/sites/site-created", {
-            domain: data.domain,
-            key: data.key
-        })
-        .then(Api().rejectErrors)
-        .then(res => res.json())
-        .then(json => json.html);
-    }
+    function showSuccessPage(data) {
+        // Populate placeholder values
+        document.getElementById("key-placeholder").innerText = data.key;
+        document.getElementById("domain-placeholder").innerText = data.domain;
+        document.getElementById("site-url-placeholder").href = data.siteUrl;
+        document.getElementById("manage-url-placeholder").href = data.manageUrl;
 
-    function renderSucessHtml(html) {
-        const content = document.getElementById("content");
-        content.innerHTML = html;
+        // Switch to success view
+        document.getElementById("main-content").classList.add("display-none");
+        document.getElementById("success-content").classList.remove("display-none");
 
         return null;
     }
@@ -43,8 +41,7 @@ Form().onSubmit(document.getElementById("site"), formData => {
     File().onLoad(document.getElementById("file"))
         .then(prepareData)
         .then(createSite)
-        .then(getSuccessHtml)
-        .then(renderSucessHtml)
+        .then(showSuccessPage)
         .catch(handleError)
         .catch(handleError);
 });

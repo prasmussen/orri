@@ -3,7 +3,7 @@ use std::str::FromStr;
 use actix_web::{web, HttpRequest, HttpResponse};
 use actix_session::Session;
 use serde::{Deserialize, Serialize};
-use crate::orri::app_state::AppState;
+use crate::orri::app_state::{AppState, ServerConfig};
 use crate::orri::site::{self, Site, CreateSiteError, FileInfo};
 use crate::orri::http;
 use crate::orri::domain::{self, Domain};
@@ -19,6 +19,14 @@ pub struct Request {
 }
 
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Response {
+    manage_url: String,
+    site_url: String,
+}
+
+
 enum Error {
     FailedToProcessDataUrl(DataUrlError),
     FailedToDecodeDataUrl(forgiving_base64::InvalidBase64),
@@ -29,7 +37,7 @@ enum Error {
 pub async fn handler(state: web::Data<AppState>, session: Session, request_data: web::Json<Request>) -> HttpResponse {
 
     handle(&state, &request_data)
-        .map(|site| handle_site(session, site))
+        .map(|site| handle_site(session, &state.config.server, site))
         .unwrap_or_else(handle_error)
 }
 
@@ -52,11 +60,17 @@ fn handle(state: &AppState, request_data: &Request) -> Result<Site, Error> {
         .map_err(Error::CreateSiteError)
 }
 
-fn handle_site(session: Session, site: Site) -> HttpResponse {
+fn handle_site(session: Session, server_config: &ServerConfig, site: Site) -> HttpResponse {
+    let manage_url = format!("/sites/{}", &site.domain);
+    let site_url = server_config.other_base_url(&site.domain.to_string());
+
     session.set(&site.domain.to_string(), &site.key);
 
-    HttpResponse::NoContent()
-        .finish()
+    HttpResponse::Ok()
+        .json(Response{
+            manage_url: manage_url,
+            site_url: site_url,
+        })
 }
 
 fn handle_error(err: Error) -> HttpResponse {

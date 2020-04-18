@@ -39,7 +39,7 @@ fn build_page(server_config: &ServerConfig) -> Page {
 
 fn build_body(server_config: &ServerConfig) -> Vec<Html> {
     vec![
-        html::div(&[attrs::class("container"), attrs::id("content")], &[
+        html::div(&[attrs::id("main-content"), attrs::class("container")], &[
             page::error_alert(),
             html::form(&[attrs::id("site")], &[
                 html::div(&[attrs::class("row")], &[
@@ -81,6 +81,63 @@ fn build_body(server_config: &ServerConfig) -> Vec<Html> {
                 ]),
             ]),
         ]),
+        build_success_content(),
         html::script(&[attrs::src("/static/new_site.js")], &[]),
     ]
+}
+
+fn build_success_content() -> Html {
+    html::div(&[attrs::id("success-content"), attrs::class("container display-none")], &[
+        html::div(&[attrs::class("row")], &[
+            html::div(&[attrs::class("column")], &[
+                html::h3(&[attrs::class("margin-top-40 margin-bottom-10")], &[
+                    html::text("Congrats!"),
+                ]),
+                html::div(&[], &[
+                    html::text("Your site "),
+                    html::strong(&[], &[
+                        html::em(&[attrs::id("domain-placeholder")], &[]),
+                    ]),
+                    html::text(" is ready."),
+                ]),
+            ]),
+        ]),
+        html::div(&[attrs::class("row")], &[
+            html::div(&[attrs::class("column")], &[
+                html::h3(&[attrs::class("margin-top-40 margin-bottom-10")], &[
+                    html::text("Important!"),
+                ]),
+                html::div(&[], &[
+                    html::text("This is your site key: "),
+                    html::strong(&[], &[
+                        html::em(&[attrs::id("key-placeholder")], &[]),
+                    ]),
+                ]),
+                html::div(&[], &[
+                    html::text("The key is needed to manage your site, so please save it. It's "),
+                    html::em(&[], &[html::text("not")]),
+                    html::text(" possible to recover the key later."),
+                ]),
+            ]),
+        ]),
+        html::div(&[attrs::class("row")], &[
+            html::div(&[attrs::class("column")], &[
+                html::h3(&[attrs::class("margin-top-40 margin-bottom-10")], &[
+                    html::text("What's next?"),
+                ]),
+                html::ul(&[], &[
+                    html::li(&[], &[
+                        html::a(&[attrs::href("#"), attrs::target("_blank"), attrs::id("site-url-placeholder")], &[
+                            html::text("Go to site"),
+                        ]),
+                    ]),
+                    html::li(&[], &[
+                        html::a(&[attrs::href("#"), attrs::target("_blank"), attrs::id("manage-url-placeholder")], &[
+                            html::text("Manage site"),
+                        ]),
+                    ]),
+                ]),
+            ]),
+        ]),
+    ])
 }
