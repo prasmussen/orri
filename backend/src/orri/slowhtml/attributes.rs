@@ -27,7 +27,7 @@ pub fn attribute(name: &str, value: &str) -> Attribute {
 pub fn attribute_trusted_name(name: &str, value: &str) -> Attribute {
     Attribute{
         name: name.to_string(),
-        value: Some(htmlescape::encode_attribute(value)),
+        value: Some(htmlescape::encode_minimal(value)),
     }
 }
 

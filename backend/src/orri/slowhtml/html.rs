@@ -55,11 +55,11 @@ impl fmt::Display for HtmlTag {
 
 
 pub fn text(text: &str) -> Html {
-    Html::Text(htmlescape::encode_minimal(text))
+    Html::Text(htmlescape::encode_attribute(text))
 }
 
 pub fn node(name: &str, attributes: &[Attribute], children: &[Html]) -> Html {
-    node_trusted_name(&htmlescape::encode_minimal(name), attributes, children)
+    node_trusted_name(&htmlescape::encode_attribute(name), attributes, children)
 }
 
 pub fn node_trusted_name(name: &str, attributes: &[Attribute], children: &[Html]) -> Html {
@@ -72,7 +72,7 @@ pub fn node_trusted_name(name: &str, attributes: &[Attribute], children: &[Html]
 }
 
 pub fn node_no_end(name: &str, attributes: &[Attribute]) -> Html {
-    node_no_end_trusted_name(&htmlescape::encode_minimal(name), attributes)
+    node_no_end_trusted_name(&htmlescape::encode_attribute(name), attributes)
 }
 
 pub fn node_no_end_trusted_name(name: &str, attributes: &[Attribute]) -> Html {
