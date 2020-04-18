@@ -48,6 +48,7 @@ impl Head {
             html::meta(&[attrs::name("viewport"), attrs::content("width=device-width, initial-scale=1")]),
             html::meta(&[attrs::name("description"), attrs::content("Create websites, no account required")]),
             html::title(&[], &[html::text(&self.title)]),
+            html::link(&[attrs::rel("stylesheet"), attrs::href("/static/orri.css")]),
         ];
 
         vec![

@@ -34,6 +34,7 @@ fn main_domain_routes(config: &mut web::ServiceConfig, state: &AppState, host: &
             .route("/sites/{domain}/add-route", web::get().to(site_http::add_route::handler))
             .route("/api/sites", web::post().to(site_api::create::handler))
             .route("/api/sites", web::put().to(site_api::add_route::handler))
+            .route("/api/sites/site-created", web::post().to(site_api::create_success::handler))
             .service(Files::new("/static", state.config.server.static_path()))
     );
 }

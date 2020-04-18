@@ -105,7 +105,7 @@ fn build_body(site: &Site, base_url: &str) -> Vec<Html> {
         .collect::<Vec<Html>>();
 
     vec![
-        html::div(&[attrs::class("container")], &[
+        html::div(&[attrs::class("container"), attrs::id("content")], &[
             html::table(&[], &[
                 html::thead(&[], &[
                     html::tr(&[], &[

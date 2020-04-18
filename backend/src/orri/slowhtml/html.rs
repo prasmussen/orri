@@ -130,6 +130,30 @@ pub fn title(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("title", attributes, children)
 }
 
+pub fn h1(attributes: &[Attribute], children: &[Html]) -> Html {
+    node_trusted_name("h1", attributes, children)
+}
+
+pub fn h2(attributes: &[Attribute], children: &[Html]) -> Html {
+    node_trusted_name("h2", attributes, children)
+}
+
+pub fn h3(attributes: &[Attribute], children: &[Html]) -> Html {
+    node_trusted_name("h3", attributes, children)
+}
+
+pub fn h4(attributes: &[Attribute], children: &[Html]) -> Html {
+    node_trusted_name("h4", attributes, children)
+}
+
+pub fn h5(attributes: &[Attribute], children: &[Html]) -> Html {
+    node_trusted_name("h5", attributes, children)
+}
+
+pub fn h6(attributes: &[Attribute], children: &[Html]) -> Html {
+    node_trusted_name("h6", attributes, children)
+}
+
 pub fn div(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("div", attributes, children)
 }
@@ -172,6 +196,22 @@ pub fn tr(attributes: &[Attribute], children: &[Html]) -> Html {
 
 pub fn td(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("td", attributes, children)
+}
+
+pub fn ul(attributes: &[Attribute], children: &[Html]) -> Html {
+    node_trusted_name("ul", attributes, children)
+}
+
+pub fn li(attributes: &[Attribute], children: &[Html]) -> Html {
+    node_trusted_name("li", attributes, children)
+}
+
+pub fn strong(attributes: &[Attribute], children: &[Html]) -> Html {
+    node_trusted_name("strong", attributes, children)
+}
+
+pub fn em(attributes: &[Attribute], children: &[Html]) -> Html {
+    node_trusted_name("em", attributes, children)
 }
 
 pub fn input(attributes: &[Attribute]) -> Html {

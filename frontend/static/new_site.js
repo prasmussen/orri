@@ -16,8 +16,14 @@ Form().onSubmit(document.getElementById("site"), data => {
             dataUrl: file.dataUrl,
         });
 
+        // TODO: check response code
         Api().post("/api/sites", data).then(res => {
-            console.log(res);
+            Api().post("/api/sites/site-created", {domain: domain, key: key})
+                .then(res => res.json())
+                .then(json => {
+                    var content = document.getElementById("content");
+                    content.innerHTML = json.html;
+                });
         });
     });
 });

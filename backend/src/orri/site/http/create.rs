@@ -39,7 +39,7 @@ fn build_page(server_config: &ServerConfig) -> Page {
 
 fn build_body(server_config: &ServerConfig) -> Vec<Html> {
     vec![
-        html::div(&[attrs::class("container")], &[
+        html::div(&[attrs::class("container"), attrs::id("content")], &[
             html::form(&[attrs::id("site")], &[
                 html::div(&[attrs::class("row")], &[
                     html::div(&[attrs::class("column")], &[

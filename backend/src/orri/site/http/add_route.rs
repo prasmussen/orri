@@ -103,7 +103,7 @@ fn build_page(site: &Site, client_provided_key: bool) -> Page {
 
 fn build_body(site: &Site, client_provided_key: bool) -> Vec<Html> {
     vec![
-        html::div(&[attrs::class("container")], &[
+        html::div(&[attrs::class("container"), attrs::id("content")], &[
             html::form(&[attrs::id("site")], &[
                 html::div(&[attrs::class("row")], &[
                     html::div(&[attrs::class("column")], &[

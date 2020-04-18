@@ -85,6 +85,10 @@ pub fn href(value: &str) -> Attribute {
     attribute_trusted_name("href", value)
 }
 
+pub fn target(value: &str) -> Attribute {
+    attribute_trusted_name("target", value)
+}
+
 pub fn src(value: &str) -> Attribute {
     attribute_trusted_name("src", value)
 }
