@@ -1,4 +1,5 @@
 function Form() {
+    let isSubmitting = false;
 
     function getData(elem) {
         const data = new FormData(elem);
@@ -11,14 +12,21 @@ function Form() {
         return result;
     }
 
+    function ready() {
+        isSubmitting = false;
+    }
+
     function onSubmit(form, callback) {
         form.addEventListener('submit', event => {
             event.preventDefault();
 
             const data = getData(form);
-            callback(data);
-        });
 
+            if (!isSubmitting) {
+                isSubmitting = true;
+                callback(data, ready);
+            }
+        });
     }
 
     return {

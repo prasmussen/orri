@@ -1,4 +1,4 @@
-Form().onSubmit(document.getElementById("site"), formData => {
+Form().onSubmit(document.getElementById("site"), (formData, formReady) => {
 
     function prepareData(file) {
         const domain = [formData.subdomain, formData.mainDomain].join(".");
@@ -38,10 +38,27 @@ Form().onSubmit(document.getElementById("site"), formData => {
         });
     }
 
+    function setButtonDisabled(isDisabled) {
+        document.getElementById("create-site").disabled = isDisabled;
+    }
+
+    function beforeSubmit(data) {
+        setButtonDisabled(true);
+
+        return data;
+    }
+
+    function afterSubmit() {
+        formReady();
+        setButtonDisabled(false);
+    }
+
     File().onLoad(document.getElementById("file"))
+        .then(beforeSubmit)
         .then(prepareData)
         .then(createSite)
         .then(showSuccessPage)
         .catch(handleError)
-        .catch(handleError);
+        .catch(handleError)
+        .finally(afterSubmit);
 });

@@ -76,7 +76,7 @@ fn build_body(server_config: &ServerConfig) -> Vec<Html> {
                 ]),
                 html::div(&[attrs::class("row")], &[
                     html::div(&[attrs::class("column column-25")], &[
-                        html::button(&[ attrs::type_("submit")], &[html::text("Create site")]),
+                        html::button(&[attrs::type_("submit"), attrs::id("create-site")], &[html::text("Create site")]),
                     ]),
                 ]),
             ]),
