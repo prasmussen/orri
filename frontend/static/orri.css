@@ -24,12 +24,13 @@ blockquote.alert#alert-error {
 
 
 @keyframes sucessFade {
-  0% {
-    background-color: #c3f3d7;
-  }
-  100% {
-    background-color: #fff;
-  }
+    0% {
+        background-color: #c3f3d7;
+    }
+
+    100% {
+        background-color: #fff;
+    }
 }
 
 .success-fade {
