@@ -11,7 +11,7 @@ const elements = {
     successContent: Page().getElement("#success-content"),
 };
 
-Form().onSubmit(elements.form, (formData, formReady) => {
+Form().onSubmit(elements.form, elements.submitButton, (formData, formReady) => {
 
     function prepareData(file) {
         const domain = [formData.subdomain, formData.mainDomain].join(".");
@@ -51,23 +51,11 @@ Form().onSubmit(elements.form, (formData, formReady) => {
         });
     }
 
-    function beforeSubmit(data) {
-        elements.submitButton.disabled = true;
-
-        return data;
-    }
-
-    function afterSubmit() {
-        formReady();
-        elements.submitButton.disabled = false;
-    }
-
     File().onLoad(elements.file)
-        .then(beforeSubmit)
         .then(prepareData)
         .then(createSite)
         .then(showSuccessPage)
         .catch(handleError)
         .catch(handleError)
-        .finally(afterSubmit);
+        .finally(formReady);
 });

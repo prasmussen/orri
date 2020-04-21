@@ -5,7 +5,7 @@ const elements = {
     file: Page().getElement("#file"),
 };
 
-Form().onSubmit(elements.form, (formData, formReady) => {
+Form().onSubmit(elements.form, elements.submitButton, (formData, formReady) => {
 
     function prepareData(file) {
         return {
@@ -32,23 +32,11 @@ Form().onSubmit(elements.form, (formData, formReady) => {
         });
     }
 
-    function beforeSubmit(data) {
-        elements.submitButton.disabled = true;
-
-        return data;
-    }
-
-    function afterSubmit() {
-        formReady();
-        elements.submitButton.disabled = false;
-    }
-
     File().onLoad(elements.file)
-        .then(beforeSubmit)
         .then(prepareData)
         .then(addRoute)
         .then(redirect)
         .catch(handleError)
         .catch(handleError)
-        .finally(afterSubmit);
+        .finally(formReady);
 });

@@ -1,5 +1,4 @@
 function Form() {
-    let isSubmitting = false;
 
     function getData(elem) {
         const data = new FormData(elem);
@@ -12,19 +11,18 @@ function Form() {
         return result;
     }
 
-    function ready() {
-        isSubmitting = false;
-    }
-
-    function onSubmit(form, callback) {
+    function onSubmit(form, submitButton, callback) {
         form.addEventListener('submit', event => {
             event.preventDefault();
 
             const data = getData(form);
 
-            if (!isSubmitting) {
-                isSubmitting = true;
-                callback(data, ready);
+            if (!submitButton.disabled) {
+                submitButton.disabled = true;
+
+                callback(data, () => {
+                    submitButton.disabled = false;
+                });
             }
         });
     }
