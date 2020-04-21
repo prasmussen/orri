@@ -39,7 +39,7 @@ Form().onSubmit(document.getElementById("site"), (formData, formReady) => {
     }
 
     function setButtonDisabled(isDisabled) {
-        document.getElementById("create-site").disabled = isDisabled;
+        document.getElementById("submit-button").disabled = isDisabled;
     }
 
     function beforeSubmit(data) {

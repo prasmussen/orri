@@ -120,3 +120,14 @@ pub fn readonly() -> Attribute {
 pub fn required() -> Attribute {
     bool_attribute_trusted("required")
 }
+
+pub fn class_list(list: &[(&str, bool)]) -> Attribute {
+    let classes = list
+        .iter()
+        .filter(|tuple| tuple.1)
+        .map(|tuple| tuple.0)
+        .collect::<Vec<&str>>()
+        .join(" ");
+
+    attribute_trusted_name("class", &classes)
+}

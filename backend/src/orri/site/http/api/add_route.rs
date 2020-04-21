@@ -23,6 +23,12 @@ pub struct Request {
 }
 
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Response {
+    manage_url: String,
+}
+
 enum Error {
     FailedToProcessDataUrl(DataUrlError),
     FailedToDecodeDataUrl(forgiving_base64::InvalidBase64),
@@ -85,7 +91,9 @@ fn get_provided_key(request_data: &Request, session: Session) -> Option<String> 
 
 
 fn handle_site(site: Site) -> HttpResponse {
-    HttpResponse::Ok().finish()
+    HttpResponse::Ok().json(Response{
+        manage_url: format!("/sites/{}", &site.domain),
+    })
 }
 
 fn handle_error(err: Error) -> HttpResponse {

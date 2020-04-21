@@ -7,11 +7,13 @@ use crate::orri::slowhtml::html::Html;
 use crate::orri::slowhtml::html;
 use crate::orri::slowhtml::attributes as attrs;
 use crate::orri::page::{Page, Head};
+use crate::orri::util;
 use http::header;
 use std::path::PathBuf;
 use std::io;
 use std::time::{Duration, Instant};
 use std::str::FromStr;
+use std::time::SystemTime;
 
 
 enum Error {
@@ -98,10 +100,11 @@ fn build_page(site: &Site, base_url: &str) -> Page {
 
 fn build_body(site: &Site, base_url: &str) -> Vec<Html> {
     let new_route_url = format!("/sites/{}/add-route", site.domain);
+    let now = SystemTime::now();
 
     let rows = site.routes
         .iter()
-        .map(|(route, route_info)| table_row(site, route, route_info, base_url))
+        .map(|(route, route_info)| table_row(site, route, route_info, base_url, now))
         .collect::<Vec<Html>>();
 
     vec![
@@ -128,10 +131,12 @@ fn build_body(site: &Site, base_url: &str) -> Vec<Html> {
     ]
 }
 
-fn table_row(site: &Site, route: &UrlPath, route_info: &RouteInfo, base_url: &str) -> Html {
+fn table_row(site: &Site, route: &UrlPath, route_info: &RouteInfo, base_url: &str, now: SystemTime) -> Html {
     let route_url = format!("{}{}", base_url, route);
+    let age_in_seconds = util::unix_timestamp(now) - route_info.file_info.timestamp;
+    let recently_added = site.routes.len() > 1 && age_in_seconds < 5;
 
-    html::tr(&[], &[
+    html::tr(&[attrs::class_list(&[("success-fade", recently_added)])], &[
         html::td(&[], &[
             html::a(&[attrs::href(&route_url)], &[html::text(&route.to_string())]),
         ]),

@@ -21,3 +21,22 @@ blockquote.alert#alert-error {
     background: #ffe0e3;
     color: #ff4757
 }
+
+
+@keyframes sucessFade {
+  0% {
+    background-color: #c3f3d7;
+  }
+  100% {
+    background-color: #fff;
+  }
+}
+
+.success-fade {
+    background-color: #fff;
+
+    animation-name: sucessFade;
+    animation-duration: 2s;
+    animation-timing-function: ease-in;
+    animation-iteration-count: 1;
+}

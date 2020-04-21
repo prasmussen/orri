@@ -6,7 +6,7 @@ use crate::orri::site::{self, Site, GetSiteError, File, RouteInfo};
 use crate::orri::slowhtml::html::Html;
 use crate::orri::slowhtml::html;
 use crate::orri::slowhtml::attributes as attrs;
-use crate::orri::page::{Page, Head};
+use crate::orri::page::{self, Page, Head};
 use http::header;
 use std::path::PathBuf;
 use std::io;
@@ -103,7 +103,8 @@ fn build_page(site: &Site, client_provided_key: bool) -> Page {
 
 fn build_body(site: &Site, client_provided_key: bool) -> Vec<Html> {
     vec![
-        html::div(&[attrs::class("container"), attrs::id("content")], &[
+        html::div(&[attrs::class("container")], &[
+            page::error_alert(),
             html::form(&[attrs::id("site")], &[
                 html::div(&[attrs::class("row")], &[
                     html::div(&[attrs::class("column")], &[
@@ -161,7 +162,7 @@ fn build_body(site: &Site, client_provided_key: bool) -> Vec<Html> {
                 ]),
                 html::div(&[attrs::class("row")], &[
                     html::div(&[attrs::class("column column-25")], &[
-                        html::button(&[attrs::type_("submit")], &[html::text("Save route")]),
+                        html::button(&[attrs::type_("submit"), attrs::id("submit-button")], &[html::text("Add route")]),
                     ]),
                 ]),
             ]),
