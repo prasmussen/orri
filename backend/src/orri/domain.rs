@@ -12,7 +12,8 @@ pub struct Domain(String);
 pub enum Error {
     TooLong(),
     SubdomainTooShort(),
-    NotAlphanumeric(),
+    InvalidChar(),
+    InvalidHyphenPosition(),
     EmptyDomainValue(),
     MissingSecondLevelDomain(),
     MissingSubDomain(),
@@ -41,12 +42,19 @@ impl FromStr for Domain {
             .rev()
             .collect::<Vec<&str>>();
 
-        let parts_are_alphanumeric = reversed_parts
+        let parts_has_allowed_chars = reversed_parts
             .iter()
-            .map(|part| part.chars().all(|c| c.is_ascii_alphanumeric()))
+            .map(|part| part.chars().all(is_allowed_char))
             .all(std::convert::identity);
 
-        util::ensure(parts_are_alphanumeric, Error::NotAlphanumeric())?;
+        util::ensure(parts_has_allowed_chars, Error::InvalidChar())?;
+
+        let parts_has_allowed_hyphen_position = reversed_parts
+            .iter()
+            .map(|part| part.starts_with("-") == false && part.ends_with("-") == false)
+            .all(std::convert::identity);
+
+        util::ensure(parts_has_allowed_hyphen_position, Error::InvalidHyphenPosition())?;
 
         match *reversed_parts.as_slice() {
             [] =>
@@ -67,5 +75,8 @@ impl FromStr for Domain {
                 Err(Error::OnlyOneSubdomainAllowed()),
         }
     }
+}
 
+fn is_allowed_char(c: char) -> bool {
+    c.is_ascii_alphanumeric() || c == '-'
 }

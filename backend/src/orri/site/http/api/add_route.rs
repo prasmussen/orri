@@ -147,9 +147,13 @@ fn handle_parse_domain_error(err: domain::Error) -> HttpResponse {
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("The subdomain is too short")),
 
-        domain::Error::NotAlphanumeric() =>
+        domain::Error::InvalidChar() =>
             HttpResponse::BadRequest()
-                .json(http::Error::from_str("The domain can only contain alphanumeric characters")),
+                .json(http::Error::from_str("The domain can only contain alphanumeric characters and hyphens")),
+
+        domain::Error::InvalidHyphenPosition() =>
+            HttpResponse::BadRequest()
+                .json(http::Error::from_str("The domain cannot start or end with a hyphen")),
 
         domain::Error::EmptyDomainValue() =>
             HttpResponse::BadRequest()
