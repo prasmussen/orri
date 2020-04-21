@@ -41,7 +41,7 @@ fn build_body(server_config: &ServerConfig) -> Vec<Html> {
     vec![
         html::div(&[attrs::id("main-content"), attrs::class("container")], &[
             page::error_alert(),
-            html::form(&[attrs::id("site")], &[
+            html::form(&[attrs::id("form")], &[
                 html::div(&[attrs::class("row")], &[
                     html::div(&[attrs::class("column")], &[
                         html::label(&[], &[

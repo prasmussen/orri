@@ -1,4 +1,17 @@
-Form().onSubmit(document.getElementById("site"), (formData, formReady) => {
+const elements = {
+    form: Page().getElement("#form"),
+    alertError: Page().getElement("#alert-error"),
+    submitButton: Page().getElement("#submit-button"),
+    file: Page().getElement("#file"),
+    keyPlaceholder: Page().getElement("#key-placeholder"),
+    domainPlaceholder: Page().getElement("#domain-placeholder"),
+    siteUrlPlaceholder: Page().getElement("#site-url-placeholder"),
+    manageUrlPlaceholder: Page().getElement("#manage-url-placeholder"),
+    mainContent: Page().getElement("#main-content"),
+    successContent: Page().getElement("#success-content"),
+};
+
+Form().onSubmit(elements.form, (formData, formReady) => {
 
     function prepareData(file) {
         const domain = [formData.subdomain, formData.mainDomain].join(".");
@@ -20,40 +33,36 @@ Form().onSubmit(document.getElementById("site"), (formData, formReady) => {
 
     function showSuccessPage(data) {
         // Populate placeholder values
-        document.getElementById("key-placeholder").innerText = data.key;
-        document.getElementById("domain-placeholder").innerText = data.domain;
-        document.getElementById("site-url-placeholder").href = data.siteUrl;
-        document.getElementById("manage-url-placeholder").href = data.manageUrl;
+        elements.keyPlaceholder.innerText = data.key;
+        elements.domainPlaceholder.innerText = data.domain;
+        elements.siteUrlPlaceholder.href = data.siteUrl;
+        elements.manageUrlPlaceholder.href = data.manageUrl;
 
         // Switch to success view
-        document.getElementById("main-content").classList.add("display-none");
-        document.getElementById("success-content").classList.remove("display-none");
+        Page().hideElement(elements.mainContent);
+        Page().unhideElement(elements.successContent);
 
         return null;
     }
 
     function handleError(err) {
         return ErrorMessage().prepare(err).then(msg => {
-            Page().showAlert(document.getElementById("alert-error"), msg);
+            Page().showAlert(elements.alertError, msg);
         });
     }
 
-    function setButtonDisabled(isDisabled) {
-        document.getElementById("submit-button").disabled = isDisabled;
-    }
-
     function beforeSubmit(data) {
-        setButtonDisabled(true);
+        elements.submitButton.disabled = true;
 
         return data;
     }
 
     function afterSubmit() {
         formReady();
-        setButtonDisabled(false);
+        elements.submitButton.disabled = false;
     }
 
-    File().onLoad(document.getElementById("file"))
+    File().onLoad(elements.file)
         .then(beforeSubmit)
         .then(prepareData)
         .then(createSite)

@@ -1,4 +1,11 @@
-Form().onSubmit(document.getElementById("site"), (formData, formReady) => {
+const elements = {
+    form: Page().getElement("#form"),
+    alertError: Page().getElement("#alert-error"),
+    submitButton: Page().getElement("#submit-button"),
+    file: Page().getElement("#file"),
+};
+
+Form().onSubmit(elements.form, (formData, formReady) => {
 
     function prepareData(file) {
         return {
@@ -21,26 +28,22 @@ Form().onSubmit(document.getElementById("site"), (formData, formReady) => {
 
     function handleError(err) {
         return ErrorMessage().prepare(err).then(msg => {
-            Page().showAlert(document.getElementById("alert-error"), msg);
+            Page().showAlert(elements.alertError, msg);
         });
     }
 
-    function setButtonDisabled(isDisabled) {
-        document.getElementById("submit-button").disabled = isDisabled;
-    }
-
     function beforeSubmit(data) {
-        setButtonDisabled(true);
+        elements.submitButton.disabled = true;
 
         return data;
     }
 
     function afterSubmit() {
         formReady();
-        setButtonDisabled(false);
+        elements.submitButton.disabled = false;
     }
 
-    File().onLoad(document.getElementById("file"))
+    File().onLoad(elements.file)
         .then(beforeSubmit)
         .then(prepareData)
         .then(addRoute)

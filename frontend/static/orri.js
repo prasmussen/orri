@@ -120,12 +120,32 @@ function Crypto() {
 
 function Page() {
 
-    function showAlert(elem, msg) {
+    function getElement(selector) {
+        const elem = document.querySelector(selector);
+        if (!elem) {
+            throw new Error("Failed to find element: " + selector);
+        }
+
+        return elem;
+    }
+
+    function hideElement(elem) {
+        elem.classList.add("display-none");
+    }
+
+    function unhideElement(elem) {
         elem.classList.remove("display-none");
+    }
+
+    function showAlert(elem, msg) {
+        unhideElement(elem);
         elem.innerText = msg;
     }
 
     return {
+        getElement: getElement,
+        hideElement: hideElement,
+        unhideElement: unhideElement,
         showAlert: showAlert,
     };
 }

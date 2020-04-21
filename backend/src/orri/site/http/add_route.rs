@@ -105,7 +105,7 @@ fn build_body(site: &Site, client_provided_key: bool) -> Vec<Html> {
     vec![
         html::div(&[attrs::class("container")], &[
             page::error_alert(),
-            html::form(&[attrs::id("site")], &[
+            html::form(&[attrs::id("form")], &[
                 html::div(&[attrs::class("row")], &[
                     html::div(&[attrs::class("column")], &[
                         html::label(&[], &[
