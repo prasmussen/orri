@@ -46,9 +46,7 @@ Form().onSubmit(elements.form, elements.submitButton, (formData, formReady) => {
     }
 
     function handleError(err) {
-        return ErrorMessage().prepare(err).then(msg => {
-            Page().showAlert(elements.alertError, msg);
-        });
+        Page().showError(elements.alertError, err);
     }
 
     File().onLoad(elements.file)

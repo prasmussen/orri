@@ -135,22 +135,18 @@ function Page() {
         elem.classList.remove("display-none");
     }
 
+    function showError(errorAlert, err) {
+        return formatError(err).then(msg => {
+            showAlert(errorAlert, msg);
+        });
+    }
+
     function showAlert(elem, msg) {
         unhideElement(elem);
         elem.innerText = msg;
     }
 
-    return {
-        getElement: getElement,
-        hideElement: hideElement,
-        unhideElement: unhideElement,
-        showAlert: showAlert,
-    };
-}
-
-function ErrorMessage() {
-
-    function prepare(err) {
+    function formatError(err) {
         if (typeof err === "string") {
             return Promise.resolve(err);
         }
@@ -173,6 +169,9 @@ function ErrorMessage() {
     }
 
     return {
-        prepare: prepare,
-    }
+        getElement: getElement,
+        hideElement: hideElement,
+        unhideElement: unhideElement,
+        showError: showError,
+    };
 }
