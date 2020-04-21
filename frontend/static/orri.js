@@ -102,11 +102,11 @@ function Api() {
 
 function Crypto() {
     function randomString(length) {
-        const randomNumbers = new Uint8Array(length);
+        const randomNumbers = new Uint32Array(length);
         crypto.getRandomValues(randomNumbers);
 
         return Array.from(randomNumbers)
-            .map(x => x.toString(16))
+            .map(x => x.toString(36))
             .join("")
             .slice(0, length);
     }
