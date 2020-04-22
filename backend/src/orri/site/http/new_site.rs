@@ -45,11 +45,24 @@ fn build_body(server_config: &ServerConfig) -> Vec<Html> {
                 html::div(&[attrs::class("row")], &[
                     html::div(&[attrs::class("column")], &[
                         html::label(&[], &[
+                            html::div(&[], &[html::text("Domain")]),
+                            html::input(&[
+                                attrs::type_("text"),
+                                attrs::name("mainDomain"),
+                                attrs::value(&server_config.domain),
+                                attrs::readonly(),
+                            ]),
+                        ]),
+                    ]),
+                ]),
+                html::div(&[attrs::class("row")], &[
+                    html::div(&[attrs::class("column")], &[
+                        html::label(&[], &[
                             html::div(&[], &[html::text("Subdomain")]),
                             html::input(&[
                                 attrs::type_("text"),
                                 attrs::name("subdomain"),
-                                attrs::placeholder("i.e. mycoolsite"),
+                                attrs::placeholder("i.e. my-cool-site"),
                                 attrs::title("Please provide a valid subdomain, at least 3 characters"),
                                 attrs::pattern("[a-z0-9-]{4,}"),
                                 attrs::required(),
@@ -68,11 +81,6 @@ fn build_body(server_config: &ServerConfig) -> Vec<Html> {
                             ]),
                         ]),
                     ]),
-                ]),
-                html::input(&[
-                    attrs::type_("hidden"),
-                    attrs::name("mainDomain"),
-                    attrs::value(&server_config.domain),
                 ]),
                 html::div(&[attrs::class("row")], &[
                     html::div(&[attrs::class("column column-25")], &[
