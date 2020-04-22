@@ -6,6 +6,7 @@ use std::collections::BTreeMap;
 use crate::orri::file;
 use crate::orri::util;
 use crate::orri::domain::Domain;
+use crate::orri::site_key::SiteKey;
 use crate::orri::url_path::UrlPath;
 use std::time::SystemTime;
 use std::str::FromStr;
@@ -14,7 +15,7 @@ use std::str::FromStr;
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Site {
     pub domain: Domain,
-    pub key: String,
+    pub key: SiteKey,
     pub routes: BTreeMap<UrlPath, RouteInfo>,
 }
 
@@ -53,7 +54,7 @@ pub enum CreateSiteError {
 
 
 // TODO: Two users can create the same site at the same time
-pub fn create(site_root: SiteRoot, key: &str, file_info: FileInfo, file_data: &[u8]) -> Result<Site, CreateSiteError> {
+pub fn create(site_root: SiteRoot, key: SiteKey, file_info: FileInfo, file_data: &[u8]) -> Result<Site, CreateSiteError> {
     site_root.prepare_directories()
         .map_err(CreateSiteError::FailedToCreateDomainDir)?;
 
@@ -61,7 +62,7 @@ pub fn create(site_root: SiteRoot, key: &str, file_info: FileInfo, file_data: &[
 
     let mut site = Site{
         domain: site_root.domain.clone(),
-        key: key.to_string(),
+        key: key,
         routes: BTreeMap::new(),
     };
 

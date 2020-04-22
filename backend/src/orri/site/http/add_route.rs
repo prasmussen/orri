@@ -2,6 +2,7 @@ use actix_web::{web, HttpRequest, HttpResponse};
 use actix_session::Session;
 use crate::orri::app_state::AppState;
 use crate::orri::domain::{self, Domain};
+use crate::orri::encryption_key::{EncryptionKey};
 use crate::orri::site::{self, Site, GetSiteError, File, RouteInfo};
 use crate::orri::slowhtml::html::Html;
 use crate::orri::slowhtml::html;
@@ -21,11 +22,11 @@ enum Error {
 }
 
 pub async fn handler(state: web::Data<AppState>, session: Session, domain: web::Path<String>) -> HttpResponse {
-    let site_key: Option<String> = session.get(&domain)
+    let key: Option<String> = session.get(&domain)
         .unwrap_or(None);
 
     handle(&state, &domain)
-        .map(|site| handle_site(site, site_key))
+        .map(|site| handle_site(site, key, &state.config.encryption_key))
         .unwrap_or_else(handle_error)
 }
 
@@ -42,10 +43,18 @@ fn handle(state: &AppState, domain_str: &str) -> Result<Site, Error> {
 }
 
 
-fn handle_site(site: Site, site_key: Option<String>) -> HttpResponse {
+fn handle_site(site: Site, provided_key: Option<String>, encryption_key: &EncryptionKey) -> HttpResponse {
 
-    let client_provided_key = site_key == Some(site.key.clone());
-    let html = render(&site, client_provided_key);
+    let client_has_key = match provided_key {
+        Some(key) =>
+            site.key.verify(&key, encryption_key).unwrap_or(false),
+
+        None =>
+            false,
+    };
+
+    let html = render(&site, client_has_key);
+
 
     HttpResponse::Ok()
         .set_header(header::CONTENT_TYPE, "text/html")
@@ -54,9 +63,9 @@ fn handle_site(site: Site, site_key: Option<String>) -> HttpResponse {
         .body(html)
 }
 
-fn render(site: &Site, client_provided_key: bool) -> String {
+fn render(site: &Site, client_has_key: bool) -> String {
     let now = Instant::now();
-    let page = build_page(site, client_provided_key);
+    let page = build_page(site, client_has_key);
     let html_string = page.to_string();
     println!("{}", now.elapsed().as_micros());
     html_string
@@ -88,7 +97,7 @@ fn handle_get_site_error(err: GetSiteError) -> HttpResponse {
     }
 }
 
-fn build_page(site: &Site, client_provided_key: bool) -> Page {
+fn build_page(site: &Site, client_has_key: bool) -> Page {
     Page{
         head: Head{
             title: format!("orri.add_route(\"{}\")", &site.domain),
@@ -96,12 +105,12 @@ fn build_page(site: &Site, client_provided_key: bool) -> Page {
                 html::script(&[attrs::src("/static/orri.js")], &[]),
             ]
         },
-        body: build_body(site, client_provided_key),
+        body: build_body(site, client_has_key),
     }
 }
 
 
-fn build_body(site: &Site, client_provided_key: bool) -> Vec<Html> {
+fn build_body(site: &Site, client_has_key: bool) -> Vec<Html> {
     vec![
         html::div(&[attrs::class("container")], &[
             page::error_alert(),
@@ -134,7 +143,7 @@ fn build_body(site: &Site, client_provided_key: bool) -> Vec<Html> {
                         ]),
                     ]),
                 ]),
-                html::conditional(client_provided_key == false,
+                html::conditional(client_has_key == false,
                     html::div(&[attrs::class("row")], &[
                         html::div(&[attrs::class("column")], &[
                             html::label(&[], &[

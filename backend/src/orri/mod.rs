@@ -8,3 +8,4 @@ pub mod app_state;
 pub mod slowhtml;
 pub mod page;
 pub mod encryption_key;
+pub mod site_key;

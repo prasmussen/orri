@@ -7,6 +7,7 @@ use crate::orri::http;
 use crate::orri::file;
 use crate::orri::util;
 use crate::orri::domain::{self, Domain};
+use crate::orri::site_key::{self, SiteKey};
 use crate::orri::url_path::{self, UrlPath};
 use data_url::{DataUrl, DataUrlError, mime, forgiving_base64};
 use std::time::SystemTime;
@@ -34,6 +35,8 @@ enum Error {
     FailedToDecodeDataUrl(forgiving_base64::InvalidBase64),
     ParseDomainError(domain::Error),
     ParsePathError(url_path::Error),
+    NoKeyProvided(),
+    VerifyKeyError(site_key::VerifyError),
     GetSiteError(GetSiteError),
     RouteAlreadyExist(),
     InvalidKey(),
@@ -69,10 +72,16 @@ fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<
     let mut site = site::get(&site_root)
         .map_err(Error::GetSiteError)?;
 
-    let provided_key = get_provided_key(&request_data, session);
 
     util::ensure(site.routes.contains_key(&path) == false, Error::RouteAlreadyExist())?;
-    util::ensure(provided_key == Some(site.key.clone()), Error::InvalidKey())?;
+
+    let provided_key = get_provided_key(&request_data, session)
+        .ok_or(Error::NoKeyProvided())?;
+
+    let has_valid_key = site.key.verify(&provided_key, &state.config.encryption_key)
+        .map_err(Error::VerifyKeyError)?;
+
+    util::ensure(has_valid_key, Error::InvalidKey())?;
 
     site.add_route(&site_root, path, file_info, &file_data)
         .map_err(Error::PersistFileError);
@@ -119,9 +128,19 @@ fn handle_error(err: Error) -> HttpResponse {
             HttpResponse::Conflict()
                 .json(http::Error::from_str("Route already exists")),
 
+        Error::NoKeyProvided() =>
+            HttpResponse::Unauthorized()
+                .json(http::Error::from_str("No key provided")),
+
         Error::InvalidKey() =>
             HttpResponse::Unauthorized()
-                .json(http::Error::from_str("Missing or invalid site key provided")),
+                .json(http::Error::from_str("Invalid key")),
+
+        Error::VerifyKeyError(err) => {
+            println!("Failed to verify key: {:?}", err);
+            HttpResponse::InternalServerError()
+                .json(http::Error::from_str("Failed to verify key"))
+        },
 
         Error::PersistFileError(err) => {
             println!("Failed to persist file: {}", err);
