@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::fmt;
 use std::io;
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -16,18 +17,45 @@ use std::str::FromStr;
 pub struct Site {
     pub domain: Domain,
     pub key: SiteKey,
+    pub quota: Quota,
     pub routes: BTreeMap<UrlPath, RouteInfo>,
 }
 
+#[derive(Clone)]
+pub struct Config {
+    pub quota_nano: QuotaLimits,
+}
+
+
+pub enum AddRouteError {
+    QuotaMaxSize(),
+    QuotaMaxRoutes(),
+    WriteFileError(file::WriteError),
+}
+
+
 impl Site {
-    pub fn add_route(&mut self, site_root: &SiteRoot, path: UrlPath, file_info: FileInfo, file_data: &[u8]) -> Result<&Site, file::WriteError> {
-        file::write(&site_root.data_file_path(&file_info.hash), file_data)?;
+    pub fn add_route(&mut self, config: &Config, site_root: &SiteRoot, path: UrlPath, file_info: FileInfo, file_data: &[u8]) -> Result<&Site, AddRouteError> {
+        let limits = self.quota.limits(config);
+
+        util::ensure(self.size() + file_info.size < limits.max_size, AddRouteError::QuotaMaxSize())?;
+        util::ensure(self.routes.len() < limits.max_routes, AddRouteError::QuotaMaxRoutes())?;
+
+        file::write(&site_root.data_file_path(&file_info.hash), file_data)
+            .map_err(AddRouteError::WriteFileError)?;
 
         self.routes.insert(path, RouteInfo{
             file_info: file_info,
         });
 
+
         Ok(self)
+    }
+
+    pub fn size(&self) -> usize {
+        self.routes
+            .iter()
+            .fold(0, |acc, (path, route_info)| acc + route_info.file_info.size)
     }
 
     pub fn persist(&self, site_root: &SiteRoot) -> Result<&Site, file::WriteJsonError> {
@@ -48,13 +76,13 @@ pub struct RouteInfo {
 pub enum CreateSiteError {
     SiteAlreadyExist(),
     FailedToCreateDomainDir(io::Error),
-    FailedToWriteFile(file::WriteError),
+    FailedToAddRoute(AddRouteError),
     FailedToSaveSiteJson(file::WriteJsonError),
 }
 
 
 // TODO: Two users can create the same site at the same time
-pub fn create(site_root: SiteRoot, key: SiteKey, file_info: FileInfo, file_data: &[u8]) -> Result<Site, CreateSiteError> {
+pub fn create(config: &Config, site_root: SiteRoot, key: SiteKey, file_info: FileInfo, file_data: &[u8]) -> Result<Site, CreateSiteError> {
     site_root.prepare_directories()
         .map_err(CreateSiteError::FailedToCreateDomainDir)?;
 
@@ -63,11 +91,12 @@ pub fn create(site_root: SiteRoot, key: SiteKey, file_info: FileInfo, file_data:
     let mut site = Site{
         domain: site_root.domain.clone(),
         key: key,
+        quota: Quota::Nano(),
         routes: BTreeMap::new(),
     };
 
-    site.add_route(&site_root, UrlPath::root(), file_info, file_data)
-        .map_err(CreateSiteError::FailedToWriteFile)?;
+    site.add_route(&config, &site_root, UrlPath::root(), file_info, file_data)
+        .map_err(CreateSiteError::FailedToAddRoute)?;
 
     site.persist(&site_root)
         .map_err(CreateSiteError::FailedToSaveSiteJson)?;
@@ -161,4 +190,55 @@ pub fn read_route_file(site_root: &SiteRoot, route: &RouteInfo) -> Result<File, 
         data: data,
     })
 
+}
+
+
+#[derive(Deserialize, Serialize, Clone)]
+pub enum Quota {
+    Nano(),
+}
+
+impl Quota {
+    pub fn limits(&self, config: &Config) -> QuotaLimits {
+        match self {
+            Quota::Nano() =>
+                config.quota_nano.clone(),
+        }
+    }
+}
+
+impl fmt::Display for Quota {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let name = match self {
+            Quota::Nano() =>
+                "nano",
+        };
+
+        write!(f, "{}", name)
+    }
+}
+
+pub enum QuotaFromStrError {
+    UnknownQuota()
+}
+
+impl FromStr for Quota {
+    type Err = QuotaFromStrError;
+
+    fn from_str(s: &str) -> Result<Quota, QuotaFromStrError> {
+        match s {
+            "nano" =>
+                Ok(Quota::Nano()),
+
+            _ =>
+                Err(QuotaFromStrError::UnknownQuota()),
+        }
+    }
+}
+
+
+#[derive(Clone)]
+pub struct QuotaLimits {
+    pub max_size: usize,
+    pub max_routes: usize,
 }

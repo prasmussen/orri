@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 use crate::orri::encryption_key::EncryptionKey;
 use crate::orri::site_key;
+use crate::orri::site;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -14,6 +15,7 @@ pub struct Config {
     pub server: ServerConfig,
     pub cookie: CookieConfig,
     pub site_key: site_key::Config,
+    pub site: site::Config,
 }
 
 

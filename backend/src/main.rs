@@ -16,6 +16,7 @@ use orri::site::http::api as site_api;
 use orri::site::http as site_http;
 use crate::orri::encryption_key::EncryptionKey;
 use orri::site_key;
+use orri::site;
 
 
 
@@ -78,6 +79,12 @@ async fn main() -> Result<(), io::Error> {
                 max_length: 99,
                 hash_iterations: 1,
                 hash_memory_size: 4096,
+            },
+            site: site::Config{
+                quota_nano: site::QuotaLimits{
+                    max_size: 5 * 1024 * 1024,
+                    max_routes: 50,
+                },
             },
         }
     };

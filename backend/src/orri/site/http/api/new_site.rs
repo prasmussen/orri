@@ -61,7 +61,7 @@ fn handle(state: &AppState, request_data: &Request) -> Result<Site, Error> {
     let site_key = site_key::from_str(&state.config.site_key, &request_data.key, &state.config.encryption_key)
         .map_err(Error::SiteKeyError)?;
 
-    site::create(site_root, site_key, file_info, &file_data)
+    site::create(&state.config.site, site_root, site_key, file_info, &file_data)
         .map_err(Error::CreateSiteError)
 }
 
@@ -167,16 +167,35 @@ fn handle_create_site_error(err: CreateSiteError) -> HttpResponse {
                 .json(http::Error::from_str("Failed to create domain dir"))
         },
 
-        CreateSiteError::FailedToWriteFile(err) => {
-            println!("Failed to write file: {}", err);
-            HttpResponse::InternalServerError()
-                .json(http::Error::from_str("Failed to write file"))
-        }
+        CreateSiteError::FailedToAddRoute(err) => {
+            handle_failed_to_add_route(err)
+        },
 
         CreateSiteError::FailedToSaveSiteJson(err) => {
             println!("Failed to save config: {}", err);
             HttpResponse::InternalServerError()
                 .json(http::Error::from_str("Failed to save config"))
         }
+    }
+}
+
+
+fn handle_failed_to_add_route(err: site::AddRouteError) -> HttpResponse {
+    match err {
+        site::AddRouteError::QuotaMaxSize() => {
+            HttpResponse::BadRequest()
+                .json(http::Error::from_str("Max total size reached"))
+        },
+
+        site::AddRouteError::QuotaMaxRoutes() => {
+            HttpResponse::BadRequest()
+                .json(http::Error::from_str("Max routes reached"))
+        },
+
+        site::AddRouteError::WriteFileError(err) => {
+            println!("Failed to write file: {}", err);
+            HttpResponse::InternalServerError()
+                .json(http::Error::from_str("Failed to write file"))
+        },
     }
 }
