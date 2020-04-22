@@ -9,6 +9,15 @@ use argonautica::{self, Hasher, Verifier};
 pub struct SiteKey(String);
 
 
+#[derive(Clone)]
+pub struct Config {
+    pub min_length: usize,
+    pub max_length: usize,
+    pub hash_iterations: u32,
+    pub hash_memory_size: u32,
+}
+
+
 #[derive(Debug)]
 pub enum Error {
     TooShort(),
@@ -41,13 +50,13 @@ impl SiteKey {
     }
 }
 
-pub fn from_str(key: &str, secret: &EncryptionKey) -> Result<SiteKey, Error> {
-    util::ensure(key.len() > 19, Error::TooShort())?;
-    util::ensure(key.len() < 100, Error::TooLong())?;
+pub fn from_str(config: &Config, key: &str, secret: &EncryptionKey) -> Result<SiteKey, Error> {
+    util::ensure(key.len() >= config.min_length, Error::TooShort())?;
+    util::ensure(key.len() <= config.max_length, Error::TooLong())?;
 
-    // TODO: get options as arguments
     let hash = Hasher::default()
-        .configure_iterations(1)
+        .configure_iterations(config.hash_iterations)
+        .configure_memory_size(config.hash_memory_size)
         .with_password(key)
         .with_secret_key(&secret.to_string())
         .hash()

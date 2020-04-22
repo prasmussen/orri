@@ -15,6 +15,7 @@ use orri::http::index;
 use orri::site::http::api as site_api;
 use orri::site::http as site_http;
 use crate::orri::encryption_key::EncryptionKey;
+use orri::site_key;
 
 
 
@@ -71,6 +72,12 @@ async fn main() -> Result<(), io::Error> {
             },
             cookie: app_state::CookieConfig{
                 secure: false,
+            },
+            site_key: site_key::Config{
+                min_length: 20,
+                max_length: 99,
+                hash_iterations: 1,
+                hash_memory_size: 4096,
             },
         }
     };
