@@ -91,7 +91,7 @@ pub fn create(config: &Config, site_root: SiteRoot, key: SiteKey, file_info: Fil
     let mut site = Site{
         domain: site_root.domain.clone(),
         key: key,
-        quota: Quota::Nano(),
+        quota: Quota::Nano,
         routes: BTreeMap::new(),
     };
 
@@ -194,29 +194,20 @@ pub fn read_route_file(site_root: &SiteRoot, route: &RouteInfo) -> Result<File, 
 
 
 #[derive(Deserialize, Serialize, Clone)]
+#[serde(rename_all = "snake_case")]
 pub enum Quota {
-    Nano(),
+    Nano,
 }
 
 impl Quota {
     pub fn limits(&self, config: &Config) -> QuotaLimits {
         match self {
-            Quota::Nano() =>
+            Quota::Nano =>
                 config.quota_nano.clone(),
         }
     }
 }
 
-impl fmt::Display for Quota {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let name = match self {
-            Quota::Nano() =>
-                "nano",
-        };
-
-        write!(f, "{}", name)
-    }
-}
 
 pub enum QuotaFromStrError {
     UnknownQuota()
@@ -228,7 +219,7 @@ impl FromStr for Quota {
     fn from_str(s: &str) -> Result<Quota, QuotaFromStrError> {
         match s {
             "nano" =>
-                Ok(Quota::Nano()),
+                Ok(Quota::Nano),
 
             _ =>
                 Err(QuotaFromStrError::UnknownQuota()),
