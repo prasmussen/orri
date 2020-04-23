@@ -232,4 +232,5 @@ impl FromStr for Quota {
 pub struct QuotaLimits {
     pub max_size: usize,
     pub max_routes: usize,
+    pub max_sites: usize,
 }

@@ -9,3 +9,4 @@ pub mod slowhtml;
 pub mod page;
 pub mod encryption_key;
 pub mod site_key;
+pub mod session_data;

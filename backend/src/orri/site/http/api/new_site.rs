@@ -3,10 +3,11 @@ use std::str::FromStr;
 use actix_web::{web, HttpRequest, HttpResponse};
 use actix_session::Session;
 use serde::{Deserialize, Serialize};
-use crate::orri::app_state::{AppState, ServerConfig};
+use crate::orri::app_state::{AppState, Config};
 use crate::orri::site::{self, Site, CreateSiteError, FileInfo};
 use crate::orri::http;
 use crate::orri::domain::{self, Domain};
+use crate::orri::session_data::{self, SessionData};
 use crate::orri::site_key::{self, SiteKey};
 use data_url::{DataUrl, DataUrlError, mime, forgiving_base64};
 
@@ -34,16 +35,17 @@ enum Error {
     ParseDomainError(domain::Error),
     SiteKeyError(site_key::Error),
     CreateSiteError(CreateSiteError),
+    SessionDataError(session_data::Error),
 }
 
 pub async fn handler(state: web::Data<AppState>, session: Session, request_data: web::Json<Request>) -> HttpResponse {
 
-    handle(&state, &request_data)
-        .map(|site| handle_site(session, &state.config.server, &request_data, site))
+    handle(&state, &session, &request_data)
+        .map(|site| handle_site(&state.config, &request_data, site))
         .unwrap_or_else(handle_error)
 }
 
-fn handle(state: &AppState, request_data: &Request) -> Result<Site, Error> {
+fn handle(state: &AppState, session: &Session, request_data: &Request) -> Result<Site, Error> {
     let domain = Domain::from_str(&request_data.domain)
         .map_err(Error::ParseDomainError)?;
 
@@ -61,15 +63,24 @@ fn handle(state: &AppState, request_data: &Request) -> Result<Site, Error> {
     let site_key = site_key::from_str(&state.config.site_key, &request_data.key, &state.config.encryption_key)
         .map_err(Error::SiteKeyError)?;
 
-    site::create(&state.config.site, site_root, site_key, file_info, &file_data)
-        .map_err(Error::CreateSiteError)
+    let site = site::create(&state.config.site, site_root, site_key, file_info, &file_data)
+        .map_err(Error::CreateSiteError)?;
+
+    let mut session_data = SessionData::from_session(&session)
+        .unwrap_or(SessionData::new());
+
+    // TODO: site is still created if sesssion_data.add_site fails
+    session_data.add_site(&site, &state.config.site, &request_data.key)
+        .map_err(Error::SessionDataError)?;
+
+    session_data.update_session(&session);
+
+    Ok(site)
 }
 
-fn handle_site(session: Session, server_config: &ServerConfig, request_data: &Request, site: Site) -> HttpResponse {
+fn handle_site(config: &Config, request_data: &Request, site: Site) -> HttpResponse {
     let manage_url = format!("/sites/{}", &site.domain);
-    let site_url = server_config.other_base_url(&site.domain.to_string());
-
-    session.set(&site.domain.to_string(), &request_data.key);
+    let site_url = config.server.other_base_url(&site.domain.to_string());
 
     HttpResponse::Ok()
         .json(Response{
@@ -77,6 +88,7 @@ fn handle_site(session: Session, server_config: &ServerConfig, request_data: &Re
             site_url: site_url,
         })
 }
+
 
 fn handle_error(err: Error) -> HttpResponse {
     match err {
@@ -96,6 +108,9 @@ fn handle_error(err: Error) -> HttpResponse {
 
         Error::CreateSiteError(err) =>
             handle_create_site_error(err),
+
+        Error::SessionDataError(err) =>
+            handle_session_data_error(err),
     }
 }
 
@@ -196,6 +211,21 @@ fn handle_failed_to_add_route(err: site::AddRouteError) -> HttpResponse {
             println!("Failed to write file: {}", err);
             HttpResponse::InternalServerError()
                 .json(http::Error::from_str("Failed to write file"))
+        },
+    }
+}
+
+
+fn handle_session_data_error(err: session_data::Error) -> HttpResponse {
+    match err {
+        session_data::Error::QuotaMaxSites() => {
+            HttpResponse::BadRequest()
+                .json(http::Error::from_str("Max total sites reached"))
+        },
+
+        session_data::Error::SessionDataTooLarge() => {
+            HttpResponse::BadRequest()
+                .json(http::Error::from_str("The session cookie is not able to store more sites"))
         },
     }
 }

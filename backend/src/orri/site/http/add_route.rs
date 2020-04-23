@@ -8,6 +8,7 @@ use crate::orri::slowhtml::html::Html;
 use crate::orri::slowhtml::html;
 use crate::orri::slowhtml::attributes as attrs;
 use crate::orri::page::{self, Page, Head};
+use crate::orri::session_data::{SessionData};
 use http::header;
 use std::path::PathBuf;
 use std::io;
@@ -22,11 +23,8 @@ enum Error {
 }
 
 pub async fn handler(state: web::Data<AppState>, session: Session, domain: web::Path<String>) -> HttpResponse {
-    let key: Option<String> = session.get(&domain)
-        .unwrap_or(None);
-
     handle(&state, &domain)
-        .map(|site| handle_site(site, key, &state.config.encryption_key))
+        .map(|site| handle_site(site, &session, &state.config.encryption_key))
         .unwrap_or_else(handle_error)
 }
 
@@ -43,18 +41,14 @@ fn handle(state: &AppState, domain_str: &str) -> Result<Site, Error> {
 }
 
 
-fn handle_site(site: Site, provided_key: Option<String>, encryption_key: &EncryptionKey) -> HttpResponse {
+fn handle_site(site: Site, session: &Session, encryption_key: &EncryptionKey) -> HttpResponse {
 
-    let client_has_key = match provided_key {
-        Some(key) =>
-            site.key.verify(&key, encryption_key).unwrap_or(false),
-
-        None =>
-            false,
-    };
+    let client_has_key = SessionData::from_session(session)
+        .and_then(|session_data| session_data.get_site_key(&site.domain))
+        .and_then(|key_from_session| site.key.verify(&key_from_session, encryption_key).ok())
+        .unwrap_or(false);
 
     let html = render(&site, client_has_key);
-
 
     HttpResponse::Ok()
         .set_header(header::CONTENT_TYPE, "text/html")

@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::orri::util;
 
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Hash, Ord, PartialOrd, Eq, PartialEq)]
 pub struct Domain(String);
 
 
