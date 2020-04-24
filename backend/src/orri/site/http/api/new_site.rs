@@ -9,6 +9,7 @@ use crate::orri::http;
 use crate::orri::domain::{self, Domain};
 use crate::orri::session_data::{self, SessionData};
 use crate::orri::site_key::{self, SiteKey};
+use crate::orri::route::Route;
 use data_url::{DataUrl, DataUrlError, mime, forgiving_base64};
 
 
@@ -79,12 +80,12 @@ fn handle(state: &AppState, session: &Session, request_data: &Request) -> Result
 }
 
 fn handle_site(config: &Config, request_data: &Request, site: Site) -> HttpResponse {
-    let manage_url = format!("/sites/{}", &site.domain);
+    let manage_route = Route::ManageSite(site.domain.to_string());
     let site_url = config.server.sites_base_url(&site.domain.to_string());
 
     HttpResponse::Ok()
         .json(Response{
-            manage_url: manage_url,
+            manage_url: manage_route.to_string(),
             site_url: site_url,
         })
 }

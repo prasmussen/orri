@@ -7,6 +7,7 @@ use crate::orri::slowhtml::html::Html;
 use crate::orri::slowhtml::html;
 use crate::orri::slowhtml::attributes as attrs;
 use crate::orri::page::{Page, Head};
+use crate::orri::route::Route;
 use crate::orri::util;
 use http::header;
 use std::path::PathBuf;
@@ -99,7 +100,7 @@ fn build_page(site: &Site, base_url: &str) -> Page {
 }
 
 fn build_body(site: &Site, base_url: &str) -> Vec<Html> {
-    let new_route_url = format!("/sites/{}/add-route", site.domain);
+    let add_route_route = Route::AddRoute(site.domain.to_string());
     let now = SystemTime::now();
 
     let rows = site.routes
@@ -122,7 +123,7 @@ fn build_body(site: &Site, base_url: &str) -> Vec<Html> {
             ]),
             html::a(
                 &[
-                    attrs::href(&new_route_url),
+                    attrs::href(&add_route_route.to_string()),
                     attrs::class("button"),
                 ],
                 &[html::text("Add route")]

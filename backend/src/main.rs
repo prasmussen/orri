@@ -18,6 +18,8 @@ use orri::site::http as site_http;
 use crate::orri::encryption_key::EncryptionKey;
 use orri::site_key;
 use orri::site;
+use orri::route::Route;
+use orri::util;
 
 
 
@@ -33,14 +35,17 @@ fn app_domain_routes(config: &mut web::ServiceConfig, state: &AppState, host: &'
         web::scope("/")
             .guard(guard::Header("Host", host))
             .wrap(cookie_session)
+
+            // User facing routes
             .route("", web::get().to(index::handler))
-            .route("/new", web::get().to(site_http::new_site::handler))
-            .route("/sites/{domain}", web::get().to(site_http::list::handler))
-            .route("/sites/{domain}/add-route", web::get().to(site_http::add_route::handler))
-            .route("/api/sites", web::post().to(site_api::new_site::handler))
-            .route("/api/sites", web::put().to(site_api::add_route::handler))
-            // TODO:
-            //.route("/api/sites/{domain}/{path}", web::put().to(site_api::add_route::handler))
+            .route(&Route::NewSite().to_string(), web::get().to(site_http::new_site::handler))
+            .route(&Route::ManageSite("{domain}".to_string()).to_string(), web::get().to(site_http::list::handler))
+            .route(&Route::AddRoute("{domain}".to_string()).to_string(), web::get().to(site_http::add_route::handler))
+
+            // Json routes
+            .route(&Route::NewSiteJson().to_string(), web::post().to(site_api::new_site::handler))
+            .route(&Route::AddRouteJson().to_string(), web::post().to(site_api::add_route::handler))
+
             .service(Files::new("/static", state.config.server.static_path()))
     );
 }
@@ -51,11 +56,6 @@ fn sites_domain_routes(config: &mut web::ServiceConfig) {
             .route("", web::get().to(site_http::view::handler))
             .route("{tail:.*}", web::get().to(site_http::view::handler))
     );
-}
-
-
-fn to_static_str(s: String) -> &'static str {
-    Box::leak(s.into_boxed_str())
 }
 
 
@@ -96,7 +96,7 @@ async fn main() -> Result<(), io::Error> {
     };
 
     // TODO: This is probably ok, but is it possible to have a 'static String in the config?
-    let domain = to_static_str(state.config.server.app_domain_with_port());
+    let domain = util::to_static_str(state.config.server.app_domain_with_port());
     let listen_addr = &state.config.server.listen_addr_with_port();
 
     HttpServer::new(move || {

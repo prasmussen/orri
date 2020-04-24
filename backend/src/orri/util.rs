@@ -24,3 +24,8 @@ pub fn sha256(bytes: &[u8]) -> String {
     let digest = digest::digest(&digest::SHA256, bytes);
     hex::encode(digest.as_ref())
 }
+
+
+pub fn to_static_str(s: String) -> &'static str {
+    Box::leak(s.into_boxed_str())
+}

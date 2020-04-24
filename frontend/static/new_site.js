@@ -25,7 +25,7 @@ orri.form.onSubmit(elements.form, elements.submitButton, (formData, formReady) =
     }
 
     function createSite(data) {
-        return orri.api.post("/api/sites", data)
+        return orri.api.post(elements.form.dataset.apiUrl, data)
             .then(orri.api.rejectErrors)
             .then(res => res.json())
             .then(json => Object.assign(data, json));

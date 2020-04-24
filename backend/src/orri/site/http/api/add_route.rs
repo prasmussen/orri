@@ -10,6 +10,7 @@ use crate::orri::domain::{self, Domain};
 use crate::orri::site_key::{self, SiteKey};
 use crate::orri::url_path::{self, UrlPath};
 use crate::orri::session_data::{SessionData};
+use crate::orri::route::Route;
 use data_url::{DataUrl, DataUrlError, mime, forgiving_base64};
 use std::time::SystemTime;
 use std::str::FromStr;
@@ -114,8 +115,10 @@ fn get_provided_key(request_data: &Request, session_data: &SessionData, domain: 
 
 
 fn handle_site(site: Site) -> HttpResponse {
+    let manage_route = Route::ManageSite(site.domain.to_string());
+
     HttpResponse::Ok().json(Response{
-        manage_url: format!("/sites/{}", &site.domain),
+        manage_url: manage_route.to_string(),
     })
 }
 

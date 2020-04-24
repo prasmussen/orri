@@ -17,7 +17,7 @@ orri.form.onSubmit(elements.form, elements.submitButton, (formData, formReady) =
     }
 
     function addRoute(data) {
-        return orri.api.put("/api/sites", data)
+        return orri.api.post(elements.form.dataset.apiUrl, data)
             .then(orri.api.rejectErrors)
             .then(res => res.json());
     }

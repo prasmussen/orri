@@ -165,14 +165,19 @@ function Page() {
                     return json.error;
                 }
 
-                return Promise.resolve("Something went wrong");
-            });
+                console.log("Unhandled error in response", err, json);
+                return Promise.resolve("Something went wrong: " + err.statusText);
+            }).catch(data => {
+                console.log("Failed reading json from response", err, data);
+                return Promise.resolve("Something went wrong: " + err.statusText);
+            }) ;
         }
 
         if (typeof err === "object" && err.message) {
             return Promise.resolve(err.message);
         }
 
+        console.log("Unhandled error", err);
         return Promise.resolve("Something went wrong");
     }
 
