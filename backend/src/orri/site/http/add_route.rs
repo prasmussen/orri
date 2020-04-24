@@ -95,9 +95,7 @@ fn build_page(site: &Site, client_has_key: bool) -> Page {
     Page{
         head: Head{
             title: format!("orri.add_route(\"{}\")", &site.domain),
-            elements: vec![
-                html::script(&[attrs::src("/static/orri.js")], &[]),
-            ]
+            elements: vec![],
         },
         body: build_body(site, client_has_key),
     }
@@ -170,6 +168,7 @@ fn build_body(site: &Site, client_has_key: bool) -> Vec<Html> {
                 ]),
             ]),
         ]),
+        html::script(&[attrs::src("/static/orri.js")], &[]),
         html::script(&[attrs::src("/static/add_route.js")], &[]),
     ]
 }

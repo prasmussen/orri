@@ -1,11 +1,11 @@
 const elements = {
-    form: Page().getElement("#form"),
-    alertError: Page().getElement("#alert-error"),
-    submitButton: Page().getElement("#submit-button"),
-    file: Page().getElement("#file"),
+    form: orri.page.getElement("#form"),
+    alertError: orri.page.getElement("#alert-error"),
+    submitButton: orri.page.getElement("#submit-button"),
+    file: orri.page.getElement("#file"),
 };
 
-Form().onSubmit(elements.form, elements.submitButton, (formData, formReady) => {
+orri.form.onSubmit(elements.form, elements.submitButton, (formData, formReady) => {
 
     function prepareData(file) {
         return {
@@ -17,8 +17,8 @@ Form().onSubmit(elements.form, elements.submitButton, (formData, formReady) => {
     }
 
     function addRoute(data) {
-        return Api().put("/api/sites", data)
-            .then(Api().rejectErrors)
+        return orri.api.put("/api/sites", data)
+            .then(orri.api.rejectErrors)
             .then(res => res.json());
     }
 
@@ -27,10 +27,10 @@ Form().onSubmit(elements.form, elements.submitButton, (formData, formReady) => {
     }
 
     function handleError(err) {
-        Page().showError(elements.alertError, err);
+        orri.page.showError(elements.alertError, err);
     }
 
-    File().onLoad(elements.file)
+    orri.file.onLoad(elements.file)
         .then(prepareData)
         .then(addRoute)
         .then(redirect)

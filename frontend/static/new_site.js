@@ -1,21 +1,21 @@
 const elements = {
-    form: Page().getElement("#form"),
-    alertError: Page().getElement("#alert-error"),
-    submitButton: Page().getElement("#submit-button"),
-    file: Page().getElement("#file"),
-    keyPlaceholder: Page().getElement("#key-placeholder"),
-    domainPlaceholder: Page().getElement("#domain-placeholder"),
-    siteUrlPlaceholder: Page().getElement("#site-url-placeholder"),
-    manageUrlPlaceholder: Page().getElement("#manage-url-placeholder"),
-    mainContent: Page().getElement("#main-content"),
-    successContent: Page().getElement("#success-content"),
+    form: orri.page.getElement("#form"),
+    alertError: orri.page.getElement("#alert-error"),
+    submitButton: orri.page.getElement("#submit-button"),
+    file: orri.page.getElement("#file"),
+    keyPlaceholder: orri.page.getElement("#key-placeholder"),
+    domainPlaceholder: orri.page.getElement("#domain-placeholder"),
+    siteUrlPlaceholder: orri.page.getElement("#site-url-placeholder"),
+    manageUrlPlaceholder: orri.page.getElement("#manage-url-placeholder"),
+    mainContent: orri.page.getElement("#main-content"),
+    successContent: orri.page.getElement("#success-content"),
 };
 
-Form().onSubmit(elements.form, elements.submitButton, (formData, formReady) => {
+orri.form.onSubmit(elements.form, elements.submitButton, (formData, formReady) => {
 
     function prepareData(file) {
         const domain = [formData.subdomain, formData.sitesDomain].join(".");
-        const key = Crypto().randomString(20);
+        const key = orri.crypto.randomString(20);
 
         return {
             domain: domain,
@@ -25,8 +25,8 @@ Form().onSubmit(elements.form, elements.submitButton, (formData, formReady) => {
     }
 
     function createSite(data) {
-        return Api().post("/api/sites", data)
-            .then(Api().rejectErrors)
+        return orri.api.post("/api/sites", data)
+            .then(orri.api.rejectErrors)
             .then(res => res.json())
             .then(json => Object.assign(data, json));
     }
@@ -39,17 +39,17 @@ Form().onSubmit(elements.form, elements.submitButton, (formData, formReady) => {
         elements.manageUrlPlaceholder.href = data.manageUrl;
 
         // Switch to success view
-        Page().hideElement(elements.mainContent);
-        Page().unhideElement(elements.successContent);
+        orri.page.hideElement(elements.mainContent);
+        orri.page.unhideElement(elements.successContent);
 
         return null;
     }
 
     function handleError(err) {
-        Page().showError(elements.alertError, err);
+        orri.page.showError(elements.alertError, err);
     }
 
-    File().onLoad(elements.file)
+    orri.file.onLoad(elements.file)
         .then(prepareData)
         .then(createSite)
         .then(showSuccessPage)

@@ -1,3 +1,11 @@
+const orri = {
+    form: Form(),
+    file: File(),
+    api: Api(),
+    crypto: Crypto(),
+    page: Page(),
+};
+
 function Form() {
 
     function getData(elem) {

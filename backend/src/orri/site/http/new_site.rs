@@ -28,9 +28,7 @@ fn build_page(server_config: &ServerConfig) -> Page {
     Page{
         head: Head{
             title: format!("orri.new_site()"),
-            elements: vec![
-                html::script(&[attrs::src("/static/orri.js")], &[]),
-            ]
+            elements: vec![],
         },
         body: build_body(server_config)
     }
@@ -90,6 +88,7 @@ fn build_body(server_config: &ServerConfig) -> Vec<Html> {
             ]),
         ]),
         build_success_content(),
+        html::script(&[attrs::src("/static/orri.js")], &[]),
         html::script(&[attrs::src("/static/new_site.js")], &[]),
     ]
 }
