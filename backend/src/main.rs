@@ -46,6 +46,7 @@ fn app_domain_routes(config: &mut web::ServiceConfig, state: &AppState, host: &'
             .route(&Route::NewSiteJson().to_string(), web::post().to(site_api::new_site::handler))
             .route(&Route::AddRouteJson().to_string(), web::post().to(site_api::add_route::handler))
 
+            // Static files
             .service(Files::new("/static", state.config.server.static_path()))
     );
 }
