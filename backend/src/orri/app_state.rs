@@ -21,7 +21,8 @@ pub struct Config {
 
 #[derive(Clone)]
 pub struct ServerConfig {
-    pub domain: String,
+    pub app_domain: String,
+    pub sites_domain: String,
     pub protocol: String,
     pub listen_addr: String,
     pub listen_port: u16,
@@ -30,15 +31,15 @@ pub struct ServerConfig {
 }
 
 impl ServerConfig {
-    pub fn domain_with_port(&self) -> String {
+    pub fn app_domain_with_port(&self) -> String {
         if self.listen_port == 80 || self.listen_port == 443 {
-            self.domain.clone()
+            self.app_domain.clone()
         } else {
-            format!("{}:{}", self.domain, self.listen_port)
+            format!("{}:{}", self.app_domain, self.listen_port)
         }
     }
 
-    pub fn other_domain_with_port(&self, domain: &str) -> String {
+    pub fn sites_domain_with_port(&self, domain: &str) -> String {
         if self.listen_port == 80 || self.listen_port == 443 {
             domain.to_string().clone()
         } else {
@@ -46,12 +47,12 @@ impl ServerConfig {
         }
     }
 
-    pub fn base_url(&self) -> String {
-        format!("{}://{}", self.protocol, self.domain_with_port())
+    pub fn app_base_url(&self) -> String {
+        format!("{}://{}", self.protocol, self.app_domain_with_port())
     }
 
-    pub fn other_base_url(&self, domain: &str) -> String {
-        format!("{}://{}", self.protocol, self.other_domain_with_port(domain))
+    pub fn sites_base_url(&self, domain: &str) -> String {
+        format!("{}://{}", self.protocol, self.sites_domain_with_port(domain))
     }
 
     pub fn listen_addr_with_port(&self) -> String {

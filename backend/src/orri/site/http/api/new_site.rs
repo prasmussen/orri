@@ -80,7 +80,7 @@ fn handle(state: &AppState, session: &Session, request_data: &Request) -> Result
 
 fn handle_site(config: &Config, request_data: &Request, site: Site) -> HttpResponse {
     let manage_url = format!("/sites/{}", &site.domain);
-    let site_url = config.server.other_base_url(&site.domain.to_string());
+    let site_url = config.server.sites_base_url(&site.domain.to_string());
 
     HttpResponse::Ok()
         .json(Response{

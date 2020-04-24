@@ -48,8 +48,8 @@ fn build_body(server_config: &ServerConfig) -> Vec<Html> {
                             html::div(&[], &[html::text("Domain")]),
                             html::input(&[
                                 attrs::type_("text"),
-                                attrs::name("mainDomain"),
-                                attrs::value(&server_config.domain),
+                                attrs::name("sitesDomain"),
+                                attrs::value(&server_config.sites_domain),
                                 attrs::readonly(),
                             ]),
                         ]),

@@ -67,7 +67,8 @@ async fn main() -> Result<(), io::Error> {
         config: app_state::Config{
             encryption_key: "YdotmVZtV5R3PRnzfCiKBV3gtitSFg70".parse().unwrap(),
             server: app_state::ServerConfig{
-                domain: "orri.loc".to_string(),
+                app_domain: "orri.devz".to_string(),
+                sites_domain: "orri.pagez".to_string(),
                 protocol: "http".to_string(),
                 listen_addr: "127.0.0.1".to_string(),
                 listen_port: 8000,
@@ -95,7 +96,7 @@ async fn main() -> Result<(), io::Error> {
     };
 
     // TODO: This is probably ok, but is it possible to have a 'static String in the config?
-    let domain = to_static_str(state.config.server.domain_with_port());
+    let domain = to_static_str(state.config.server.app_domain_with_port());
     let listen_addr = &state.config.server.listen_addr_with_port();
 
     HttpServer::new(move || {

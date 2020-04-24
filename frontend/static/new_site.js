@@ -14,7 +14,7 @@ const elements = {
 Form().onSubmit(elements.form, elements.submitButton, (formData, formReady) => {
 
     function prepareData(file) {
-        const domain = [formData.subdomain, formData.mainDomain].join(".");
+        const domain = [formData.subdomain, formData.sitesDomain].join(".");
         const key = Crypto().randomString(20);
 
         return {

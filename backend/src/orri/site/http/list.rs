@@ -23,7 +23,7 @@ enum Error {
 
 
 pub async fn handler(state: web::Data<AppState>, domain: web::Path<String>) -> HttpResponse {
-    let base_url = &state.config.server.other_base_url(&domain);
+    let base_url = &state.config.server.sites_base_url(&domain);
 
     handle(&state, &domain)
         .map(|site| handle_site(site, base_url))
