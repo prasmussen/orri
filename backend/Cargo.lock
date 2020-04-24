@@ -1234,6 +1234,7 @@ name = "orri"
 version = "0.1.0"
 dependencies = [
  "actix-files",
+ "actix-http",
  "actix-rt",
  "actix-session",
  "actix-web",

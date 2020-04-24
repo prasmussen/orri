@@ -72,4 +72,5 @@ impl ServerConfig {
 #[derive(Clone)]
 pub struct CookieConfig {
     pub secure: bool,
+    pub max_age: i64,
 }

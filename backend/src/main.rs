@@ -10,6 +10,7 @@ use std::str::FromStr;
 use actix_web::{web, App, HttpServer, guard};
 use actix_files::Files;
 use actix_session::CookieSession;
+use actix_http::cookie::SameSite;
 use orri::app_state::{self, AppState};
 use orri::http::index;
 use orri::site::http::api as site_api;
@@ -22,9 +23,11 @@ use orri::site;
 
 
 fn main_domain_routes(config: &mut web::ServiceConfig, state: &AppState, host: &'static str) {
-    // TODO: set SameSite, etc
     let cookie_session = CookieSession::private(state.config.encryption_key.as_bytes())
-        .secure(state.config.cookie.secure);
+        .http_only(true)
+        .same_site(SameSite::Lax)
+        .secure(state.config.cookie.secure)
+        .max_age(state.config.cookie.max_age);
 
     config.service(
         web::scope("/")
@@ -73,6 +76,7 @@ async fn main() -> Result<(), io::Error> {
             },
             cookie: app_state::CookieConfig{
                 secure: false,
+                max_age: 315576000,
             },
             site_key: site_key::Config{
                 min_length: 20,
