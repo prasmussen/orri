@@ -22,7 +22,7 @@ use orri::site;
 
 
 
-fn main_domain_routes(config: &mut web::ServiceConfig, state: &AppState, host: &'static str) {
+fn app_domain_routes(config: &mut web::ServiceConfig, state: &AppState, host: &'static str) {
     let cookie_session = CookieSession::private(state.config.encryption_key.as_bytes())
         .http_only(true)
         .same_site(SameSite::Lax)
@@ -45,7 +45,7 @@ fn main_domain_routes(config: &mut web::ServiceConfig, state: &AppState, host: &
     );
 }
 
-fn other_domains_routes(config: &mut web::ServiceConfig) {
+fn sites_domain_routes(config: &mut web::ServiceConfig) {
     config.service(
         web::scope("/")
             .route("", web::get().to(site_http::view::handler))
@@ -103,8 +103,8 @@ async fn main() -> Result<(), io::Error> {
         App::new()
             .data(state.clone())
             .app_data(web::JsonConfig::default().limit(1024 * 1024 * 10))
-            .configure(|cfg| main_domain_routes(cfg, &state, domain))
-            .configure(other_domains_routes)
+            .configure(|cfg| app_domain_routes(cfg, &state, domain))
+            .configure(sites_domain_routes)
     })
     .bind(listen_addr)?
     .run()
