@@ -6,12 +6,12 @@ pub enum Route {
     NewSite(),
     ManageSite(String),
     AddRoute(String),
-    EditRoute(String),
+    EditRoute(String, Option<String>),
 
     // Json routes
     NewSiteJson(),
     AddRouteJson(),
-    UpdateRouteJson(),
+    EditRouteJson(),
     DeleteRouteJson(),
 }
 
@@ -28,8 +28,14 @@ impl fmt::Display for Route {
             Route::AddRoute(domain) =>
                 write!(f, "/sites/{}/routes/add", domain),
 
-            Route::EditRoute(domain) =>
-                write!(f, "/sites/{}/routes/edit", domain),
+            Route::EditRoute(domain, route) =>
+                match route {
+                    Some(path) =>
+                        write!(f, "/sites/{}/routes/edit?path={}", domain, path),
+
+                    None =>
+                        write!(f, "/sites/{}/routes/edit", domain),
+                },
 
             Route::NewSiteJson() =>
                 write!(f, "/json/sites"),
@@ -37,8 +43,8 @@ impl fmt::Display for Route {
             Route::AddRouteJson() =>
                 write!(f, "/json/sites/add-route"),
 
-            Route::UpdateRouteJson() =>
-                write!(f, "/json/sites/update-route"),
+            Route::EditRouteJson() =>
+                write!(f, "/json/sites/edit-route"),
 
             Route::DeleteRouteJson() =>
                 write!(f, "/json/sites/delete-route"),

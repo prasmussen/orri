@@ -33,6 +33,12 @@ pub enum AddRouteError {
     WriteFileError(file::WriteError),
 }
 
+pub enum UpdateRouteError {
+    RouteNotFound(),
+    QuotaMaxSize(),
+    WriteFileError(file::WriteError),
+}
+
 
 impl Site {
     pub fn add_route(&mut self, config: &Config, site_root: &SiteRoot, path: UrlPath, file_info: FileInfo, file_data: &[u8]) -> Result<&Site, AddRouteError> {
@@ -52,12 +58,31 @@ impl Site {
         Ok(self)
     }
 
+    pub fn update_route(&mut self, config: &Config, site_root: &SiteRoot, path: UrlPath, file_info: FileInfo, file_data: &[u8]) -> Result<&Site, UpdateRouteError> {
+        let limits = self.quota.limits(config);
+
+        let old_route = self.routes.get(&path)
+            .ok_or(UpdateRouteError::RouteNotFound())?;
+
+        util::ensure(self.size() - old_route.file_info.size + file_info.size < limits.max_size, UpdateRouteError::QuotaMaxSize())?;
+
+        file::write(&site_root.data_file_path(&file_info.hash), file_data)
+            .map_err(UpdateRouteError::WriteFileError)?;
+
+        self.routes.insert(path, RouteInfo{
+            file_info: file_info,
+        });
+
+        Ok(self)
+    }
+
     pub fn size(&self) -> usize {
         self.routes
             .iter()
             .fold(0, |acc, (path, route_info)| acc + route_info.file_info.size)
     }
 
+    // TODO: remove all files hashes that does not exist in routes after json is written
     pub fn persist(&self, site_root: &SiteRoot) -> Result<&Site, file::WriteJsonError> {
         file::write_json(&site_root.site_json_path(), self)?;
 

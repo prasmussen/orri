@@ -40,9 +40,8 @@ enum Error {
     NoKeyProvided(),
     VerifyKeyError(site_key::VerifyError),
     GetSiteError(GetSiteError),
-    RouteAlreadyExist(),
     InvalidKey(),
-    FailedToAddRoute(site::AddRouteError),
+    FailedToUpdateRoute(site::UpdateRouteError),
     PersistSiteError(file::WriteJsonError),
 }
 
@@ -74,9 +73,6 @@ fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<
     let mut site = site::get(&site_root)
         .map_err(Error::GetSiteError)?;
 
-
-    util::ensure(site.routes.contains_key(&path) == false, Error::RouteAlreadyExist())?;
-
     let mut session_data = SessionData::from_session(&session)
         .unwrap_or(SessionData::new());
 
@@ -88,8 +84,8 @@ fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<
 
     util::ensure(has_valid_key, Error::InvalidKey())?;
 
-    site.add_route(&state.config.site, &site_root, path, file_info, &file_data)
-        .map_err(Error::FailedToAddRoute)?;
+    site.update_route(&state.config.site, &site_root, path, file_info, &file_data)
+        .map_err(Error::FailedToUpdateRoute)?;
 
     site.persist(&site_root)
         .map_err(Error::PersistSiteError)?;
@@ -141,10 +137,6 @@ fn handle_error(err: Error) -> HttpResponse {
         Error::GetSiteError(err) =>
             handle_get_site_error(err),
 
-        Error::RouteAlreadyExist() =>
-            HttpResponse::Conflict()
-                .json(http::Error::from_str("Route already exists")),
-
         Error::NoKeyProvided() =>
             HttpResponse::Unauthorized()
                 .json(http::Error::from_str("No key provided")),
@@ -159,8 +151,8 @@ fn handle_error(err: Error) -> HttpResponse {
                 .json(http::Error::from_str("Failed to verify key"))
         },
 
-        Error::FailedToAddRoute(err) => {
-            handle_failed_to_add_route(err)
+        Error::FailedToUpdateRoute(err) => {
+            handle_failed_to_update_route(err)
         },
 
         Error::PersistSiteError(err) => {
@@ -240,19 +232,19 @@ fn handle_get_site_error(err: GetSiteError) -> HttpResponse {
     }
 }
 
-fn handle_failed_to_add_route(err: site::AddRouteError) -> HttpResponse {
+fn handle_failed_to_update_route(err: site::UpdateRouteError) -> HttpResponse {
     match err {
-        site::AddRouteError::QuotaMaxSize() => {
+        site::UpdateRouteError::RouteNotFound() => {
+            HttpResponse::NotFound()
+                .json(http::Error::from_str("Route not found"))
+        },
+
+        site::UpdateRouteError::QuotaMaxSize() => {
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("Max total size reached"))
         },
 
-        site::AddRouteError::QuotaMaxRoutes() => {
-            HttpResponse::BadRequest()
-                .json(http::Error::from_str("Max routes reached"))
-        },
-
-        site::AddRouteError::WriteFileError(err) => {
+        site::UpdateRouteError::WriteFileError(err) => {
             println!("Failed to write file: {}", err);
             HttpResponse::InternalServerError()
                 .json(http::Error::from_str("Failed to write file"))

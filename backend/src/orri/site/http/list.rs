@@ -116,7 +116,8 @@ fn build_body(site: &Site, base_url: &str) -> Vec<Html> {
                         html::th(&[], &[html::text("Route")]),
                         html::th(&[], &[html::text("Mime")]),
                         html::th(&[], &[html::text("Size")]),
-                        html::th(&[], &[html::text("Delete")]),
+                        html::th(&[], &[]),
+                        html::th(&[], &[]),
                     ]),
                 ]),
                 html::tbody(&[], &rows),
@@ -134,6 +135,7 @@ fn build_body(site: &Site, base_url: &str) -> Vec<Html> {
 
 fn table_row(site: &Site, route: &UrlPath, route_info: &RouteInfo, base_url: &str, now: SystemTime) -> Html {
     let route_url = format!("{}{}", base_url, route);
+    let edit_url = Route::EditRoute(site.domain.to_string(), Some(route.to_string())).to_string();
     let age_in_seconds = util::unix_timestamp(now) - route_info.file_info.timestamp;
     let recently_added = site.routes.len() > 1 && age_in_seconds < 5;
 
@@ -143,6 +145,9 @@ fn table_row(site: &Site, route: &UrlPath, route_info: &RouteInfo, base_url: &st
         ]),
         html::td(&[], &[html::text(&route_info.file_info.mime)]),
         html::td(&[], &[html::text(&route_info.file_info.size.to_string())]),
+        html::td(&[], &[
+            html::a(&[attrs::href(&edit_url)], &[html::text("Edit")]),
+        ]),
         html::td(&[], &[
             html::a(&[attrs::href("#")], &[html::text("Delete")]),
         ]),

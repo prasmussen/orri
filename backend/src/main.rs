@@ -41,10 +41,12 @@ fn app_domain_routes(config: &mut web::ServiceConfig, state: &AppState, host: &'
             .route(&Route::NewSite().to_string(), web::get().to(site_http::new_site::handler))
             .route(&Route::ManageSite("{domain}".to_string()).to_string(), web::get().to(site_http::list::handler))
             .route(&Route::AddRoute("{domain}".to_string()).to_string(), web::get().to(site_http::add_route::handler))
+            .route(&Route::EditRoute("{domain}".to_string(), None).to_string(), web::get().to(site_http::edit_route::handler))
 
             // Json routes
             .route(&Route::NewSiteJson().to_string(), web::post().to(site_api::new_site::handler))
             .route(&Route::AddRouteJson().to_string(), web::post().to(site_api::add_route::handler))
+            .route(&Route::EditRouteJson().to_string(), web::put().to(site_api::edit_route::handler))
 
             // Static files
             .service(Files::new("/static", state.config.server.static_path()))
