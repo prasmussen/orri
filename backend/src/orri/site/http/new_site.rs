@@ -37,12 +37,17 @@ fn build_page(server_config: &ServerConfig) -> Page {
 
 
 fn build_body(server_config: &ServerConfig) -> Vec<Html> {
-    let new_site_url = Route::NewSiteJson().to_string();
+    let new_site_route = Route::NewSiteJson();
 
     vec![
         html::div(&[attrs::id("main-content"), attrs::class("container")], &[
             page::error_alert(),
-            html::form(&[attrs::id("form"), attrs::attribute_trusted_name("data-api-url", &new_site_url)], &[
+            html::form(
+                &[
+                    attrs::id("form"),
+                    attrs::attribute_trusted_name("data-api-method", &new_site_route.request_method().to_string()),
+                    attrs::attribute_trusted_name("data-api-url", &new_site_route.to_string())
+                ], &[
                 html::div(&[attrs::class("row")], &[
                     html::div(&[attrs::class("column")], &[
                         html::label(&[], &[

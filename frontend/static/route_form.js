@@ -16,8 +16,8 @@ orri.form.onSubmit(elements.form, elements.submitButton, (formData, formReady) =
         };
     }
 
-    function addRoute(data) {
-        return orri.api.post(elements.form.dataset.apiUrl, data)
+    function updateRoute(data) {
+        return orri.api.request(elements.form.dataset.apiMethod, elements.form.dataset.apiUrl, data)
             .then(orri.api.rejectErrors)
             .then(res => res.json());
     }
@@ -32,7 +32,7 @@ orri.form.onSubmit(elements.form, elements.submitButton, (formData, formReady) =
 
     orri.file.onLoad(elements.file)
         .then(prepareData)
-        .then(addRoute)
+        .then(updateRoute)
         .then(redirect)
         .catch(handleError)
         .catch(handleError)

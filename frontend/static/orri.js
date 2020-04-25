@@ -75,12 +75,14 @@ function File() {
 }
 
 function Api() {
-    function post(url, data) {
-        return request(url, "POST", data);
-    }
-
-    function put(url, data) {
-        return request(url, "PUT", data);
+    function request(method, url, data) {
+        return fetch(url, {
+            method: method,
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data)
+        });
     }
 
     function rejectErrors(res) {
@@ -91,19 +93,8 @@ function Api() {
         return Promise.reject(res);
     }
 
-    function request(url, method, data) {
-        return fetch(url, {
-            method: method,
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data)
-        });
-    }
-
     return {
-        post: post,
-        put: put,
+        request: request,
         rejectErrors: rejectErrors,
     };
 }

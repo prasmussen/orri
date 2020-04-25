@@ -1,4 +1,5 @@
 use std::fmt;
+use actix_web::http::Method;
 
 
 pub enum Route {
@@ -15,6 +16,35 @@ pub enum Route {
     DeleteRouteJson(),
 }
 
+impl Route {
+    pub fn request_method(&self) -> Method {
+        match self {
+            Route::NewSite() =>
+                Method::GET,
+
+            Route::ManageSite(_) =>
+                Method::GET,
+
+            Route::AddRoute(_) =>
+                Method::GET,
+
+            Route::EditRoute(_, _) =>
+                Method::GET,
+
+            Route::NewSiteJson() =>
+                Method::POST,
+
+            Route::AddRouteJson() =>
+                Method::POST,
+
+            Route::EditRouteJson() =>
+                Method::PUT,
+
+            Route::DeleteRouteJson() =>
+                Method::DELETE,
+        }
+    }
+}
 
 impl fmt::Display for Route {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

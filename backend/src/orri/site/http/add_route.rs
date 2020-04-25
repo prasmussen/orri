@@ -104,12 +104,17 @@ fn build_page(site: &Site, client_has_key: bool) -> Page {
 
 
 fn build_body(site: &Site, client_has_key: bool) -> Vec<Html> {
-    let add_route_url = Route::AddRouteJson().to_string();
+    let add_route = Route::AddRouteJson();
 
     vec![
         html::div(&[attrs::class("container")], &[
             page::error_alert(),
-            html::form(&[attrs::id("form"), attrs::attribute_trusted_name("data-api-url", &add_route_url)], &[
+            html::form(
+                &[
+                    attrs::id("form"),
+                    attrs::attribute_trusted_name("data-api-method", &add_route.request_method().to_string()),
+                    attrs::attribute_trusted_name("data-api-url", &add_route.to_string())
+                ], &[
                 html::div(&[attrs::class("row")], &[
                     html::div(&[attrs::class("column")], &[
                         html::label(&[], &[
@@ -172,6 +177,6 @@ fn build_body(site: &Site, client_has_key: bool) -> Vec<Html> {
             ]),
         ]),
         html::script(&[attrs::src("/static/orri.js")], &[]),
-        html::script(&[attrs::src("/static/add_route.js")], &[]),
+        html::script(&[attrs::src("/static/route_form.js")], &[]),
     ]
 }
