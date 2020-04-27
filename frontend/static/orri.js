@@ -1,5 +1,6 @@
 const orri = {
     form: Form(),
+    button: Button(),
     file: File(),
     api: Api(),
     crypto: Crypto(),
@@ -37,6 +38,58 @@ function Form() {
 
     return {
         onSubmit: onSubmit,
+    };
+}
+
+function Button() {
+
+    function prepareFieldName(name) {
+        const nameWithoutPrefix = name.replace(/^apiBody/, "");
+
+        return [
+            nameWithoutPrefix.charAt(0).toLowerCase(),
+            nameWithoutPrefix.slice(1),
+        ].join("");
+    }
+
+    function getBodyData(button) {
+        const buttonData = Object.assign({}, button.dataset);
+        const result = {};
+
+        for (let [key, value] of Object.entries(buttonData)) {
+            if (!key.startsWith("apiBody")) {
+                continue
+            }
+
+            const fieldName = prepareFieldName(key);
+
+            if (fieldName.length === 0) {
+                continue;
+            }
+
+
+            result[fieldName] = value;
+        }
+
+        return result;
+    }
+
+    function onClick(button, callback) {
+        button.addEventListener('click', () => {
+            const data = getBodyData(button);
+
+            if (!button.disabled) {
+                button.disabled = true;
+
+                callback(data, () => {
+                    button.disabled = false;
+                });
+            }
+        });
+    }
+
+    return {
+        onClick: onClick,
     };
 }
 

@@ -56,6 +56,10 @@ fn app_domain_routes(config: &mut web::ServiceConfig, state: &AppState, host: &'
                 &Route::EditRouteJson().to_string(),
                 web::method(Route::EditRouteJson().request_method()).to(site_api::edit_route::handler)
             )
+            .route(
+                &Route::DeleteSiteJson().to_string(),
+                web::method(Route::DeleteSiteJson().request_method()).to(site_api::remove_site::handler)
+            )
 
             // Static files
             .service(Files::new("/static", state.config.server.static_path()))

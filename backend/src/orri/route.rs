@@ -14,6 +14,7 @@ pub enum Route {
     AddRouteJson(),
     EditRouteJson(),
     DeleteRouteJson(),
+    DeleteSiteJson(),
 }
 
 impl Route {
@@ -41,6 +42,9 @@ impl Route {
                 Method::PUT,
 
             Route::DeleteRouteJson() =>
+                Method::DELETE,
+
+            Route::DeleteSiteJson() =>
                 Method::DELETE,
         }
     }
@@ -78,6 +82,9 @@ impl fmt::Display for Route {
 
             Route::DeleteRouteJson() =>
                 write!(f, "/json/sites/delete-route"),
+
+            Route::DeleteSiteJson() =>
+                write!(f, "/json/sites"),
         }
     }
 }

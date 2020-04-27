@@ -46,6 +46,10 @@ impl SessionData {
         Ok(())
     }
 
+    pub fn remove_site(&mut self, domain: &Domain) {
+        self.sites.remove(domain);
+    }
+
     pub fn get_site_key(&self, domain: &Domain) -> Option<String> {
         self.sites.get(domain)
             .map(|s| s.to_string())

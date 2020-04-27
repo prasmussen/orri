@@ -175,6 +175,12 @@ impl SiteRoot {
     pub fn prepare_directories(&self) -> Result<(), io::Error> {
         fs::create_dir_all(self.data_path())
     }
+
+    pub fn remove(&self) -> Result<(), io::Error> {
+        fs::remove_dir_all(&self.root)?;
+
+        Ok(())
+    }
 }
 
 
