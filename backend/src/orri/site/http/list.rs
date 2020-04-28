@@ -111,36 +111,55 @@ fn build_body(site: &Site, base_url: &str) -> Vec<Html> {
 
     vec![
         html::div(&[attrs::class("container"), attrs::id("content")], &[
-            page::error_alert(),
-            html::table(&[], &[
-                html::thead(&[], &[
-                    html::tr(&[], &[
-                        html::th(&[], &[html::text("Route")]),
-                        html::th(&[], &[html::text("Mime")]),
-                        html::th(&[], &[html::text("Size")]),
-                        html::th(&[], &[]),
+            html::div(&[attrs::class("row")], &[
+                html::div(&[attrs::class("column")], &[
+                    page::error_alert(),
+                ]),
+            ]),
+            html::div(&[attrs::class("row")], &[
+                html::div(&[attrs::class("column")], &[
+                    html::table(&[], &[
+                        html::thead(&[], &[
+                            html::tr(&[], &[
+                                html::th(&[], &[html::text("Route")]),
+                                html::th(&[], &[html::text("Mime")]),
+                                html::th(&[], &[html::text("Size")]),
+                                html::th(&[], &[]),
+                            ]),
+                        ]),
+                        html::tbody(&[], &rows),
                     ]),
                 ]),
-                html::tbody(&[], &rows),
             ]),
-            html::a(
-                &[
-                    attrs::href(&add_route_route.to_string()),
-                    attrs::class("button"),
-                ],
-                &[html::text("Add route")]
-            ),
-            html::button(
-                &[
-                    attrs::id("remove-site"),
-                    attrs::type_("button"),
-                    attrs::class("button-outline"),
-                    attrs::attribute_trusted_name("data-api-method", &delete_site_route.request_method().to_string()),
-                    attrs::attribute_trusted_name("data-api-url", &delete_site_route.to_string()),
-                    attrs::attribute_trusted_name("data-api-body-domain", &site.domain.to_string()),
-                ],
-                &[html::text("Remove site")]
-            ),
+            html::div(&[attrs::class("row")], &[
+                html::div(&[attrs::class("column")], &[
+                    html::a(
+                        &[
+                            attrs::href(&add_route_route.to_string()),
+                            attrs::class("button"),
+                        ],
+                        &[html::text("Add route")]
+                    ),
+                ]),
+                html::div(&[attrs::class("column")], &[
+                    html::button(
+                        &[
+                            attrs::id("remove-site"),
+                            attrs::type_("button"),
+                            attrs::class("button-outline"),
+                            attrs::attribute_trusted_name("data-api-method", &delete_site_route.request_method().to_string()),
+                            attrs::attribute_trusted_name("data-api-url", &delete_site_route.to_string()),
+                            attrs::attribute_trusted_name("data-api-body-domain", &site.domain.to_string()),
+                        ],
+                        &[html::text("Remove site")]
+                    ),
+                ]),
+                html::div(&[attrs::class("column")], &[]),
+                html::div(&[attrs::class("column")], &[]),
+                html::div(&[attrs::class("column")], &[]),
+                html::div(&[attrs::class("column")], &[]),
+                html::div(&[attrs::class("column")], &[]),
+            ]),
         ]),
         html::script(&[attrs::src("/static/orri.js")], &[]),
         html::script(&[attrs::src("/static/manage_site.js")], &[]),
