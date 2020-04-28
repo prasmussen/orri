@@ -1,28 +1,32 @@
-const elements = {
-    removeSiteButton: orri.page.getElement("#remove-site"),
-    alertError: orri.page.getElement("#alert-error"),
-};
+(function() {
 
-orri.button.onClick(elements.removeSiteButton, (buttonBodyData, buttonReady) => {
+    const elements = {
+        removeSiteButton: orri.page.getElement("#remove-site"),
+        alertError: orri.page.getElement("#alert-error"),
+    };
 
-    function redirect() {
-        // TODO: redirect to /sites
-        window.location.href = "/";
-    }
+    orri.button.onClick(elements.removeSiteButton, (buttonBodyData, buttonReady) => {
 
-    function handleError(err) {
-        orri.page.showError(elements.alertError, err);
-    }
+        function redirect() {
+            // TODO: redirect to /sites
+            window.location.href = "/";
+        }
 
-    if (!window.confirm("Do you really want to delete this site?")) {
-        buttonReady();
-        return;
-    }
+        function handleError(err) {
+            orri.page.showError(elements.alertError, err);
+        }
 
-    return orri.api.request(elements.removeSiteButton.dataset.apiMethod, elements.removeSiteButton.dataset.apiUrl, buttonBodyData)
-        .then(orri.api.rejectErrors)
-        .then(redirect)
-        .catch(handleError)
-        .catch(handleError)
-        .finally(buttonReady);
-});
+        if (!window.confirm("Do you really want to delete this site?")) {
+            buttonReady();
+            return;
+        }
+
+        return orri.api.request(elements.removeSiteButton.dataset.apiMethod, elements.removeSiteButton.dataset.apiUrl, buttonBodyData)
+            .then(orri.api.rejectErrors)
+            .then(redirect)
+            .catch(handleError)
+            .catch(handleError)
+            .finally(buttonReady);
+    });
+
+})();
