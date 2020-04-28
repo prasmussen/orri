@@ -49,7 +49,7 @@ enum Error {
 pub async fn handler(state: web::Data<AppState>, session: Session, request_data: web::Json<Request>) -> HttpResponse {
 
     handle(&state, session, &request_data)
-        .map(handle_site)
+        .map(prepare_response)
         .unwrap_or_else(handle_error)
 }
 
@@ -114,7 +114,7 @@ fn get_provided_key(request_data: &Request, session_data: &SessionData, domain: 
 }
 
 
-fn handle_site(site: Site) -> HttpResponse {
+fn prepare_response(site: Site) -> HttpResponse {
     let manage_route = Route::ManageSite(site.domain.to_string());
 
     HttpResponse::Ok().json(Response{

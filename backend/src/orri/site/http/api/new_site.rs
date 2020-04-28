@@ -42,7 +42,7 @@ enum Error {
 pub async fn handler(state: web::Data<AppState>, session: Session, request_data: web::Json<Request>) -> HttpResponse {
 
     handle(&state, &session, &request_data)
-        .map(|site| handle_site(&state.config, &request_data, site))
+        .map(|site| prepare_response(&state.config, site))
         .unwrap_or_else(handle_error)
 }
 
@@ -79,7 +79,7 @@ fn handle(state: &AppState, session: &Session, request_data: &Request) -> Result
     Ok(site)
 }
 
-fn handle_site(config: &Config, request_data: &Request, site: Site) -> HttpResponse {
+fn prepare_response(config: &Config, site: Site) -> HttpResponse {
     let manage_route = Route::ManageSite(site.domain.to_string());
     let site_url = config.server.sites_base_url(&site.domain.to_string());
 

@@ -21,7 +21,7 @@ enum Error {
 pub async fn handler(req: HttpRequest, state: web::Data<AppState>) -> HttpResponse {
 
     handle(&req, &state)
-        .map(handle_file)
+        .map(prepare_response)
         .unwrap_or_else(handle_error)
 }
 
@@ -48,7 +48,7 @@ fn handle(req: &HttpRequest, state: &AppState) -> Result<File, Error> {
         .map_err(Error::FailedToReadRouteData)
 }
 
-fn handle_file(file: site::File) -> HttpResponse {
+fn prepare_response(file: site::File) -> HttpResponse {
     HttpResponse::Ok()
         .set_header(header::ETAG, file.metadata.hash)
         .set_header(header::CACHE_CONTROL, "no-cache")

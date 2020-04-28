@@ -25,7 +25,7 @@ enum Error {
 
 pub async fn handler(state: web::Data<AppState>, session: Session, domain: web::Path<String>) -> HttpResponse {
     handle(&state, &domain)
-        .map(|site| handle_site(site, &session, &state.config.encryption_key))
+        .map(|site| prepare_response(site, &session, &state.config.encryption_key))
         .unwrap_or_else(handle_error)
 }
 
@@ -42,7 +42,7 @@ fn handle(state: &AppState, domain_str: &str) -> Result<Site, Error> {
 }
 
 
-fn handle_site(site: Site, session: &Session, encryption_key: &EncryptionKey) -> HttpResponse {
+fn prepare_response(site: Site, session: &Session, encryption_key: &EncryptionKey) -> HttpResponse {
 
     let client_has_key = SessionData::from_session(session)
         .and_then(|session_data| session_data.get_site_key(&site.domain))
@@ -59,6 +59,7 @@ fn handle_site(site: Site, session: &Session, encryption_key: &EncryptionKey) ->
 }
 
 fn render(site: &Site, client_has_key: bool) -> String {
+    // TODO: remove timing stuff (find all occurences)
     let now = Instant::now();
     let page = build_page(site, client_has_key);
     let html_string = page.to_string();

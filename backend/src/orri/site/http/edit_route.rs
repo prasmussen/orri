@@ -52,7 +52,7 @@ pub async fn handler(state: web::Data<AppState>, session: Session, domain: web::
     };
 
     handle(&state, &request_data)
-        .map(|view_data| handle_view_data(view_data, &session, &state.config.encryption_key))
+        .map(|view_data| prepare_response(view_data, &session, &state.config.encryption_key))
         .unwrap_or_else(handle_error)
 }
 
@@ -78,7 +78,7 @@ fn handle(state: &AppState, request_data: &RequestData) -> Result<ViewData, Erro
 }
 
 
-fn handle_view_data(view_data: ViewData, session: &Session, encryption_key: &EncryptionKey) -> HttpResponse {
+fn prepare_response(view_data: ViewData, session: &Session, encryption_key: &EncryptionKey) -> HttpResponse {
 
     let client_has_key = SessionData::from_session(session)
         .and_then(|session_data| session_data.get_site_key(&view_data.site.domain))

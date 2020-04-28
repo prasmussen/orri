@@ -28,7 +28,7 @@ pub async fn handler(state: web::Data<AppState>, domain: web::Path<String>) -> H
     let base_url = &state.config.server.sites_base_url(&domain);
 
     handle(&state, &domain)
-        .map(|site| handle_site(site, base_url))
+        .map(|site| prepare_response(site, base_url))
         .unwrap_or_else(handle_error)
 }
 
@@ -44,7 +44,7 @@ fn handle(state: &AppState, domain_str: &str) -> Result<Site, Error> {
 }
 
 
-fn handle_site(site: Site, base_url: &str) -> HttpResponse {
+fn prepare_response(site: Site, base_url: &str) -> HttpResponse {
     let html = render(&site, base_url);
 
     HttpResponse::Ok()
