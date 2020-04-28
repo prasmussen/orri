@@ -176,18 +176,20 @@ fn build_body(view_data: &ViewData, client_has_key: bool) -> Vec<Html> {
                         html::button(&[attrs::type_("submit"), attrs::id("submit-button")], &[html::text("Update route")]),
                     ]),
                     html::div(&[attrs::class("column")], &[
-                        html::button(
-                            &[
-                                attrs::id("remove-route"),
-                                attrs::type_("button"),
-                                attrs::class("button-outline"),
-                                attrs::attribute_trusted_name("data-api-method", &delete_route.request_method().to_string()),
-                                attrs::attribute_trusted_name("data-api-url", &delete_route.to_string()),
-                                attrs::attribute_trusted_name("data-api-body-domain", &view_data.site.domain.to_string()),
-                                attrs::attribute_trusted_name("data-api-body-path", &view_data.path.to_string()),
-                            ],
-                            &[html::text("Remove route")]
-                        ),
+                        html::conditional(view_data.path != UrlPath::root(),
+                            html::button(
+                                &[
+                                    attrs::id("remove-route"),
+                                    attrs::type_("button"),
+                                    attrs::class("button-outline"),
+                                    attrs::attribute_trusted_name("data-api-method", &delete_route.request_method().to_string()),
+                                    attrs::attribute_trusted_name("data-api-url", &delete_route.to_string()),
+                                    attrs::attribute_trusted_name("data-api-body-domain", &view_data.site.domain.to_string()),
+                                    attrs::attribute_trusted_name("data-api-body-path", &view_data.path.to_string()),
+                                ],
+                                &[html::text("Remove route")]
+                            ),
+                        )
                     ]),
                     html::div(&[attrs::class("column")], &[]),
                     html::div(&[attrs::class("column")], &[]),

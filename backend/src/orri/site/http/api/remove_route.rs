@@ -33,6 +33,7 @@ pub struct Response {
 enum Error {
     ParseDomainError(domain::Error),
     ParsePathError(url_path::Error),
+    CannotDeleteRoot(),
     NoKeyProvided(),
     VerifyKeyError(site_key::VerifyError),
     GetSiteError(GetSiteError),
@@ -53,6 +54,8 @@ fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<
 
     let path = UrlPath::from_str(&request_data.path)
         .map_err(Error::ParsePathError)?;
+
+    util::ensure(path != UrlPath::root(), Error::CannotDeleteRoot())?;
 
     let site_root = site::SiteRoot::new(&state.config.server.sites_root, domain);
 
@@ -109,6 +112,10 @@ fn handle_error(err: Error) -> HttpResponse {
 
         Error::ParsePathError(err) =>
             handle_parse_path_error(err),
+
+        Error::CannotDeleteRoot() =>
+            HttpResponse::BadRequest()
+                .json(http::Error::from_str("The root route cannot be deleted")),
 
         Error::GetSiteError(err) =>
             handle_get_site_error(err),
