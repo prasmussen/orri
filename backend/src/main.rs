@@ -73,8 +73,8 @@ fn app_domain_routes(config: &mut web::ServiceConfig, state: &AppState, host: &'
 fn sites_domain_routes(config: &mut web::ServiceConfig) {
     config.service(
         web::scope("/")
-            .route("", web::get().to(site_http::view::handler))
-            .route("{tail:.*}", web::get().to(site_http::view::handler))
+            .route("", web::get().to(site_http::view_site::handler))
+            .route("{tail:.*}", web::get().to(site_http::view_site::handler))
     );
 }
 
