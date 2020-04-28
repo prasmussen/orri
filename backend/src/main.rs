@@ -101,14 +101,14 @@ async fn main() -> Result<(), io::Error> {
             },
             site_key: site_key::Config{
                 min_length: 20,
-                max_length: 99,
+                max_length: 50,
                 hash_iterations: 1,
                 hash_memory_size: 4096,
             },
             site: site::Config{
                 quota_nano: site::QuotaLimits{
                     max_size: 1 * 1024 * 1024,
-                    max_routes: 10,
+                    max_routes: 100,
                     max_sites: 10,
                 },
             },
