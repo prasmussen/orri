@@ -57,6 +57,10 @@ fn app_domain_routes(config: &mut web::ServiceConfig, state: &AppState, host: &'
                 web::method(Route::EditRouteJson().request_method()).to(site_api::edit_route::handler)
             )
             .route(
+                &Route::DeleteRouteJson().to_string(),
+                web::method(Route::DeleteRouteJson().request_method()).to(site_api::remove_route::handler)
+            )
+            .route(
                 &Route::DeleteSiteJson().to_string(),
                 web::method(Route::DeleteSiteJson().request_method()).to(site_api::remove_site::handler)
             )

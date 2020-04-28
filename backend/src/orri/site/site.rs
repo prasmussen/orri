@@ -76,6 +76,12 @@ impl Site {
         Ok(self)
     }
 
+    pub fn remove_route(&mut self, path: UrlPath) -> &Site {
+        self.routes.remove(&path);
+
+        self
+    }
+
     pub fn size(&self) -> usize {
         self.routes
             .iter()
