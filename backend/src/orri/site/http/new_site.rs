@@ -69,7 +69,7 @@ fn build_body(server_config: &ServerConfig) -> Vec<Html> {
                                 attrs::type_("text"),
                                 attrs::name("subdomain"),
                                 attrs::placeholder("i.e. my-cool-site"),
-                                attrs::title("Please provide a valid subdomain, at least 3 characters"),
+                                attrs::title("Please provide a valid subdomain, at least 4 characters"),
                                 attrs::pattern("[a-z0-9-]{4,}"),
                                 attrs::required(),
                             ]),

@@ -6,13 +6,13 @@ use crate::orri::util;
 use crate::orri::domain::Domain;
 use crate::orri::site::{self, Site};
 use crate::orri::encryption_key::EncryptionKey;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use actix_session::Session;
 
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct SessionData {
-    sites: HashMap<Domain, String>
+    sites: BTreeMap<Domain, String>
 }
 
 const SESSION_KEY_NAME: &'static str = "data";
@@ -22,7 +22,7 @@ const MAX_COOKIE_SIZE: usize = 4096;
 impl SessionData {
     pub fn new() -> SessionData {
         SessionData{
-            sites: HashMap::new(),
+            sites: BTreeMap::new(),
         }
     }
 
@@ -33,6 +33,10 @@ impl SessionData {
 
     pub fn update_session(&self, session: &Session) {
         session.set(SESSION_KEY_NAME, self);
+    }
+
+    pub fn list_sites(&self) -> Vec<&Domain> {
+        self.sites.keys().collect()
     }
 
     pub fn add_site(&mut self, site: &Site, site_config: &site::Config, key: &str) -> Result<(), Error> {

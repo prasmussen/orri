@@ -32,6 +32,7 @@ fn build_body() -> Vec<Html> {
     vec![
         html::div(&[attrs::class("container"), attrs::id("content")], &[
             html::a(&[attrs::href("/new"), attrs::class("button")], &[html::text("New site")]),
+            html::a(&[attrs::href("/sites"), attrs::class("button button-outline")], &[html::text("Manage site")]),
         ]),
     ]
 }
