@@ -19,6 +19,9 @@ pub struct Site {
     pub key: SiteKey,
     pub quota: Quota,
     pub routes: BTreeMap<UrlPath, RouteInfo>,
+
+    #[serde(skip)]
+    unwritten_files: Vec<File>,
 }
 
 #[derive(Clone)]
@@ -30,13 +33,17 @@ pub struct Config {
 pub enum AddRouteError {
     QuotaMaxSize(),
     QuotaMaxRoutes(),
-    WriteFileError(file::WriteError),
 }
 
 pub enum UpdateRouteError {
     RouteNotFound(),
     QuotaMaxSize(),
+}
+
+pub enum PersistSiteError {
+    FailedToCreateDomainDir(io::Error),
     WriteFileError(file::WriteError),
+    WriteSiteJsonError(file::WriteJsonError),
 }
 
 
@@ -47,13 +54,14 @@ impl Site {
         util::ensure(self.size() + file_info.size < limits.max_size, AddRouteError::QuotaMaxSize())?;
         util::ensure(self.routes.len() < limits.max_routes, AddRouteError::QuotaMaxRoutes())?;
 
-        file::write(&site_root.data_file_path(&file_info.hash), file_data)
-            .map_err(AddRouteError::WriteFileError)?;
+        self.unwritten_files.push(File{
+            metadata: file_info.clone(),
+            data: file_data.to_vec(),
+        });
 
         self.routes.insert(path, RouteInfo{
             file_info: file_info,
         });
-
 
         Ok(self)
     }
@@ -66,8 +74,10 @@ impl Site {
 
         util::ensure(self.size() - old_route.file_info.size + file_info.size < limits.max_size, UpdateRouteError::QuotaMaxSize())?;
 
-        file::write(&site_root.data_file_path(&file_info.hash), file_data)
-            .map_err(UpdateRouteError::WriteFileError)?;
+        self.unwritten_files.push(File{
+            metadata: file_info.clone(),
+            data: file_data.to_vec(),
+        });
 
         self.routes.insert(path, RouteInfo{
             file_info: file_info,
@@ -89,8 +99,19 @@ impl Site {
     }
 
     // TODO: remove all files hashes that does not exist in routes after json is written
-    pub fn persist(&self, site_root: &SiteRoot) -> Result<&Site, file::WriteJsonError> {
-        file::write_json(&site_root.site_json_path(), self)?;
+    pub fn persist(&self, site_root: &SiteRoot) -> Result<&Site, PersistSiteError> {
+        site_root.prepare_directories()
+            .map_err(PersistSiteError::FailedToCreateDomainDir)?;
+
+        self.unwritten_files
+            .iter()
+            .try_for_each(|file|
+                file::write(&site_root.data_file_path(&file.metadata.hash), &file.data)
+            )
+            .map_err(PersistSiteError::WriteFileError)?;
+
+        file::write_json(&site_root.site_json_path(), self)
+            .map_err(PersistSiteError::WriteSiteJsonError)?;
 
         Ok(self)
     }
@@ -103,20 +124,15 @@ pub struct RouteInfo {
 
 
 
-
 pub enum CreateSiteError {
     SiteAlreadyExist(),
-    FailedToCreateDomainDir(io::Error),
     FailedToAddRoute(AddRouteError),
-    FailedToSaveSiteJson(file::WriteJsonError),
 }
 
 
 // TODO: Two users can create the same site at the same time
-pub fn create(config: &Config, site_root: SiteRoot, key: SiteKey, file_info: FileInfo, file_data: &[u8]) -> Result<Site, CreateSiteError> {
-    site_root.prepare_directories()
-        .map_err(CreateSiteError::FailedToCreateDomainDir)?;
-
+pub fn create(config: &Config, site_root: &SiteRoot, key: SiteKey, file_info: FileInfo, file_data: &[u8]) -> Result<Site, CreateSiteError> {
+    // TODO: move to persist to prevent race-condition
     util::ensure(site_root.site_json_path().exists() == false, CreateSiteError::SiteAlreadyExist())?;
 
     let mut site = Site{
@@ -124,13 +140,11 @@ pub fn create(config: &Config, site_root: SiteRoot, key: SiteKey, file_info: Fil
         key: key,
         quota: Quota::Nano,
         routes: BTreeMap::new(),
+        unwritten_files: vec![],
     };
 
     site.add_route(&config, &site_root, UrlPath::root(), file_info, file_data)
         .map_err(CreateSiteError::FailedToAddRoute)?;
-
-    site.persist(&site_root)
-        .map_err(CreateSiteError::FailedToSaveSiteJson)?;
 
     Ok(site)
 }
@@ -213,6 +227,7 @@ impl FileInfo {
 }
 
 
+#[derive(Clone)]
 pub struct File {
     pub metadata: FileInfo,
     pub data: Vec<u8>,

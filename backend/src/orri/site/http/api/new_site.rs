@@ -36,6 +36,7 @@ enum Error {
     ParseDomainError(domain::Error),
     SiteKeyError(site_key::Error),
     CreateSiteError(CreateSiteError),
+    PersistSiteError(site::PersistSiteError),
     SessionDataError(session_data::Error),
 }
 
@@ -64,8 +65,11 @@ fn handle(state: &AppState, session: &Session, request_data: &Request) -> Result
     let site_key = site_key::from_str(&state.config.site_key, &request_data.key, &state.config.encryption_key)
         .map_err(Error::SiteKeyError)?;
 
-    let site = site::create(&state.config.site, site_root, site_key, file_info, &file_data)
+    let site = site::create(&state.config.site, &site_root, site_key, file_info, &file_data)
         .map_err(Error::CreateSiteError)?;
+
+    site.persist(&site_root)
+        .map_err(Error::PersistSiteError)?;
 
     let mut session_data = SessionData::from_session(&session)
         .unwrap_or(SessionData::new());
@@ -109,6 +113,9 @@ fn handle_error(err: Error) -> HttpResponse {
 
         Error::CreateSiteError(err) =>
             handle_create_site_error(err),
+
+        Error::PersistSiteError(err) =>
+            handle_persist_site_error(err),
 
         Error::SessionDataError(err) =>
             handle_session_data_error(err),
@@ -177,21 +184,9 @@ fn handle_create_site_error(err: CreateSiteError) -> HttpResponse {
                 .json(http::Error::from_str("Site already exist"))
         },
 
-        CreateSiteError::FailedToCreateDomainDir(err) => {
-            println!("Failed to create domain: {}", err);
-            HttpResponse::InternalServerError()
-                .json(http::Error::from_str("Failed to create domain dir"))
-        },
-
         CreateSiteError::FailedToAddRoute(err) => {
             handle_failed_to_add_route(err)
         },
-
-        CreateSiteError::FailedToSaveSiteJson(err) => {
-            println!("Failed to save config: {}", err);
-            HttpResponse::InternalServerError()
-                .json(http::Error::from_str("Failed to save config"))
-        }
     }
 }
 
@@ -207,12 +202,6 @@ fn handle_failed_to_add_route(err: site::AddRouteError) -> HttpResponse {
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("Max routes reached"))
         },
-
-        site::AddRouteError::WriteFileError(err) => {
-            println!("Failed to write file: {}", err);
-            HttpResponse::InternalServerError()
-                .json(http::Error::from_str("Failed to write file"))
-        },
     }
 }
 
@@ -227,6 +216,28 @@ fn handle_session_data_error(err: session_data::Error) -> HttpResponse {
         session_data::Error::SessionDataTooLarge() => {
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("The session cookie is not able to store more sites"))
+        },
+    }
+}
+
+fn handle_persist_site_error(err: site::PersistSiteError) -> HttpResponse {
+    match err {
+        site::PersistSiteError::FailedToCreateDomainDir(err) => {
+            println!("Failed to create domain: {}", err);
+            HttpResponse::InternalServerError()
+                .json(http::Error::from_str("Failed to persist site"))
+        },
+
+        site::PersistSiteError::WriteFileError(err) => {
+            println!("Failed to write file: {}", err);
+            HttpResponse::InternalServerError()
+                .json(http::Error::from_str("Failed to persist site"))
+        },
+
+        site::PersistSiteError::WriteSiteJsonError(err) => {
+            println!("Failed to write site json: {}", err);
+            HttpResponse::InternalServerError()
+                .json(http::Error::from_str("Failed to persist site"))
         },
     }
 }

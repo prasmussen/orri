@@ -42,7 +42,7 @@ enum Error {
     GetSiteError(GetSiteError),
     InvalidKey(),
     FailedToUpdateRoute(site::UpdateRouteError),
-    PersistSiteError(file::WriteJsonError),
+    PersistSiteError(site::PersistSiteError),
 }
 
 pub async fn handler(state: web::Data<AppState>, session: Session, request_data: web::Json<Request>) -> HttpResponse {
@@ -156,9 +156,7 @@ fn handle_error(err: Error) -> HttpResponse {
         },
 
         Error::PersistSiteError(err) => {
-            println!("Failed to persist site: {}", err);
-            HttpResponse::InternalServerError()
-                .json(http::Error::from_str("Failed to persist site"))
+            handle_persist_site_error(err)
         },
     }
 }
@@ -243,11 +241,27 @@ fn handle_failed_to_update_route(err: site::UpdateRouteError) -> HttpResponse {
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("Max total size reached"))
         },
+    }
+}
 
-        site::UpdateRouteError::WriteFileError(err) => {
+fn handle_persist_site_error(err: site::PersistSiteError) -> HttpResponse {
+    match err {
+        site::PersistSiteError::FailedToCreateDomainDir(err) => {
+            println!("Failed to create domain: {}", err);
+            HttpResponse::InternalServerError()
+                .json(http::Error::from_str("Failed to persist site"))
+        },
+
+        site::PersistSiteError::WriteFileError(err) => {
             println!("Failed to write file: {}", err);
             HttpResponse::InternalServerError()
-                .json(http::Error::from_str("Failed to write file"))
+                .json(http::Error::from_str("Failed to persist site"))
+        },
+
+        site::PersistSiteError::WriteSiteJsonError(err) => {
+            println!("Failed to write site json: {}", err);
+            HttpResponse::InternalServerError()
+                .json(http::Error::from_str("Failed to persist site"))
         },
     }
 }
