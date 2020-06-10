@@ -162,6 +162,10 @@ pub fn p(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("p", attributes, children)
 }
 
+pub fn span(attributes: &[Attribute], children: &[Html]) -> Html {
+    node_trusted_name("span", attributes, children)
+}
+
 pub fn a(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("a", attributes, children)
 }

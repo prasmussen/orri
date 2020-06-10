@@ -6,6 +6,18 @@
     margin-right: 20px;
 }
 
+label.form-label {
+    padding-bottom: 0px;
+}
+
+p.form-input-hint {
+    margin-bottom: 0px;
+}
+
+.form-group .form-input:not(:placeholder-shown):invalid+.form-input-hint {
+    color: #bcc3ce;
+}
+
 .margin-top-20 {
     margin-top: 20px;
 }

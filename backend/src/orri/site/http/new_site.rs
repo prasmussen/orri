@@ -71,9 +71,12 @@ fn build_body(server_config: &ServerConfig) -> Vec<Html> {
                                     attrs::type_("text"),
                                     attrs::name("subdomain"),
                                     attrs::placeholder("i.e. my-cool-site"),
-                                    attrs::title("Please provide a valid subdomain, at least 4 characters"),
-                                    attrs::pattern("[a-z0-9-]{4,}"),
+                                    attrs::title("Please provide a valid subdomain, at least 5 characters"),
+                                    attrs::pattern("[a-z0-9-]{5,}"),
                                     attrs::required(),
+                                ]),
+                                html::p(&[attrs::class("form-input-hint")], &[
+                                    html::text(&format!("Minimum 5 characters. The full domain of your site will be <subdomain>.{}", &server_config.sites_domain)),
                                 ]),
                             ]),
                         ]),
@@ -87,7 +90,7 @@ fn build_body(server_config: &ServerConfig) -> Vec<Html> {
                                     attrs::required(),
                                 ]),
                                 html::p(&[attrs::class("form-input-hint")], &[
-                                    html::text("Upload a html file that will be your site front page."),
+                                    html::text("The selected file will be the front page of your site."),
                                     html::text(" "),
                                     html::a(
                                         &[attrs::href("https://glot.io/snippets/fo1aqwk3ec/raw/index.html"), attrs::target("_blank")],
@@ -96,7 +99,7 @@ fn build_body(server_config: &ServerConfig) -> Vec<Html> {
                                 ]),
                             ]),
                         ]),
-                        html::div(&[attrs::class("form-group")], &[
+                        html::div(&[attrs::class("form-group margin-top-20")], &[
                             html::button(
                                 &[
                                     attrs::type_("submit"),

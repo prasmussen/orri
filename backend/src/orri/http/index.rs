@@ -41,9 +41,9 @@ fn build_body() -> Vec<Html> {
                     html::div(&[attrs::class("hero-body")], &[
                         html::div(&[attrs::class("column col-12")], &[
                             html::h1(&[], &[html::text("Get started")]),
-                            html::p(&[], &[html::text("Publish a new site or manage an existing site, no account required!")]),
-                            html::a(&[attrs::class("btn btn-large btn-primary"), attrs::href(&new_site_route.to_string())], &[html::text("NEW SITE")]),
-                            html::a(&[attrs::class("btn btn-large"), attrs::href(&list_sites_route.to_string())], &[html::text("MANAGE SITE")]),
+                            html::p(&[], &[html::text("Publish your site in seconds, no account required!")]),
+                            html::a(&[attrs::class("btn btn-large btn-primary"), attrs::href(&new_site_route.to_string())], &[html::text("New site")]),
+                            html::a(&[attrs::class("btn btn-large"), attrs::href(&list_sites_route.to_string())], &[html::text("Manage site")]),
                         ]),
                     ]),
                 ]),

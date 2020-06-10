@@ -143,6 +143,9 @@ fn build_body(site: &Site, client_has_key: bool) -> Vec<Html> {
                                     attrs::pattern("/.+"),
                                     attrs::required(),
                                 ]),
+                                html::p(&[attrs::class("form-input-hint")], &[
+                                    html::text("The route must start with a /"),
+                                ]),
                             ]),
                         ]),
                         html::conditional(client_has_key == false,
@@ -166,6 +169,9 @@ fn build_body(site: &Site, client_has_key: bool) -> Vec<Html> {
                                     attrs::class("form-input"),
                                     attrs::id("file"),
                                     attrs::required(),
+                                ]),
+                                html::p(&[attrs::class("form-input-hint")], &[
+                                    html::text("Most formats are supported, i.e. html, js, css, jpg."),
                                 ]),
                             ]),
                         ]),
