@@ -96,7 +96,7 @@ fn handle_get_site_error(err: GetSiteError) -> HttpResponse {
 fn build_page(site: &Site, client_has_key: bool) -> Page {
     Page{
         head: Head{
-            title: format!("orri.add_route(\"{}\")", &site.domain),
+            title: format!("Add route - {} - orri", &site.domain),
             elements: vec![],
         },
         body: build_body(site, client_has_key),
@@ -108,71 +108,76 @@ fn build_body(site: &Site, client_has_key: bool) -> Vec<Html> {
     let add_route = Route::AddRouteJson();
 
     vec![
+        page::navbar(),
         html::div(&[attrs::class("container")], &[
-            page::error_alert(),
-            html::form(
-                &[
-                    attrs::id("form"),
-                    attrs::attribute_trusted_name("data-api-method", &add_route.request_method().to_string()),
-                    attrs::attribute_trusted_name("data-api-url", &add_route.to_string())
-                ], &[
-                html::div(&[attrs::class("row")], &[
-                    html::div(&[attrs::class("column")], &[
-                        html::label(&[], &[
-                            html::div(&[], &[html::text("Domain")]),
-                            html::input(&[
-                                attrs::type_("text"),
-                                attrs::name("domain"),
-                                attrs::value(&site.domain.to_string()),
-                                attrs::readonly(),
-                            ]),
-                        ]),
-                    ]),
-                ]),
-                html::div(&[attrs::class("row")], &[
-                    html::div(&[attrs::class("column")], &[
-                        html::label(&[], &[
-                            html::div(&[], &[html::text("Route")]),
-                            html::input(&[
-                                attrs::type_("text"),
-                                attrs::name("path"),
-                                attrs::placeholder("i.e. /some-page or /some-styles.css"),
-                                attrs::title("The path to the file, it must start with a slash"),
-                                attrs::pattern("/.+"),
-                                attrs::required(),
-                            ]),
-                        ]),
-                    ]),
-                ]),
-                html::conditional(client_has_key == false,
-                    html::div(&[attrs::class("row")], &[
-                        html::div(&[attrs::class("column")], &[
-                            html::label(&[], &[
-                                html::div(&[], &[html::text("Site key")]),
+            html::div(&[attrs::class("columns")], &[
+                html::div(&[attrs::class("column col-6 col-mx-auto")], &[
+                    page::error_alert(),
+                    html::form(
+                        &[
+                            attrs::id("form"),
+                            attrs::attribute_trusted_name("data-api-method", &add_route.request_method().to_string()),
+                            attrs::attribute_trusted_name("data-api-url", &add_route.to_string())
+                        ], &[
+                        html::div(&[attrs::class("form-group")], &[
+                            html::label(&[attrs::class("form-label")], &[
+                                html::div(&[], &[html::text("Domain")]),
                                 html::input(&[
-                                    attrs::type_("password"),
-                                    attrs::name("key"),
+                                    attrs::type_("text"),
+                                    attrs::class("form-input"),
+                                    attrs::name("domain"),
+                                    attrs::value(&site.domain.to_string()),
+                                    attrs::readonly(),
+                                ]),
+                            ]),
+                        ]),
+                        html::div(&[attrs::class("form-group")], &[
+                            html::label(&[attrs::class("form-label")], &[
+                                html::div(&[], &[html::text("Route")]),
+                                html::input(&[
+                                    attrs::type_("text"),
+                                    attrs::class("form-input"),
+                                    attrs::name("path"),
+                                    attrs::placeholder("i.e. /some-page or /some-styles.css"),
+                                    attrs::title("The path to the file, it must start with a slash"),
+                                    attrs::pattern("/.+"),
                                     attrs::required(),
                                 ]),
                             ]),
                         ]),
-                    ])
-                ),
-                html::div(&[attrs::class("row")], &[
-                    html::div(&[attrs::class("column")], &[
-                        html::label(&[], &[
-                            html::div(&[], &[html::text("File")]),
-                            html::input(&[
-                                attrs::type_("file"),
-                                attrs::id("file"),
-                                attrs::required(),
+                        html::conditional(client_has_key == false,
+                            html::div(&[attrs::class("form-group")], &[
+                                html::label(&[attrs::class("form-label")], &[
+                                    html::div(&[], &[html::text("Site key")]),
+                                    html::input(&[
+                                        attrs::type_("password"),
+                                        attrs::class("form-input"),
+                                        attrs::name("key"),
+                                        attrs::required(),
+                                    ]),
+                                ]),
+                            ]),
+                        ),
+                        html::div(&[attrs::class("form-group")], &[
+                            html::label(&[attrs::class("form-label")], &[
+                                html::div(&[], &[html::text("File")]),
+                                html::input(&[
+                                    attrs::type_("file"),
+                                    attrs::class("form-input"),
+                                    attrs::id("file"),
+                                    attrs::required(),
+                                ]),
                             ]),
                         ]),
-                    ]),
-                ]),
-                html::div(&[attrs::class("row")], &[
-                    html::div(&[attrs::class("column column-25")], &[
-                        html::button(&[attrs::type_("submit"), attrs::id("submit-button")], &[html::text("Add route")]),
+                        html::div(&[attrs::class("form-group margin-top-20")], &[
+                            html::button(
+                                &[
+                                    attrs::type_("submit"),
+                                    attrs::class("btn btn-primary btn-lg"),
+                                    attrs::id("submit-button")
+                                ],
+                                &[html::text("Add route")]),
+                        ]),
                     ]),
                 ]),
             ]),

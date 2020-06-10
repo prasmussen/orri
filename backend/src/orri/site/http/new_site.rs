@@ -28,7 +28,7 @@ pub async fn handler(state: web::Data<AppState>) -> HttpResponse {
 fn build_page(server_config: &ServerConfig) -> Page {
     Page{
         head: Head{
-            title: format!("orri.new_site()"),
+            title: format!("New site - orri"),
             elements: vec![],
         },
         body: build_body(server_config)
@@ -40,57 +40,72 @@ fn build_body(server_config: &ServerConfig) -> Vec<Html> {
     let new_site_route = Route::NewSiteJson();
 
     vec![
+        page::navbar(),
         html::div(&[attrs::id("main-content"), attrs::class("container")], &[
-            page::error_alert(),
-            html::form(
-                &[
-                    attrs::id("form"),
-                    attrs::attribute_trusted_name("data-api-method", &new_site_route.request_method().to_string()),
-                    attrs::attribute_trusted_name("data-api-url", &new_site_route.to_string())
-                ], &[
-                html::div(&[attrs::class("row")], &[
-                    html::div(&[attrs::class("column")], &[
-                        html::label(&[], &[
-                            html::div(&[], &[html::text("Domain")]),
-                            html::input(&[
-                                attrs::type_("text"),
-                                attrs::name("sitesDomain"),
-                                attrs::value(&server_config.sites_domain),
-                                attrs::readonly(),
+            html::div(&[attrs::class("columns")], &[
+                html::div(&[attrs::class("column col-6 col-mx-auto")], &[
+                    page::error_alert(),
+                    html::form(
+                        &[
+                            attrs::id("form"),
+                            attrs::attribute_trusted_name("data-api-method", &new_site_route.request_method().to_string()),
+                            attrs::attribute_trusted_name("data-api-url", &new_site_route.to_string())
+                        ], &[
+                        html::div(&[attrs::class("form-group")], &[
+                            html::label(&[attrs::class("form-label")], &[
+                                html::div(&[], &[html::text("Domain")]),
+                                html::input(&[
+                                    attrs::class("form-input"),
+                                    attrs::type_("text"),
+                                    attrs::name("sitesDomain"),
+                                    attrs::value(&server_config.sites_domain),
+                                    attrs::readonly(),
+                                ]),
                             ]),
                         ]),
-                    ]),
-                ]),
-                html::div(&[attrs::class("row")], &[
-                    html::div(&[attrs::class("column")], &[
-                        html::label(&[], &[
-                            html::div(&[], &[html::text("Subdomain")]),
-                            html::input(&[
-                                attrs::type_("text"),
-                                attrs::name("subdomain"),
-                                attrs::placeholder("i.e. my-cool-site"),
-                                attrs::title("Please provide a valid subdomain, at least 4 characters"),
-                                attrs::pattern("[a-z0-9-]{4,}"),
-                                attrs::required(),
+                        html::div(&[attrs::class("form-group")], &[
+                            html::label(&[attrs::class("form-label")], &[
+                                html::div(&[], &[html::text("Subdomain")]),
+                                html::input(&[
+                                    attrs::class("form-input"),
+                                    attrs::type_("text"),
+                                    attrs::name("subdomain"),
+                                    attrs::placeholder("i.e. my-cool-site"),
+                                    attrs::title("Please provide a valid subdomain, at least 4 characters"),
+                                    attrs::pattern("[a-z0-9-]{4,}"),
+                                    attrs::required(),
+                                ]),
                             ]),
                         ]),
-                    ]),
-                ]),
-                html::div(&[attrs::class("row")], &[
-                    html::div(&[attrs::class("column")], &[
-                        html::label(&[], &[
-                            html::div(&[], &[html::text("File")]),
-                            html::input(&[
-                                attrs::type_("file"),
-                                attrs::id("file"),
-                                attrs::required(),
+                        html::div(&[attrs::class("form-group")], &[
+                            html::label(&[attrs::class("form-label")], &[
+                                html::div(&[], &[html::text("File")]),
+                                html::input(&[
+                                    attrs::class("form-input"),
+                                    attrs::type_("file"),
+                                    attrs::id("file"),
+                                    attrs::required(),
+                                ]),
+                                html::p(&[attrs::class("form-input-hint")], &[
+                                    html::text("Upload a html file that will be your site front page."),
+                                    html::text(" "),
+                                    html::a(
+                                        &[attrs::href("https://glot.io/snippets/fo1aqwk3ec/raw/index.html"), attrs::target("_blank")],
+                                        &[html::text("Click here for a minimal starting point.")]
+                                    ),
+                                ]),
                             ]),
                         ]),
-                    ]),
-                ]),
-                html::div(&[attrs::class("row")], &[
-                    html::div(&[attrs::class("column column-25")], &[
-                        html::button(&[attrs::type_("submit"), attrs::id("submit-button")], &[html::text("Create site")]),
+                        html::div(&[attrs::class("form-group")], &[
+                            html::button(
+                                &[
+                                    attrs::type_("submit"),
+                                    attrs::id("submit-button"),
+                                    attrs::class("btn btn-primary btn-lg")
+                                ],
+                                &[html::text("Publish site")]
+                            ),
+                        ]),
                     ]),
                 ]),
             ]),
@@ -103,8 +118,8 @@ fn build_body(server_config: &ServerConfig) -> Vec<Html> {
 
 fn build_success_content() -> Html {
     html::div(&[attrs::id("success-content"), attrs::class("container display-none")], &[
-        html::div(&[attrs::class("row")], &[
-            html::div(&[attrs::class("column")], &[
+        html::div(&[attrs::class("columns")], &[
+            html::div(&[attrs::class("column col-6 col-mx-auto")], &[
                 html::h3(&[attrs::class("margin-top-40 margin-bottom-10")], &[
                     html::text("Congrats!"),
                 ]),
@@ -117,8 +132,8 @@ fn build_success_content() -> Html {
                 ]),
             ]),
         ]),
-        html::div(&[attrs::class("row")], &[
-            html::div(&[attrs::class("column")], &[
+        html::div(&[attrs::class("columns")], &[
+            html::div(&[attrs::class("column col-6 col-mx-auto")], &[
                 html::h3(&[attrs::class("margin-top-40 margin-bottom-10")], &[
                     html::text("Important!"),
                 ]),
@@ -135,8 +150,8 @@ fn build_success_content() -> Html {
                 ]),
             ]),
         ]),
-        html::div(&[attrs::class("row")], &[
-            html::div(&[attrs::class("column")], &[
+        html::div(&[attrs::class("columns")], &[
+            html::div(&[attrs::class("column col-6 col-mx-auto")], &[
                 html::h3(&[attrs::class("margin-top-40 margin-bottom-10")], &[
                     html::text("What's next?"),
                 ]),

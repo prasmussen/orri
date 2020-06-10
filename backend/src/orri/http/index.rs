@@ -1,10 +1,11 @@
 use actix_web::{web, HttpResponse};
 use http::header;
 use crate::orri::app_state::AppState;
-use crate::orri::page::{Page, Head};
+use crate::orri::page::{self, Page, Head};
 use crate::orri::slowhtml::html::Html;
 use crate::orri::slowhtml::html;
 use crate::orri::slowhtml::attributes as attrs;
+use crate::orri::route::Route;
 
 
 pub async fn handler(state: web::Data<AppState>) -> HttpResponse {
@@ -20,7 +21,7 @@ pub async fn handler(state: web::Data<AppState>) -> HttpResponse {
 fn build_page() -> Page {
     Page{
         head: Head{
-            title: format!("orri.index()"),
+            title: format!("Home - orri"),
             elements: vec![]
         },
         body: build_body()
@@ -29,10 +30,24 @@ fn build_page() -> Page {
 
 
 fn build_body() -> Vec<Html> {
+    let new_site_route = Route::NewSite();
+    let list_sites_route = Route::ListSites();
+
     vec![
-        html::div(&[attrs::class("container"), attrs::id("content")], &[
-            html::a(&[attrs::href("/new"), attrs::class("button")], &[html::text("New site")]),
-            html::a(&[attrs::href("/sites"), attrs::class("button button-outline")], &[html::text("Manage site")]),
+        page::navbar(),
+        html::div(&[attrs::class("container")], &[
+            html::div(&[attrs::class("columns")], &[
+                html::div(&[attrs::class("hero hero-lg p-centered")], &[
+                    html::div(&[attrs::class("hero-body")], &[
+                        html::div(&[attrs::class("column col-12")], &[
+                            html::h1(&[], &[html::text("Get started")]),
+                            html::p(&[], &[html::text("Publish a new site or manage an existing site, no account required!")]),
+                            html::a(&[attrs::class("btn btn-large btn-primary"), attrs::href(&new_site_route.to_string())], &[html::text("NEW SITE")]),
+                            html::a(&[attrs::class("btn btn-large"), attrs::href(&list_sites_route.to_string())], &[html::text("MANAGE SITE")]),
+                        ]),
+                    ]),
+                ]),
+            ]),
         ]),
     ]
 }

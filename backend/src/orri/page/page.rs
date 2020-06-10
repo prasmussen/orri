@@ -34,6 +34,17 @@ impl Page {
 }
 
 
+pub fn navbar() -> Html {
+    html::header(&[attrs::class("navbar")], &[
+        html::section(&[attrs::class("navbar-section")], &[
+            html::a(&[attrs::href("/"), attrs::class("btn btn-link")], &[html::text("Home")])
+        ]),
+        html::section(&[attrs::class("navbar-section")], &[
+            html::a(&[attrs::href("https://github.com/prasmussen/orri"), attrs::class("btn btn-link")], &[html::text("Github")])
+        ]),
+    ])
+}
+
 pub struct Head {
     pub title: String,
     pub elements: Vec<Html>,
@@ -53,34 +64,22 @@ impl Head {
 
         vec![
             common,
-            milligram_styles(),
+            vendor_styles(),
             self.elements,
         ].concat()
     }
 }
 
 
-fn milligram_styles() -> Vec<Html> {
+fn vendor_styles() -> Vec<Html> {
     vec![
         html::link(&[
             attrs::rel("stylesheet"),
-            attrs::href("https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic"),
-        ]),
-        html::link(&[
-            attrs::rel("stylesheet"),
-            attrs::href("/static/vendor/normalize.min.css"),
-        ]),
-        html::link(&[
-            attrs::rel("stylesheet"),
-            attrs::href("/static/vendor/milligram.min.css"),
+            attrs::href("/static/vendor/spectre.min.css"),
         ]),
     ]
 }
 
 pub fn error_alert() -> Html {
-    html::div(&[attrs::class("row")], &[
-        html::div(&[attrs::class("column")], &[
-            html::blockquote(&[attrs::class("alert display-none"), attrs::id("alert-error")], &[]),
-        ]),
-    ])
+    html::div(&[attrs::class("toast toast-error display-none"), attrs::id("alert-error")], &[])
 }

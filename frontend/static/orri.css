@@ -2,6 +2,14 @@
     display: none !important;
 }
 
+.btn {
+    margin-right: 20px;
+}
+
+.margin-top-20 {
+    margin-top: 20px;
+}
+
 .margin-top-40 {
     margin-top: 40px;
 }
@@ -9,19 +17,6 @@
 .margin-bottom-10 {
     margin-bottom: 10px;
 }
-
-blockquote.alert {
-    line-height: 40px;
-    border-radius: 4px;
-    border-left: 8px solid #bababa;
-}
-
-blockquote.alert#alert-error {
-    border-color: #ff4757;
-    background: #ffe0e3;
-    color: #ff4757
-}
-
 
 @keyframes sucessFade {
     0% {

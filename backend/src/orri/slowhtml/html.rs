@@ -158,6 +158,10 @@ pub fn div(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("div", attributes, children)
 }
 
+pub fn p(attributes: &[Attribute], children: &[Html]) -> Html {
+    node_trusted_name("p", attributes, children)
+}
+
 pub fn a(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("a", attributes, children)
 }
@@ -232,4 +236,12 @@ pub fn link(attributes: &[Attribute]) -> Html {
 
 pub fn script(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("script", attributes, children)
+}
+
+pub fn header(attributes: &[Attribute], children: &[Html]) -> Html {
+    node_trusted_name("header", attributes, children)
+}
+
+pub fn section(attributes: &[Attribute], children: &[Html]) -> Html {
+    node_trusted_name("section", attributes, children)
 }

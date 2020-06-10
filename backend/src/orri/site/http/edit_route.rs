@@ -98,7 +98,7 @@ fn prepare_response(view_data: ViewData, session: &Session, encryption_key: &Enc
 fn build_page(view_data: &ViewData, client_has_key: bool) -> Page {
     Page{
         head: Head{
-            title: format!("orri.add_route(\"{}\")", &view_data.site.domain),
+            title: format!("Edit route - {} - orri", &view_data.site.domain),
             elements: vec![],
         },
         body: build_body(view_data, client_has_key),
@@ -111,75 +111,77 @@ fn build_body(view_data: &ViewData, client_has_key: bool) -> Vec<Html> {
     let delete_route = Route::DeleteRouteJson();
 
     vec![
+        page::navbar(),
         html::div(&[attrs::class("container")], &[
-            page::error_alert(),
-            html::form(
-                &[
-                    attrs::id("form"),
-                    attrs::attribute_trusted_name("data-api-method", &edit_route.request_method().to_string()),
-                    attrs::attribute_trusted_name("data-api-url", &edit_route.to_string()),
-                ], &[
-                html::div(&[attrs::class("row")], &[
-                    html::div(&[attrs::class("column")], &[
-                        html::label(&[], &[
-                            html::div(&[], &[html::text("Domain")]),
-                            html::input(&[
-                                attrs::type_("text"),
-                                attrs::name("domain"),
-                                attrs::value(&view_data.site.domain.to_string()),
-                                attrs::readonly(),
-                            ]),
-                        ]),
-                    ]),
-                ]),
-                html::div(&[attrs::class("row")], &[
-                    html::div(&[attrs::class("column")], &[
-                        html::label(&[], &[
-                            html::div(&[], &[html::text("Route")]),
-                            html::input(&[
-                                attrs::type_("text"),
-                                attrs::name("path"),
-                                attrs::value(&view_data.path.to_string()),
-                                attrs::readonly(),
-                            ]),
-                        ]),
-                    ]),
-                ]),
-                html::conditional(client_has_key == false,
-                    html::div(&[attrs::class("row")], &[
-                        html::div(&[attrs::class("column")], &[
-                            html::label(&[], &[
-                                html::div(&[], &[html::text("Site key")]),
+            html::div(&[attrs::class("columns")], &[
+                html::div(&[attrs::class("column col-6 col-mx-auto")], &[
+                    page::error_alert(),
+                    html::form(
+                        &[
+                            attrs::id("form"),
+                            attrs::attribute_trusted_name("data-api-method", &edit_route.request_method().to_string()),
+                            attrs::attribute_trusted_name("data-api-url", &edit_route.to_string()),
+                        ], &[
+                        html::div(&[attrs::class("form-group")], &[
+                            html::label(&[attrs::class("form-label")], &[
+                                html::div(&[], &[html::text("Domain")]),
                                 html::input(&[
-                                    attrs::type_("password"),
-                                    attrs::name("key"),
+                                    attrs::type_("text"),
+                                    attrs::class("form-input"),
+                                    attrs::name("domain"),
+                                    attrs::value(&view_data.site.domain.to_string()),
+                                    attrs::readonly(),
+                                ]),
+                            ]),
+                        ]),
+                        html::div(&[attrs::class("form-group")], &[
+                            html::label(&[attrs::class("form-label")], &[
+                                html::div(&[], &[html::text("Route")]),
+                                html::input(&[
+                                    attrs::type_("text"),
+                                    attrs::class("form-input"),
+                                    attrs::name("path"),
+                                    attrs::value(&view_data.path.to_string()),
+                                    attrs::readonly(),
+                                ]),
+                            ]),
+                        ]),
+                        html::conditional(client_has_key == false,
+                            html::div(&[attrs::class("form-group")], &[
+                                html::label(&[attrs::class("form-label")], &[
+                                    html::div(&[], &[html::text("Site key")]),
+                                    html::input(&[
+                                        attrs::type_("password"),
+                                        attrs::class("form-input"),
+                                        attrs::name("key"),
+                                        attrs::required(),
+                                    ]),
+                                ]),
+                            ]),
+                        ),
+                        html::div(&[attrs::class("form-group")], &[
+                            html::label(&[attrs::class("form-label")], &[
+                                html::div(&[], &[html::text("File")]),
+                                html::input(&[
+                                    attrs::type_("file"),
+                                    attrs::class("form-input"),
+                                    attrs::id("file"),
                                     attrs::required(),
                                 ]),
                             ]),
                         ]),
-                    ])
-                ),
-                html::div(&[attrs::class("row")], &[
-                    html::div(&[attrs::class("column")], &[
-                        html::label(&[], &[
-                            html::div(&[], &[html::text("File")]),
-                            html::input(&[
-                                attrs::type_("file"),
-                                attrs::id("file"),
-                                attrs::required(),
-                            ]),
-                        ]),
-                    ]),
-                ]),
-                html::div(&[attrs::class("row")], &[
-                    html::div(&[attrs::class("column")], &[
-                        html::button(&[attrs::type_("submit"), attrs::id("submit-button")], &[html::text("Update route")]),
-                    ]),
-                    html::div(&[attrs::class("column")], &[
-                        html::conditional(view_data.path != UrlPath::root(),
+                        html::div(&[attrs::class("form-group margin-top-20")], &[
+                            html::button(
+                                &[
+                                    attrs::type_("submit"),
+                                    attrs::class("btn btn-primary btn-lg"),
+                                    attrs::id("submit-button")
+                                ], &[html::text("Update route")]
+                            ),
                             html::button(
                                 &[
                                     attrs::id("remove-route"),
+                                    attrs::class("btn btn-error btn-lg"),
                                     attrs::type_("button"),
                                     attrs::class("button-outline"),
                                     attrs::attribute_trusted_name("data-api-method", &delete_route.request_method().to_string()),
@@ -189,12 +191,8 @@ fn build_body(view_data: &ViewData, client_has_key: bool) -> Vec<Html> {
                                 ],
                                 &[html::text("Remove route")]
                             ),
-                        )
+                        ]),
                     ]),
-                    html::div(&[attrs::class("column")], &[]),
-                    html::div(&[attrs::class("column")], &[]),
-                    html::div(&[attrs::class("column")], &[]),
-                    html::div(&[attrs::class("column")], &[]),
                 ]),
             ]),
         ]),

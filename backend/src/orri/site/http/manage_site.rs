@@ -6,10 +6,9 @@ use crate::orri::site::{self, Site, GetSiteError, File, RouteInfo};
 use crate::orri::slowhtml::html::Html;
 use crate::orri::slowhtml::html;
 use crate::orri::slowhtml::attributes as attrs;
-use crate::orri::page::{Page, Head};
+use crate::orri::page::{self, Page, Head};
 use crate::orri::route::Route;
 use crate::orri::util;
-use crate::orri::page;
 use http::header;
 use std::path::PathBuf;
 use std::io;
@@ -91,7 +90,7 @@ fn handle_get_site_error(err: GetSiteError) -> HttpResponse {
 fn build_page(site: &Site, base_url: &str) -> Page {
     Page{
         head: Head{
-            title: format!("orri.list_routes(\"{}\")", &site.domain),
+            title: format!("Manage {} - orri", &site.domain),
             elements: vec![]
         },
         body: build_body(site, base_url)
@@ -110,15 +109,16 @@ fn build_body(site: &Site, base_url: &str) -> Vec<Html> {
         .collect::<Vec<Html>>();
 
     vec![
+        page::navbar(),
         html::div(&[attrs::class("container"), attrs::id("content")], &[
-            html::div(&[attrs::class("row")], &[
-                html::div(&[attrs::class("column")], &[
+            html::div(&[attrs::class("columns")], &[
+                html::div(&[attrs::class("column col-6 col-mx-auto")], &[
                     page::error_alert(),
                 ]),
             ]),
-            html::div(&[attrs::class("row")], &[
-                html::div(&[attrs::class("column")], &[
-                    html::table(&[], &[
+            html::div(&[attrs::class("columns")], &[
+                html::div(&[attrs::class("column col-6 col-mx-auto")], &[
+                    html::table(&[attrs::class("table")], &[
                         html::thead(&[], &[
                             html::tr(&[], &[
                                 html::th(&[], &[html::text("Route")]),
@@ -129,36 +129,27 @@ fn build_body(site: &Site, base_url: &str) -> Vec<Html> {
                         ]),
                         html::tbody(&[], &rows),
                     ]),
+                    html::div(&[attrs::class("form-group margin-top-40")], &[
+                        html::a(
+                            &[
+                                attrs::href(&add_route_route.to_string()),
+                                attrs::class("btn btn-primary btn-lg"),
+                            ],
+                            &[html::text("Add route")]
+                        ),
+                        html::button(
+                            &[
+                                attrs::id("remove-site"),
+                                attrs::type_("button"),
+                                attrs::class("btn btn-error btn-lg"),
+                                attrs::attribute_trusted_name("data-api-method", &delete_site_route.request_method().to_string()),
+                                attrs::attribute_trusted_name("data-api-url", &delete_site_route.to_string()),
+                                attrs::attribute_trusted_name("data-api-body-domain", &site.domain.to_string()),
+                            ],
+                            &[html::text("Remove site")]
+                        ),
+                    ]),
                 ]),
-            ]),
-            html::div(&[attrs::class("row")], &[
-                html::div(&[attrs::class("column")], &[
-                    html::a(
-                        &[
-                            attrs::href(&add_route_route.to_string()),
-                            attrs::class("button"),
-                        ],
-                        &[html::text("Add route")]
-                    ),
-                ]),
-                html::div(&[attrs::class("column")], &[
-                    html::button(
-                        &[
-                            attrs::id("remove-site"),
-                            attrs::type_("button"),
-                            attrs::class("button-outline"),
-                            attrs::attribute_trusted_name("data-api-method", &delete_site_route.request_method().to_string()),
-                            attrs::attribute_trusted_name("data-api-url", &delete_site_route.to_string()),
-                            attrs::attribute_trusted_name("data-api-body-domain", &site.domain.to_string()),
-                        ],
-                        &[html::text("Remove site")]
-                    ),
-                ]),
-                html::div(&[attrs::class("column")], &[]),
-                html::div(&[attrs::class("column")], &[]),
-                html::div(&[attrs::class("column")], &[]),
-                html::div(&[attrs::class("column")], &[]),
-                html::div(&[attrs::class("column")], &[]),
             ]),
         ]),
         html::script(&[attrs::src("/static/orri.js")], &[]),

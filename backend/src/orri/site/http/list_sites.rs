@@ -34,7 +34,7 @@ pub async fn handler(state: web::Data<AppState>, session: Session) -> HttpRespon
 fn build_page(server_config: &ServerConfig, session_data: SessionData) -> Page {
     Page{
         head: Head{
-            title: format!("Sites - orri"),
+            title: format!("My sites - orri"),
             elements: vec![],
         },
         body: build_body(server_config, session_data)
@@ -52,46 +52,50 @@ fn build_body(server_config: &ServerConfig, session_data: SessionData) -> Vec<Ht
     let have_session_sites = rows.len() > 0;
 
     vec![
+        page::navbar(),
         html::div(&[attrs::class("container"), attrs::id("content")], &[
-            html::div(&[attrs::class("row")], &[
-                html::div(&[attrs::class("column")], &[
+            html::div(&[attrs::class("columns")], &[
+                html::div(&[attrs::class("column col-6 col-mx-auto")], &[
                     page::error_alert(),
                 ]),
             ]),
-            html::div(&[], &[
-                html::div(
-                    &[
-                        attrs::id("sites-table"),
-                        attrs::class_list(&[("display-none", have_session_sites == false)]),
-                    ], &[
-                        html::div(&[attrs::class("row")], &[
-                            html::div(&[attrs::class("column")], &[
-                                html::table(&[], &[
-                                    html::thead(&[], &[
-                                        html::tr(&[], &[
-                                            html::th(&[], &[html::text("Domain")]),
-                                            html::th(&[], &[]),
-                                        ]),
+            html::div(&[attrs::class("columns")], &[
+                html::div(&[attrs::class("column col-6 col-mx-auto")], &[
+                    html::div(
+                        &[
+                            attrs::id("sites-table"),
+                            attrs::class_list(&[("display-none", have_session_sites == false)]),
+                        ], &[
+                            html::table(&[attrs::class("table")], &[
+                                html::thead(&[], &[
+                                    html::tr(&[], &[
+                                        html::th(&[], &[html::text("Domain")]),
+                                        html::th(&[], &[]),
                                     ]),
-                                    html::tbody(&[], &rows),
                                 ]),
+                                html::tbody(&[], &rows),
                             ]),
-                        ]),
-                        html::div(&[attrs::class("row")], &[
-                            html::div(&[attrs::class("column column-25")], &[
-                                html::button(&[attrs::type_("button"), attrs::id("manage-other")], &[html::text("Manage other")]),
+                            html::div(&[attrs::class("form-group margin-top-40")], &[
+                                html::button(
+                                    &[
+                                        attrs::type_("button"),
+                                        attrs::class("btn btn-lg"), 
+                                        attrs::id("manage-other")
+                                    ],
+                                    &[html::text("Manage other")]
+                                ),
                             ]),
-                        ]),
-                    ]
-                ),
-                html::div(
-                    &[
-                        attrs::id("manage-other-form"),
-                        attrs::class_list(&[("display-none", have_session_sites)]),
-                    ], &[
-                        site_form(&server_config, have_session_sites),
-                    ]
-                ),
+                        ]
+                    ),
+                    html::div(
+                        &[
+                            attrs::id("manage-other-form"),
+                            attrs::class_list(&[("display-none", have_session_sites)]),
+                        ], &[
+                            site_form(&server_config, have_session_sites),
+                        ]
+                    ),
+                ]),
             ]),
         ]),
         html::script(&[attrs::src("/static/orri.js")], &[]),
@@ -103,54 +107,58 @@ fn build_body(server_config: &ServerConfig, session_data: SessionData) -> Vec<Ht
 fn site_form(server_config: &ServerConfig, have_session_sites: bool) -> Html {
     let list_sites_route = Route::ListSites();
 
-    html::form(
-        &[
-            attrs::id("form"),
-            attrs::attribute_trusted_name("data-api-base-url", &list_sites_route.to_string())
-        ], &[
-        html::div(&[attrs::class("site-form row")], &[
-            html::div(&[attrs::class("column")], &[
-                html::label(&[], &[
-                    html::div(&[], &[html::text("Domain")]),
-                    html::input(&[
-                        attrs::type_("text"),
-                        attrs::name("sitesDomain"),
-                        attrs::value(&server_config.sites_domain),
-                        attrs::readonly(),
-                    ]),
-                ]),
-            ]),
-        ]),
-        html::div(&[attrs::class("row")], &[
-            html::div(&[attrs::class("column")], &[
-                html::label(&[], &[
-                    html::div(&[], &[html::text("Subdomain")]),
-                    html::input(&[
-                        attrs::type_("text"),
-                        attrs::name("subdomain"),
-                        attrs::placeholder("i.e. my-cool-site"),
-                        attrs::title("Please provide a valid subdomain, at least 4 characters"),
-                        attrs::pattern("[a-z0-9-]{4,}"),
-                        attrs::required(),
-                    ]),
-                ]),
-            ]),
-        ]),
-        html::div(&[attrs::class("row")], &[
-            html::div(&[attrs::class("column column-25")], &[
-                html::button(&[attrs::type_("submit"), attrs::id("submit-button")], &[html::text("Manage")]),
-            ]),
-            html::div(
+    html::div(&[attrs::class("columns")], &[
+        html::div(&[attrs::class("column col-6 col-mx-auto")], &[
+            html::form(
                 &[
-                    attrs::class_list(&[
-                        ("column", true),
-                        ("column-25", true),
-                        ("display-none", have_session_sites == false),
-                    ]),
+                    attrs::id("form"),
+                    attrs::attribute_trusted_name("data-api-base-url", &list_sites_route.to_string())
                 ], &[
-                    html::button(&[attrs::type_("button"), attrs::id("show-my-sites")], &[html::text("Show my sites") ]),
-                ]
-            ),
+                html::div(&[attrs::class("form-group")], &[
+                    html::label(&[attrs::class("form-label")], &[
+                        html::div(&[], &[html::text("Domain")]),
+                        html::input(&[
+                            attrs::class("form-input"),
+                            attrs::type_("text"),
+                            attrs::name("sitesDomain"),
+                            attrs::value(&server_config.sites_domain),
+                            attrs::readonly(),
+                        ]),
+                    ]),
+                ]),
+                html::div(&[attrs::class("form-group")], &[
+                    html::label(&[attrs::class("form-label")], &[
+                        html::div(&[], &[html::text("Subdomain")]),
+                        html::input(&[
+                            attrs::class("form-input"),
+                            attrs::type_("text"),
+                            attrs::name("subdomain"),
+                            attrs::placeholder("i.e. my-cool-site"),
+                            attrs::title("Please provide a valid subdomain, at least 4 characters"),
+                            attrs::pattern("[a-z0-9-]{4,}"),
+                            attrs::required(),
+                        ]),
+                    ]),
+                ]),
+                html::div(&[attrs::class("form-group margin-top-20")], &[
+                    html::button(
+                        &[
+                            attrs::class("btn btn-primary btn-lg"),
+                            attrs::type_("submit"),
+                            attrs::id("submit-button"),
+                        ],
+                        &[html::text("Manage")]
+                    ),
+                    html::button(
+                        &[
+                            attrs::class("btn btn-lg"),
+                            attrs::type_("button"),
+                            attrs::id("show-my-sites"),
+                        ],
+                        &[html::text("My sites")]
+                    ),
+                ]),
+            ]),
         ]),
     ])
 }
