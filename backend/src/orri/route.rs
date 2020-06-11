@@ -5,7 +5,8 @@ use actix_web::http::Method;
 pub enum Route {
     // User facing routes
     NewSite(),
-    ListSites(),
+    MySites(),
+    FindSite(),
     SiteExist(String),
     ManageSite(String),
     AddRoute(String),
@@ -25,7 +26,10 @@ impl Route {
             Route::NewSite() =>
                 Method::GET,
 
-            Route::ListSites() =>
+            Route::MySites() =>
+                Method::GET,
+
+            Route::FindSite() =>
                 Method::GET,
 
             Route::SiteExist(_) =>
@@ -64,8 +68,11 @@ impl fmt::Display for Route {
             Route::NewSite() =>
                 write!(f, "/new"),
 
-            Route::ListSites() =>
-                write!(f, "/sites"),
+            Route::MySites() =>
+                write!(f, "/my-sites"),
+
+            Route::FindSite() =>
+                write!(f, "/find-site"),
 
             Route::ManageSite(domain) =>
                 write!(f, "/sites/{}", domain),

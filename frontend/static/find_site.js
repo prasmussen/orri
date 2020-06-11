@@ -4,10 +4,6 @@
         form: orri.page.getElement("#form"),
         submitButton: orri.page.getElement("#submit-button"),
         alertError: orri.page.getElement("#alert-error"),
-        manageOtherButton: orri.page.getElement("#manage-other"),
-        manageOtherForm: orri.page.getElement("#manage-other-form"),
-        sitesTable: orri.page.getElement("#sites-table"),
-        mySitesButton: orri.page.getElement("#show-my-sites"),
     };
 
     function ensureSiteExists(url) {
@@ -28,7 +24,6 @@
 
         const manageUrl = [
             elements.form.dataset.apiBaseUrl,
-            "/",
             formData.subdomain,
             ".",
             formData.sitesDomain,
@@ -39,24 +34,6 @@
             .catch(handleError)
             .catch(handleError)
             .finally(formReady);
-    });
-
-    orri.button.onClick(elements.manageOtherButton, (buttonBodyData, buttonReady) => {
-        // Switch to success view
-        orri.page.hideElement(elements.alertError);
-        orri.page.hideElement(elements.sitesTable);
-        orri.page.unhideElement(elements.manageOtherForm);
-
-        buttonReady();
-    });
-
-    orri.button.onClick(elements.mySitesButton, (buttonBodyData, buttonReady) => {
-        // Switch to success view
-        orri.page.hideElement(elements.alertError);
-        orri.page.hideElement(elements.manageOtherForm);
-        orri.page.unhideElement(elements.sitesTable);
-
-        buttonReady();
     });
 
 })();

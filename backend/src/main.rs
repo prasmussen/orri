@@ -39,7 +39,8 @@ fn app_domain_routes(config: &mut web::ServiceConfig, state: &AppState, host: &'
             // User facing routes
             .route("", web::get().to(index::handler))
             .route(&Route::NewSite().to_string(), web::get().to(site_http::new_site::handler))
-            .route(&Route::ListSites().to_string(), web::get().to(site_http::list_sites::handler))
+            .route(&Route::MySites().to_string(), web::get().to(site_http::my_sites::handler))
+            .route(&Route::FindSite().to_string(), web::get().to(site_http::find_site::handler))
             .route(&Route::SiteExist("{domain}".to_string()).to_string(), web::head().to(site_http::site_exist::handler))
             .route(&Route::ManageSite("{domain}".to_string()).to_string(), web::get().to(site_http::manage_site::handler))
             .route(&Route::AddRoute("{domain}".to_string()).to_string(), web::get().to(site_http::add_route::handler))

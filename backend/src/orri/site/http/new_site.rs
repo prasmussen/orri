@@ -94,7 +94,7 @@ fn build_body(server_config: &ServerConfig) -> Vec<Html> {
                                     html::text(" "),
                                     html::a(
                                         &[attrs::href("https://glot.io/snippets/fo1aqwk3ec/raw/index.html"), attrs::target("_blank")],
-                                        &[html::text("Click here for a minimal starting point.")]
+                                        &[html::text("See this link for a minimal starting point.")]
                                     ),
                                 ]),
                             ]),

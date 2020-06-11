@@ -59,26 +59,17 @@ impl Head {
             html::meta(&[attrs::name("viewport"), attrs::content("width=device-width, initial-scale=1")]),
             html::meta(&[attrs::name("description"), attrs::content("Create websites, no account required")]),
             html::title(&[], &[html::text(&self.title)]),
+            html::link(&[attrs::rel("stylesheet"), attrs::href("/static/vendor/spectre.min.css")]),
             html::link(&[attrs::rel("stylesheet"), attrs::href("/static/orri.css")]),
         ];
 
         vec![
             common,
-            vendor_styles(),
             self.elements,
         ].concat()
     }
 }
 
-
-fn vendor_styles() -> Vec<Html> {
-    vec![
-        html::link(&[
-            attrs::rel("stylesheet"),
-            attrs::href("/static/vendor/spectre.min.css"),
-        ]),
-    ]
-}
 
 pub fn error_alert() -> Html {
     html::div(&[attrs::class("toast toast-error display-none"), attrs::id("alert-error")], &[])

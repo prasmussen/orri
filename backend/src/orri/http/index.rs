@@ -31,7 +31,7 @@ fn build_page() -> Page {
 
 fn build_body() -> Vec<Html> {
     let new_site_route = Route::NewSite();
-    let list_sites_route = Route::ListSites();
+    let my_sites_route = Route::MySites();
 
     vec![
         page::navbar(),
@@ -42,8 +42,8 @@ fn build_body() -> Vec<Html> {
                         html::div(&[attrs::class("column col-12")], &[
                             html::h1(&[], &[html::text("Get started")]),
                             html::p(&[], &[html::text("Publish your site in seconds, no account required!")]),
-                            html::a(&[attrs::class("btn btn-large btn-primary"), attrs::href(&new_site_route.to_string())], &[html::text("New site")]),
-                            html::a(&[attrs::class("btn btn-large"), attrs::href(&list_sites_route.to_string())], &[html::text("Manage site")]),
+                            html::a(&[attrs::class("btn btn-lg btn-primary"), attrs::href(&new_site_route.to_string())], &[html::text("New site")]),
+                            html::a(&[attrs::class("btn btn-lg"), attrs::href(&my_sites_route.to_string())], &[html::text("Manage site")]),
                         ]),
                     ]),
                 ]),
