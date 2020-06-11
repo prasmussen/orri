@@ -111,7 +111,14 @@ fn build_body(view_data: &ViewData, client_has_key: bool) -> Vec<Html> {
     let delete_route = Route::DeleteRouteJson();
 
     vec![
-        page::navbar(),
+        page::navbar(
+            page::breadcrumbs(&[
+                page::breadcrumb("Home", Route::Index()),
+                page::breadcrumb("Sites", Route::MySites()),
+                page::breadcrumb(&view_data.site.domain.to_string(), Route::ManageSite(view_data.site.domain.to_string())),
+                page::breadcrumb("Edit route", Route::EditRoute(view_data.site.domain.to_string(), Some(view_data.path.to_string()))),
+            ]),
+        ),
         html::div(&[attrs::class("container")], &[
             html::div(&[attrs::class("columns")], &[
                 html::div(&[attrs::class("column col-6 col-mx-auto")], &[

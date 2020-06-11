@@ -53,7 +53,12 @@ fn build_body(server_config: &ServerConfig, session_data: SessionData) -> Vec<Ht
     let find_site_route = Route::FindSite();
 
     vec![
-        page::navbar(),
+        page::navbar(
+            page::breadcrumbs(&[
+                page::breadcrumb("Home", Route::Index()),
+                page::breadcrumb("My sites", Route::MySites()),
+            ]),
+        ),
         html::div(&[attrs::class("container"), attrs::id("content")], &[
             html::div(&[attrs::class("columns")], &[
                 html::div(&[attrs::class("column col-6 col-mx-auto")], &[

@@ -109,7 +109,13 @@ fn build_body(site: &Site, base_url: &str) -> Vec<Html> {
         .collect::<Vec<Html>>();
 
     vec![
-        page::navbar(),
+        page::navbar(
+            page::breadcrumbs(&[
+                page::breadcrumb("Home", Route::Index()),
+                page::breadcrumb("Sites", Route::MySites()),
+                page::breadcrumb(&site.domain.to_string(), Route::ManageSite(site.domain.to_string())),
+            ]),
+        ),
         html::div(&[attrs::class("container"), attrs::id("content")], &[
             html::div(&[attrs::class("columns")], &[
                 html::div(&[attrs::class("column col-6 col-mx-auto")], &[

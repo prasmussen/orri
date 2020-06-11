@@ -43,7 +43,12 @@ fn build_body(server_config: &ServerConfig) -> Vec<Html> {
     let site_exist_base_route = Route::SiteExist("".to_string());
 
     vec![
-        page::navbar(),
+        page::navbar(
+            page::breadcrumbs(&[
+                page::breadcrumb("Home", Route::Index()),
+                page::breadcrumb("Find site", Route::FindSite()),
+            ]),
+        ),
         html::div(&[attrs::class("container"), attrs::id("content")], &[
             html::div(&[attrs::class("columns")], &[
                 html::div(&[attrs::class("column col-6 col-mx-auto")], &[

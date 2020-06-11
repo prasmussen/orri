@@ -4,6 +4,7 @@ use actix_web::http::Method;
 
 pub enum Route {
     // User facing routes
+    Index(),
     NewSite(),
     MySites(),
     FindSite(),
@@ -23,6 +24,9 @@ pub enum Route {
 impl Route {
     pub fn request_method(&self) -> Method {
         match self {
+            Route::Index() =>
+                Method::GET,
+
             Route::NewSite() =>
                 Method::GET,
 
@@ -65,6 +69,9 @@ impl Route {
 impl fmt::Display for Route {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            Route::Index() =>
+                write!(f, "/"),
+
             Route::NewSite() =>
                 write!(f, "/new"),
 

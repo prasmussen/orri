@@ -34,7 +34,11 @@ fn build_body() -> Vec<Html> {
     let my_sites_route = Route::MySites();
 
     vec![
-        page::navbar(),
+        page::navbar(
+            page::breadcrumbs(&[
+                page::breadcrumb("Home", Route::Index()),
+            ]),
+        ),
         html::div(&[attrs::class("container")], &[
             html::div(&[attrs::class("columns")], &[
                 html::div(&[attrs::class("hero hero-lg p-centered")], &[

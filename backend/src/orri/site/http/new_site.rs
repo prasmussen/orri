@@ -40,7 +40,12 @@ fn build_body(server_config: &ServerConfig) -> Vec<Html> {
     let new_site_route = Route::NewSiteJson();
 
     vec![
-        page::navbar(),
+        page::navbar(
+            page::breadcrumbs(&[
+                page::breadcrumb("Home", Route::Index()),
+                page::breadcrumb("New site", Route::NewSite()),
+            ]),
+        ),
         html::div(&[attrs::id("main-content"), attrs::class("container")], &[
             html::div(&[attrs::class("columns")], &[
                 html::div(&[attrs::class("column col-6 col-mx-auto")], &[

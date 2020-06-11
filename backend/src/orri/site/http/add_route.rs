@@ -108,7 +108,14 @@ fn build_body(site: &Site, client_has_key: bool) -> Vec<Html> {
     let add_route = Route::AddRouteJson();
 
     vec![
-        page::navbar(),
+        page::navbar(
+            page::breadcrumbs(&[
+                page::breadcrumb("Home", Route::Index()),
+                page::breadcrumb("Sites", Route::MySites()),
+                page::breadcrumb(&site.domain.to_string(), Route::ManageSite(site.domain.to_string())),
+                page::breadcrumb("Add route", Route::AddRoute(site.domain.to_string())),
+            ]),
+        ),
         html::div(&[attrs::class("container")], &[
             html::div(&[attrs::class("columns")], &[
                 html::div(&[attrs::class("column col-6 col-mx-auto")], &[
