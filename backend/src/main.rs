@@ -110,8 +110,8 @@ async fn main() -> Result<(), io::Error> {
             },
             site: site::Config{
                 quota_nano: site::QuotaLimits{
-                    max_size: 1 * 1024 * 1024,
-                    max_routes: 100,
+                    max_size: 1 * 1000 * 1000,
+                    max_routes: 20,
                     max_sites: 10,
                 },
             },

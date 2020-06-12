@@ -7,6 +7,24 @@ header.navbar {
     margin-bottom: 20px;
 }
 
+.features .column {
+    padding: .4rem;
+}
+
+.features .card {
+    background: 0 0;
+    border: 0;
+    color: #5b687d;
+    padding: .5rem;
+}
+
+.features .card .card-title {
+    color: #5755d9;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
 .btn {
     margin-right: 20px;
 }
@@ -21,6 +39,10 @@ p.form-input-hint {
 
 .form-group .form-input:not(:placeholder-shown):invalid+.form-input-hint {
     color: #bcc3ce;
+}
+
+.max-width-976 {
+    max-width: 976px;
 }
 
 .margin-top-20 {
