@@ -51,6 +51,7 @@ fn build_body(server_config: &ServerConfig, session_data: SessionData) -> Vec<Ht
 
     let have_session_sites = rows.len() > 0;
     let find_site_route = Route::FindSite();
+    let new_site_route = Route::NewSite();
 
     vec![
         page::navbar(
@@ -67,24 +68,53 @@ fn build_body(server_config: &ServerConfig, session_data: SessionData) -> Vec<Ht
             ]),
             html::div(&[attrs::class("columns")], &[
                 html::div(&[attrs::class("column col-6 col-mx-auto")], &[
-                    html::table(&[attrs::class("table")], &[
-                        html::thead(&[], &[
-                            html::tr(&[], &[
-                                html::th(&[], &[html::text("Domain")]),
-                                html::th(&[], &[]),
+                    if have_session_sites {
+                        html::div(&[], &[
+                            html::table(&[attrs::class("table")], &[
+                                html::thead(&[], &[
+                                    html::tr(&[], &[
+                                        html::th(&[], &[html::text("Domain")]),
+                                        html::th(&[], &[]),
+                                    ]),
+                                ]),
+                                html::tbody(&[], &rows),
                             ]),
-                        ]),
-                        html::tbody(&[], &rows),
-                    ]),
-                    html::div(&[attrs::class("form-group margin-top-40")], &[
-                        html::a(
-                            &[
-                                attrs::href(&find_site_route.to_string()),
-                                attrs::class("btn btn-lg"), 
-                            ],
-                            &[html::text("Manage other")]
-                        ),
-                    ]),
+                            html::div(&[attrs::class("form-group margin-top-40")], &[
+                                html::a(
+                                    &[
+                                        attrs::href(&find_site_route.to_string()),
+                                        attrs::class("btn btn-lg"),
+                                    ],
+                                    &[html::text("Manage other")]
+                                ),
+                            ]),
+                        ])
+                    } else {
+                        html::div(&[attrs::class("empty background-white")], &[
+                            html::p(&[attrs::class("empty-title h5")], &[
+                                html::text("No sites available in your current session")
+                            ]),
+                            html::p(&[attrs::class("empty-subtitle max-width-428")], &[
+                                html::text("Don't worry, you can create a new one or you can find an existing site to manage if you have its site key")
+                            ]),
+                            html::div(&[attrs::class("empty-action")], &[
+                                html::a(
+                                    &[
+                                        attrs::href(&new_site_route.to_string()),
+                                        attrs::class("btn btn-primary btn-lg"),
+                                    ],
+                                    &[html::text("New site")]
+                                ),
+                                html::a(
+                                    &[
+                                        attrs::href(&find_site_route.to_string()),
+                                        attrs::class("btn btn-lg"),
+                                    ],
+                                    &[html::text("Find site")]
+                                ),
+                            ]),
+                        ])
+                    },
                 ]),
             ]),
         ]),

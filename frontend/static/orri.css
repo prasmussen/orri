@@ -41,8 +41,16 @@ p.form-input-hint {
     color: #bcc3ce;
 }
 
+.background-white {
+    background: #fff;
+}
+
 .max-width-976 {
     max-width: 976px;
+}
+
+.max-width-428 {
+    max-width: 428px;
 }
 
 .margin-top-20 {
