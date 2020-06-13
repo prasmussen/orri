@@ -12,7 +12,6 @@ use crate::orri::util;
 use http::header;
 use std::path::PathBuf;
 use std::io;
-use std::time::{Duration, Instant};
 use std::str::FromStr;
 use std::time::SystemTime;
 
@@ -44,21 +43,13 @@ fn handle(state: &AppState, domain_str: &str) -> Result<Site, Error> {
 
 
 fn prepare_response(site: Site, base_url: &str) -> HttpResponse {
-    let html = render(&site, base_url);
+    let html = build_page(&site, base_url).to_string();
 
     HttpResponse::Ok()
         .set_header(header::CONTENT_TYPE, "text/html")
         .set_header(header::CACHE_CONTROL, "no-cache")
         .set_header(header::PRAGMA, "no-cache")
         .body(html)
-}
-
-fn render(site: &Site, base_url: &str) -> String {
-    let now = Instant::now();
-    let page = build_page(site, base_url);
-    let html_string = page.to_string();
-    println!("{}", now.elapsed().as_micros());
-    html_string
 }
 
 fn handle_error(err: Error) -> HttpResponse {

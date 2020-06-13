@@ -14,7 +14,6 @@ use http::header;
 use std::path::PathBuf;
 use std::io;
 use serde::Deserialize;
-use std::time::{Duration, Instant};
 use std::str::FromStr;
 
 
@@ -49,22 +48,13 @@ fn prepare_response(site: Site, session: &Session, encryption_key: &EncryptionKe
         .and_then(|key_from_session| site.key.verify(&key_from_session, encryption_key).ok())
         .unwrap_or(false);
 
-    let html = render(&site, client_has_key);
+    let html = build_page(&site, client_has_key).to_string();
 
     HttpResponse::Ok()
         .set_header(header::CONTENT_TYPE, "text/html")
         .set_header(header::CACHE_CONTROL, "no-cache")
         .set_header(header::PRAGMA, "no-cache")
         .body(html)
-}
-
-fn render(site: &Site, client_has_key: bool) -> String {
-    // TODO: remove timing stuff (find all occurences)
-    let now = Instant::now();
-    let page = build_page(site, client_has_key);
-    let html_string = page.to_string();
-    println!("{}", now.elapsed().as_micros());
-    html_string
 }
 
 fn handle_error(err: Error) -> HttpResponse {

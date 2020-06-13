@@ -11,7 +11,6 @@ use http::header;
 use std::path::PathBuf;
 use std::io;
 use serde::Deserialize;
-use std::time::{Duration, Instant};
 use std::str::FromStr;
 
 
