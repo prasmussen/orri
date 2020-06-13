@@ -67,7 +67,7 @@ impl FromStr for Domain {
                 Err(Error::MissingSubDomain()),
 
             [tld, sld, subdomain] => {
-                util::ensure(subdomain.len() > 3, Error::SubdomainTooShort())?;
+                util::ensure(subdomain.len() >= 5, Error::SubdomainTooShort())?;
                 Ok(Domain(host))
             },
 
