@@ -57,7 +57,7 @@ fn build_body(site_config: &site::Config) -> Vec<Html> {
             ]),
             html::div(&[attrs::class("columns margin-top-40")], &[
                 html::div(&[attrs::class("column col-12")], &[
-                    html::h3(&[], &[html::text("What you get for free")]),
+                    html::h3(&[], &[html::text("What you get")]),
                 ]),
             ]),
             html::div(&[attrs::class("columns features")], &[
