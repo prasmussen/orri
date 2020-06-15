@@ -27,8 +27,8 @@ pub struct Request {
 pub struct Response {
     manage_url: String,
     site_url: String,
+    is_saved_in_session: bool,
 }
-
 
 enum Error {
     FailedToProcessDataUrl(DataUrlError),
@@ -37,17 +37,16 @@ enum Error {
     SiteKeyError(site_key::Error),
     CreateSiteError(CreateSiteError),
     PersistSiteError(site::PersistSiteError),
-    SessionDataError(session_data::Error),
 }
 
 pub async fn handler(state: web::Data<AppState>, session: Session, request_data: web::Json<Request>) -> HttpResponse {
 
-    handle(&state, &session, &request_data)
-        .map(|site| prepare_response(&state.config, site))
+    handle(&state, &session, &state.config, &request_data)
+        .map(prepare_response)
         .unwrap_or_else(handle_error)
 }
 
-fn handle(state: &AppState, session: &Session, request_data: &Request) -> Result<Site, Error> {
+fn handle(state: &AppState, session: &Session, config: &Config, request_data: &Request) -> Result<Response, Error> {
     let domain = Domain::from_str(&request_data.domain)
         .map_err(Error::ParseDomainError)?;
 
@@ -74,24 +73,19 @@ fn handle(state: &AppState, session: &Session, request_data: &Request) -> Result
     let mut session_data = SessionData::from_session(&session)
         .unwrap_or(SessionData::new());
 
-    // TODO: site is still created if sesssion_data.add_site fails
-    session_data.add_site(&site, &state.config.site, &request_data.key)
-        .map_err(Error::SessionDataError)?;
+    let session_data_result = session_data.add_site(&site, &state.config.site, &request_data.key);
 
     session_data.update_session(&session);
 
-    Ok(site)
+    Ok(Response{
+        manage_url: Route::ManageSite(site.domain.to_string()).to_string(),
+        site_url: config.server.sites_base_url(&site.domain.to_string()).to_string(),
+        is_saved_in_session: session_data_result.is_ok(),
+    })
 }
 
-fn prepare_response(config: &Config, site: Site) -> HttpResponse {
-    let manage_route = Route::ManageSite(site.domain.to_string());
-    let site_url = config.server.sites_base_url(&site.domain.to_string());
-
-    HttpResponse::Ok()
-        .json(Response{
-            manage_url: manage_route.to_string(),
-            site_url: site_url,
-        })
+fn prepare_response(response: Response) -> HttpResponse {
+    HttpResponse::Ok().json(response)
 }
 
 
@@ -116,9 +110,6 @@ fn handle_error(err: Error) -> HttpResponse {
 
         Error::PersistSiteError(err) =>
             handle_persist_site_error(err),
-
-        Error::SessionDataError(err) =>
-            handle_session_data_error(err),
     }
 }
 
@@ -205,20 +196,6 @@ fn handle_failed_to_add_route(err: site::AddRouteError) -> HttpResponse {
     }
 }
 
-
-fn handle_session_data_error(err: session_data::Error) -> HttpResponse {
-    match err {
-        session_data::Error::QuotaMaxSites() => {
-            HttpResponse::BadRequest()
-                .json(http::Error::from_str("Max total sites reached"))
-        },
-
-        session_data::Error::SessionDataTooLarge() => {
-            HttpResponse::BadRequest()
-                .json(http::Error::from_str("The session cookie is not able to store more sites"))
-        },
-    }
-}
 
 fn handle_persist_site_error(err: site::PersistSiteError) -> HttpResponse {
     match err {
