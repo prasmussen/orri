@@ -74,11 +74,21 @@ fn handle(state: &AppState, session: &Session, request_data: &Request) -> Result
     let mut session_data = SessionData::from_session(&session)
         .unwrap_or(SessionData::new());
 
-    // TODO: site is still created if sesssion_data.add_site fails
-    session_data.add_site(&site, &state.config.site, &request_data.key)
-        .map_err(Error::SessionDataError)?;
+    let session_data_result = session_data.add_site(&site, &state.config.site, &request_data.key)
+        .map_err(Error::SessionDataError);
 
-    session_data.update_session(&session);
+    match session_data_result {
+        Ok(()) => {
+            session_data.update_session(&session);
+            Ok(())
+        },
+
+        Err(err) => {
+            site_root.remove();
+            Err(err)
+        },
+    }?;
+
 
     Ok(site)
 }
