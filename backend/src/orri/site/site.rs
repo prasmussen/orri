@@ -149,9 +149,7 @@ pub enum CreateSiteError {
 }
 
 
-// TODO: Two users can create the same site at the same time
 pub fn create(config: &Config, site_root: &SiteRoot, key: SiteKey, file_info: FileInfo, file_data: &[u8]) -> Result<Site, CreateSiteError> {
-    // TODO: move to persist to prevent race-condition
     util::ensure(site_root.site_json_path().exists() == false, CreateSiteError::SiteAlreadyExist())?;
 
     let mut site = Site{
