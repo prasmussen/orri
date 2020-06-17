@@ -11,6 +11,7 @@ use crate::orri::site_key::SiteKey;
 use crate::orri::url_path::UrlPath;
 use std::time::SystemTime;
 use std::str::FromStr;
+use std::ffi::OsString;
 
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -98,7 +99,6 @@ impl Site {
             .fold(0, |acc, (path, route_info)| acc + route_info.file_info.size)
     }
 
-    // TODO: remove all files hashes that does not exist in routes after json is written
     pub fn persist(&self, site_root: &SiteRoot) -> Result<&Site, PersistSiteError> {
         site_root.prepare_directories()
             .map_err(PersistSiteError::FailedToCreateDomainDir)?;
@@ -113,7 +113,26 @@ impl Site {
         file::write_json(&site_root.site_json_path(), self)
             .map_err(PersistSiteError::WriteSiteJsonError)?;
 
+        self.remove_stale_data(site_root);
+
         Ok(self)
+    }
+
+    fn remove_stale_data(&self, site_root: &SiteRoot) -> Result<(), io::Error> {
+        let fresh_hashes = self.routes.iter()
+            .map(|(url_path, route_info)| OsString::from(route_info.file_info.hash.clone()))
+            .collect::<Vec<OsString>>();
+
+        fs::read_dir(site_root.data_path())?
+            .for_each(|res| {
+                res.map(|entry| {
+                    if !fresh_hashes.contains(&entry.file_name()) {
+                        fs::remove_file(entry.path());
+                    }
+                });
+            });
+
+        Ok(())
     }
 }
 
