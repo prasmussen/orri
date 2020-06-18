@@ -20,6 +20,7 @@ use orri::site_key;
 use orri::site;
 use orri::route::Route;
 use orri::util;
+use log;
 
 
 
@@ -84,7 +85,7 @@ fn sites_domain_routes(config: &mut web::ServiceConfig) {
 
 #[actix_rt::main]
 async fn main() -> Result<(), io::Error> {
-    println!("Starting...");
+    env_logger::init();
 
     let state = app_state::AppState{
         config: app_state::Config{
@@ -121,6 +122,8 @@ async fn main() -> Result<(), io::Error> {
     // TODO: This is probably ok, but is it possible to have a 'static String in the config?
     let domain = util::to_static_str(state.config.server.app_domain_with_port());
     let listen_addr = &state.config.server.listen_addr_with_port();
+
+    log::info!("Starting server on {}", listen_addr);
 
     HttpServer::new(move || {
         App::new()

@@ -154,7 +154,7 @@ fn handle_error(err: Error) -> HttpResponse {
                 .json(http::Error::from_str("Invalid key")),
 
         Error::VerifyKeyError(err) => {
-            println!("Failed to verify key: {:?}", err);
+            log::error!("Failed to verify key: {:?}", err);
             HttpResponse::InternalServerError()
                 .json(http::Error::from_str("Failed to verify key"))
         },
@@ -232,7 +232,7 @@ fn handle_get_site_error(err: GetSiteError) -> HttpResponse {
         },
 
         GetSiteError::FailedToReadSiteJson(err) => {
-            println!("Failed to read site json: {}", err);
+            log::error!("Failed to read site json: {}", err);
             HttpResponse::InternalServerError().finish()
         },
     }
@@ -255,19 +255,19 @@ fn handle_failed_to_add_route(err: site::AddRouteError) -> HttpResponse {
 fn handle_persist_site_error(err: site::PersistSiteError) -> HttpResponse {
     match err {
         site::PersistSiteError::FailedToCreateDomainDir(err) => {
-            println!("Failed to create domain: {}", err);
+            log::error!("Failed to create domain: {}", err);
             HttpResponse::InternalServerError()
                 .json(http::Error::from_str("Failed to persist site"))
         },
 
         site::PersistSiteError::WriteFileError(err) => {
-            println!("Failed to write file: {}", err);
+            log::error!("Failed to write file: {}", err);
             HttpResponse::InternalServerError()
                 .json(http::Error::from_str("Failed to persist site"))
         },
 
         site::PersistSiteError::WriteSiteJsonError(err) => {
-            println!("Failed to write site json: {}", err);
+            log::error!("Failed to write site json: {}", err);
             HttpResponse::InternalServerError()
                 .json(http::Error::from_str("Failed to persist site"))
         },

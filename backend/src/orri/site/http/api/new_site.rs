@@ -180,7 +180,7 @@ fn handle_site_key_error(err: site_key::Error) -> HttpResponse {
                 .json(http::Error::from_str("The key is too long")),
 
         site_key::Error::HashError(err) => {
-            println!("Failed to hash key: {:?}", err);
+            log::error!("Failed to hash key: {:?}", err);
             HttpResponse::InternalServerError()
                 .json(http::Error::from_str("Failed to hash key"))
         },
@@ -233,19 +233,19 @@ fn handle_session_data_error(err: session_data::Error) -> HttpResponse {
 fn handle_persist_site_error(err: site::PersistSiteError) -> HttpResponse {
     match err {
         site::PersistSiteError::FailedToCreateDomainDir(err) => {
-            println!("Failed to create domain: {}", err);
+            log::error!("Failed to create domain: {}", err);
             HttpResponse::InternalServerError()
                 .json(http::Error::from_str("Failed to persist site"))
         },
 
         site::PersistSiteError::WriteFileError(err) => {
-            println!("Failed to write file: {}", err);
+            log::error!("Failed to write file: {}", err);
             HttpResponse::InternalServerError()
                 .json(http::Error::from_str("Failed to persist site"))
         },
 
         site::PersistSiteError::WriteSiteJsonError(err) => {
-            println!("Failed to write site json: {}", err);
+            log::error!("Failed to write site json: {}", err);
             HttpResponse::InternalServerError()
                 .json(http::Error::from_str("Failed to persist site"))
         },

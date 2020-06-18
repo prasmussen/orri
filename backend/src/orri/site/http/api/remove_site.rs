@@ -97,13 +97,13 @@ fn handle_error(err: Error) -> HttpResponse {
                 .json(http::Error::from_str("Invalid key")),
 
         Error::VerifyKeyError(err) => {
-            println!("Failed to verify key: {:?}", err);
+            log::error!("Failed to verify key: {:?}", err);
             HttpResponse::InternalServerError()
                 .json(http::Error::from_str("Failed to verify key"))
         },
 
         Error::RemoveSiteError(err) => {
-            println!("Failed to remove site: {}", err);
+            log::error!("Failed to remove site: {}", err);
             HttpResponse::InternalServerError()
                 .json(http::Error::from_str("Failed to remove site"))
         },
@@ -153,7 +153,7 @@ fn handle_get_site_error(err: GetSiteError) -> HttpResponse {
         },
 
         GetSiteError::FailedToReadSiteJson(err) => {
-            println!("Failed to read site json: {}", err);
+            log::error!("Failed to read site json: {}", err);
             HttpResponse::InternalServerError().finish()
         },
     }

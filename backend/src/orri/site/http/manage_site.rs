@@ -72,7 +72,7 @@ fn handle_get_site_error(err: GetSiteError) -> HttpResponse {
         },
 
         GetSiteError::FailedToReadSiteJson(err) => {
-            println!("Failed to read site json: {}", err);
+            log::error!("Failed to read site json: {}", err);
             HttpResponse::InternalServerError().finish()
         },
     }
