@@ -12,6 +12,7 @@ use crate::orri::route::Route;
 use crate::orri::url_path::{self, UrlPath};
 use crate::orri::session_data::{SessionData};
 use crate::orri::util;
+use crate::orri::http as http_helper;
 use http::header;
 use std::path::PathBuf;
 use std::io;
@@ -86,10 +87,8 @@ fn prepare_response(view_data: ViewData, session: &Session, encryption_key: &Enc
 
     let html = build_page(&view_data, client_has_key).to_string();
 
-    HttpResponse::Ok()
+    http_helper::no_cache_headers(&mut HttpResponse::Ok())
         .set_header(header::CONTENT_TYPE, "text/html")
-        .set_header(header::CACHE_CONTROL, "no-cache")
-        .set_header(header::PRAGMA, "no-cache")
         .body(html)
 }
 

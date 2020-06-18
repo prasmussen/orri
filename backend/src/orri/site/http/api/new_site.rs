@@ -10,6 +10,7 @@ use crate::orri::domain::{self, Domain};
 use crate::orri::session_data::{self, SessionData};
 use crate::orri::site_key::{self, SiteKey};
 use crate::orri::route::Route;
+use crate::orri::http as http_helper;
 use data_url::{DataUrl, DataUrlError, mime, forgiving_base64};
 
 
@@ -97,7 +98,7 @@ fn prepare_response(config: &Config, site: Site) -> HttpResponse {
     let manage_route = Route::ManageSite(site.domain.to_string());
     let site_url = config.server.sites_base_url(&site.domain.to_string());
 
-    HttpResponse::Ok()
+    http_helper::no_cache_headers(&mut HttpResponse::Ok())
         .json(Response{
             manage_url: manage_route.to_string(),
             site_url: site_url,

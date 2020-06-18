@@ -3,6 +3,7 @@ use crate::orri::app_state::AppState;
 use crate::orri::domain::{self, Domain};
 use crate::orri::url_path::{self, UrlPath};
 use crate::orri::site::{self, Site, GetSiteError, File};
+use crate::orri::http as http_helper;
 use http::header;
 use std::path::PathBuf;
 use std::io;
@@ -49,10 +50,9 @@ fn handle(req: &HttpRequest, state: &AppState) -> Result<File, Error> {
 }
 
 fn prepare_response(file: site::File) -> HttpResponse {
-    HttpResponse::Ok()
-        .set_header(header::ETAG, file.metadata.hash)
-        .set_header(header::CACHE_CONTROL, "no-cache")
-        .set_header(header::PRAGMA, "no-cache")
+    http_helper::no_cache_headers(&mut HttpResponse::Ok())
+        //.set_header(header::ETAG, file.metadata.hash)
+        .set_header(header::CONTENT_TYPE, file.metadata.mime)
         .body(file.data)
 }
 

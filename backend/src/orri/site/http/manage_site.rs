@@ -9,6 +9,7 @@ use crate::orri::slowhtml::attributes as attrs;
 use crate::orri::page::{self, Page, Head};
 use crate::orri::route::Route;
 use crate::orri::util;
+use crate::orri::http as http_helper;
 use http::header;
 use std::path::PathBuf;
 use std::io;
@@ -45,10 +46,8 @@ fn handle(state: &AppState, domain_str: &str) -> Result<Site, Error> {
 fn prepare_response(site: Site, base_url: &str) -> HttpResponse {
     let html = build_page(&site, base_url).to_string();
 
-    HttpResponse::Ok()
+    http_helper::no_cache_headers(&mut HttpResponse::Ok())
         .set_header(header::CONTENT_TYPE, "text/html")
-        .set_header(header::CACHE_CONTROL, "no-cache")
-        .set_header(header::PRAGMA, "no-cache")
         .body(html)
 }
 
