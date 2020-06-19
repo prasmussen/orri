@@ -103,3 +103,4 @@ impl Head {
 pub fn error_alert() -> Html {
     html::div(&[attrs::class("toast toast-error display-none"), attrs::id("alert-error")], &[])
 }
+
