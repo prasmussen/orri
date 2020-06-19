@@ -35,14 +35,14 @@ pub struct Response {
 enum Error {
     FailedToProcessDataUrl(DataUrlError),
     FailedToDecodeDataUrl(forgiving_base64::InvalidBase64),
-    ParseDomainError(domain::Error),
-    ParsePathError(url_path::Error),
+    ParseDomain(domain::Error),
+    ParsePath(url_path::Error),
     NoKeyProvided(),
-    VerifyKeyError(site_key::VerifyError),
-    GetSiteError(GetSiteError),
+    VerifyKey(site_key::VerifyError),
+    GetSite(GetSiteError),
     InvalidKey(),
     FailedToUpdateRoute(site::UpdateRouteError),
-    PersistSiteError(site::PersistSiteError),
+    PersistSite(site::PersistSiteError),
 }
 
 pub async fn handler(state: web::Data<AppState>, session: Session, request_data: web::Json<Request>) -> HttpResponse {
@@ -54,10 +54,10 @@ pub async fn handler(state: web::Data<AppState>, session: Session, request_data:
 
 fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<Site, Error> {
     let domain = Domain::from_str(&request_data.domain)
-        .map_err(Error::ParseDomainError)?;
+        .map_err(Error::ParseDomain)?;
 
     let path = UrlPath::from_str(&request_data.path)
-        .map_err(Error::ParsePathError)?;
+        .map_err(Error::ParsePath)?;
 
     let url = DataUrl::process(&request_data.data_url)
         .map_err(Error::FailedToProcessDataUrl)?;
@@ -71,7 +71,7 @@ fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<
     let site_root = site::SiteRoot::new(&state.config.server.sites_root, domain);
 
     let mut site = site::get(&site_root)
-        .map_err(Error::GetSiteError)?;
+        .map_err(Error::GetSite)?;
 
     let mut session_data = SessionData::from_session(&session)
         .unwrap_or_else(SessionData::new);
@@ -80,7 +80,7 @@ fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<
         .ok_or(Error::NoKeyProvided())?;
 
     let has_valid_key = site.key.verify(&provided_key, &state.config.encryption_key)
-        .map_err(Error::VerifyKeyError)?;
+        .map_err(Error::VerifyKey)?;
 
     util::ensure(has_valid_key, Error::InvalidKey())?;
 
@@ -88,7 +88,7 @@ fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<
         .map_err(Error::FailedToUpdateRoute)?;
 
     site.persist(&site_root)
-        .map_err(Error::PersistSiteError)?;
+        .map_err(Error::PersistSite)?;
 
     match &request_data.key {
         Some(key) => {
@@ -129,13 +129,13 @@ fn handle_error(err: Error) -> HttpResponse {
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("Failed to decode base64 in data url")),
 
-        Error::ParseDomainError(err) =>
+        Error::ParseDomain(err) =>
             handle_parse_domain_error(err),
 
-        Error::ParsePathError(err) =>
+        Error::ParsePath(err) =>
             handle_parse_path_error(err),
 
-        Error::GetSiteError(err) =>
+        Error::GetSite(err) =>
             handle_get_site_error(err),
 
         Error::NoKeyProvided() =>
@@ -146,7 +146,7 @@ fn handle_error(err: Error) -> HttpResponse {
             HttpResponse::Unauthorized()
                 .json(http::Error::from_str("Invalid key")),
 
-        Error::VerifyKeyError(err) => {
+        Error::VerifyKey(err) => {
             log::error!("Failed to verify key: {:?}", err);
             HttpResponse::InternalServerError()
                 .json(http::Error::from_str("Failed to verify key"))
@@ -156,7 +156,7 @@ fn handle_error(err: Error) -> HttpResponse {
             handle_failed_to_update_route(err)
         },
 
-        Error::PersistSiteError(err) => {
+        Error::PersistSite(err) => {
             handle_persist_site_error(err)
         },
     }

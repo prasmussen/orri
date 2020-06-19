@@ -10,9 +10,9 @@ use std::str::FromStr;
 
 
 enum Error {
-    ParseDomainError(domain::Error),
-    ParsePathError(url_path::Error),
-    GetSiteError(GetSiteError),
+    ParseDomain(domain::Error),
+    ParsePath(url_path::Error),
+    GetSite(GetSiteError),
     RouteNotFound(),
     FailedToReadRouteData(io::Error),
 }
@@ -31,15 +31,15 @@ fn handle(req: &HttpRequest, state: &AppState) -> Result<File, Error> {
         .unwrap_or_default();
 
     let domain = Domain::from_str(&host)
-        .map_err(Error::ParseDomainError)?;
+        .map_err(Error::ParseDomain)?;
 
     let path = UrlPath::from_str(req.uri().path())
-        .map_err(Error::ParsePathError)?;
+        .map_err(Error::ParsePath)?;
 
     let site_root = site::SiteRoot::new(&state.config.server.sites_root, domain);
 
     let site = site::get(&site_root)
-        .map_err(Error::GetSiteError)?;
+        .map_err(Error::GetSite)?;
 
     let route = site.routes.get(&path)
         .ok_or(Error::RouteNotFound())?;
@@ -57,15 +57,15 @@ fn prepare_response(file: site::File) -> HttpResponse {
 
 fn handle_error(err: Error) -> HttpResponse {
     match err {
-        Error::ParseDomainError(_err) => {
+        Error::ParseDomain(_err) => {
             HttpResponse::BadRequest().finish()
         },
 
-        Error::ParsePathError(_err) => {
+        Error::ParsePath(_err) => {
             HttpResponse::BadRequest().finish()
         },
 
-        Error::GetSiteError(err) => {
+        Error::GetSite(err) => {
             handle_get_site_error(err)
         },
 

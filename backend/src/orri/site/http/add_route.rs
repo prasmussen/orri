@@ -16,8 +16,8 @@ use std::str::FromStr;
 
 
 enum Error {
-    ParseDomainError(domain::Error),
-    GetSiteError(GetSiteError),
+    ParseDomain(domain::Error),
+    GetSite(GetSiteError),
 }
 
 pub async fn handler(state: web::Data<AppState>, session: Session, domain: web::Path<String>) -> HttpResponse {
@@ -30,12 +30,12 @@ pub async fn handler(state: web::Data<AppState>, session: Session, domain: web::
 fn handle(state: &AppState, domain_str: &str) -> Result<Site, Error> {
 
     let domain = Domain::from_str(domain_str)
-        .map_err(Error::ParseDomainError)?;
+        .map_err(Error::ParseDomain)?;
 
     let site_root = site::SiteRoot::new(&state.config.server.sites_root, domain);
 
     site::get(&site_root)
-        .map_err(Error::GetSiteError)
+        .map_err(Error::GetSite)
 }
 
 
@@ -55,11 +55,11 @@ fn prepare_response(site: Site, session: &Session, encryption_key: &EncryptionKe
 
 fn handle_error(err: Error) -> HttpResponse {
     match err {
-        Error::ParseDomainError(_err) => {
+        Error::ParseDomain(_err) => {
             HttpResponse::BadRequest().finish()
         },
 
-        Error::GetSiteError(err) => {
+        Error::GetSite(err) => {
             handle_get_site_error(err)
         },
     }

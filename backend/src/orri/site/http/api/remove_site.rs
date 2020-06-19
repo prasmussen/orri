@@ -21,12 +21,12 @@ pub struct Request {
 
 
 enum Error {
-    ParseDomainError(domain::Error),
+    ParseDomain(domain::Error),
     NoKeyProvided(),
-    VerifyKeyError(site_key::VerifyError),
-    GetSiteError(GetSiteError),
+    VerifyKey(site_key::VerifyError),
+    GetSite(GetSiteError),
     InvalidKey(),
-    RemoveSiteError(io::Error),
+    RemoveSite(io::Error),
 }
 
 pub async fn handler(state: web::Data<AppState>, session: Session, request_data: web::Json<Request>) -> HttpResponse {
@@ -38,12 +38,12 @@ pub async fn handler(state: web::Data<AppState>, session: Session, request_data:
 
 fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<Site, Error> {
     let domain = Domain::from_str(&request_data.domain)
-        .map_err(Error::ParseDomainError)?;
+        .map_err(Error::ParseDomain)?;
 
     let site_root = site::SiteRoot::new(&state.config.server.sites_root, domain);
 
     let site = site::get(&site_root)
-        .map_err(Error::GetSiteError)?;
+        .map_err(Error::GetSite)?;
 
     let mut session_data = SessionData::from_session(&session)
         .unwrap_or_else(SessionData::new);
@@ -52,12 +52,12 @@ fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<
         .ok_or(Error::NoKeyProvided())?;
 
     let has_valid_key = site.key.verify(&provided_key, &state.config.encryption_key)
-        .map_err(Error::VerifyKeyError)?;
+        .map_err(Error::VerifyKey)?;
 
     util::ensure(has_valid_key, Error::InvalidKey())?;
 
     site_root.remove()
-        .map_err(Error::RemoveSiteError)?;
+        .map_err(Error::RemoveSite)?;
 
     session_data.remove_site(&site.domain);
     let _ = session_data.update_session(&session);
@@ -79,10 +79,10 @@ fn prepare_response(_site: Site) -> HttpResponse {
 
 fn handle_error(err: Error) -> HttpResponse {
     match err {
-        Error::ParseDomainError(err) =>
+        Error::ParseDomain(err) =>
             handle_parse_domain_error(err),
 
-        Error::GetSiteError(err) =>
+        Error::GetSite(err) =>
             handle_get_site_error(err),
 
         Error::NoKeyProvided() =>
@@ -93,13 +93,13 @@ fn handle_error(err: Error) -> HttpResponse {
             HttpResponse::Unauthorized()
                 .json(http::Error::from_str("Invalid key")),
 
-        Error::VerifyKeyError(err) => {
+        Error::VerifyKey(err) => {
             log::error!("Failed to verify key: {:?}", err);
             HttpResponse::InternalServerError()
                 .json(http::Error::from_str("Failed to verify key"))
         },
 
-        Error::RemoveSiteError(err) => {
+        Error::RemoveSite(err) => {
             log::error!("Failed to remove site: {}", err);
             HttpResponse::InternalServerError()
                 .json(http::Error::from_str("Failed to remove site"))

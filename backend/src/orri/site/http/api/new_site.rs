@@ -34,11 +34,11 @@ pub struct Response {
 enum Error {
     FailedToProcessDataUrl(DataUrlError),
     FailedToDecodeDataUrl(forgiving_base64::InvalidBase64),
-    ParseDomainError(domain::Error),
-    SiteKeyError(site_key::Error),
-    CreateSiteError(CreateSiteError),
-    PersistSiteError(site::PersistSiteError),
-    SessionDataError(session_data::Error),
+    ParseDomain(domain::Error),
+    SiteKey(site_key::Error),
+    CreateSite(CreateSiteError),
+    PersistSite(site::PersistSiteError),
+    SessionData(session_data::Error),
 }
 
 pub async fn handler(state: web::Data<AppState>, session: Session, request_data: web::Json<Request>) -> HttpResponse {
@@ -50,7 +50,7 @@ pub async fn handler(state: web::Data<AppState>, session: Session, request_data:
 
 fn handle(state: &AppState, session: &Session, request_data: &Request) -> Result<Site, Error> {
     let domain = Domain::from_str(&request_data.domain)
-        .map_err(Error::ParseDomainError)?;
+        .map_err(Error::ParseDomain)?;
 
     let url = DataUrl::process(&request_data.data_url)
         .map_err(Error::FailedToProcessDataUrl)?;
@@ -64,19 +64,19 @@ fn handle(state: &AppState, session: &Session, request_data: &Request) -> Result
     let site_root = site::SiteRoot::new(&state.config.server.sites_root, domain);
 
     let site_key = site_key::from_str(&state.config.site_key, &request_data.key, &state.config.encryption_key)
-        .map_err(Error::SiteKeyError)?;
+        .map_err(Error::SiteKey)?;
 
     let site = site::create(&state.config.site, &site_root, site_key, file_info, &file_data)
-        .map_err(Error::CreateSiteError)?;
+        .map_err(Error::CreateSite)?;
 
     site.persist(&site_root)
-        .map_err(Error::PersistSiteError)?;
+        .map_err(Error::PersistSite)?;
 
     let mut session_data = SessionData::from_session(&session)
         .unwrap_or_else(SessionData::new);
 
     let session_data_result = session_data.add_site(&site, &state.config.site, &request_data.key)
-        .map_err(Error::SessionDataError);
+        .map_err(Error::SessionData);
 
     match session_data_result {
         Ok(()) => {
@@ -116,19 +116,19 @@ fn handle_error(err: Error) -> HttpResponse {
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("Failed to decode base64 in data url")),
 
-        Error::ParseDomainError(err) =>
+        Error::ParseDomain(err) =>
             handle_parse_domain_error(err),
 
-        Error::SiteKeyError(err) =>
+        Error::SiteKey(err) =>
             handle_site_key_error(err),
 
-        Error::CreateSiteError(err) =>
+        Error::CreateSite(err) =>
             handle_create_site_error(err),
 
-        Error::PersistSiteError(err) =>
+        Error::PersistSite(err) =>
             handle_persist_site_error(err),
 
-        Error::SessionDataError(err) =>
+        Error::SessionData(err) =>
             handle_session_data_error(err),
     }
 }

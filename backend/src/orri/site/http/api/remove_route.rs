@@ -28,14 +28,14 @@ pub struct Response {
 }
 
 enum Error {
-    ParseDomainError(domain::Error),
-    ParsePathError(url_path::Error),
+    ParseDomain(domain::Error),
+    ParsePath(url_path::Error),
     CannotDeleteRoot(),
     NoKeyProvided(),
-    VerifyKeyError(site_key::VerifyError),
-    GetSiteError(GetSiteError),
+    VerifyKey(site_key::VerifyError),
+    GetSite(GetSiteError),
     InvalidKey(),
-    PersistSiteError(site::PersistSiteError),
+    PersistSite(site::PersistSiteError),
 }
 
 pub async fn handler(state: web::Data<AppState>, session: Session, request_data: web::Json<Request>) -> HttpResponse {
@@ -47,17 +47,17 @@ pub async fn handler(state: web::Data<AppState>, session: Session, request_data:
 
 fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<Site, Error> {
     let domain = Domain::from_str(&request_data.domain)
-        .map_err(Error::ParseDomainError)?;
+        .map_err(Error::ParseDomain)?;
 
     let path = UrlPath::from_str(&request_data.path)
-        .map_err(Error::ParsePathError)?;
+        .map_err(Error::ParsePath)?;
 
     util::ensure(path != UrlPath::root(), Error::CannotDeleteRoot())?;
 
     let site_root = site::SiteRoot::new(&state.config.server.sites_root, domain);
 
     let mut site = site::get(&site_root)
-        .map_err(Error::GetSiteError)?;
+        .map_err(Error::GetSite)?;
 
     let mut session_data = SessionData::from_session(&session)
         .unwrap_or_else(SessionData::new);
@@ -66,13 +66,13 @@ fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<
         .ok_or(Error::NoKeyProvided())?;
 
     let has_valid_key = site.key.verify(&provided_key, &state.config.encryption_key)
-        .map_err(Error::VerifyKeyError)?;
+        .map_err(Error::VerifyKey)?;
 
     util::ensure(has_valid_key, Error::InvalidKey())?;
 
     site.remove_route(path)
         .persist(&site_root)
-        .map_err(Error::PersistSiteError)?;
+        .map_err(Error::PersistSite)?;
 
     match &request_data.key {
         Some(key) => {
@@ -105,17 +105,17 @@ fn prepare_response(site: Site) -> HttpResponse {
 
 fn handle_error(err: Error) -> HttpResponse {
     match err {
-        Error::ParseDomainError(err) =>
+        Error::ParseDomain(err) =>
             handle_parse_domain_error(err),
 
-        Error::ParsePathError(err) =>
+        Error::ParsePath(err) =>
             handle_parse_path_error(err),
 
         Error::CannotDeleteRoot() =>
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("The root route cannot be deleted")),
 
-        Error::GetSiteError(err) =>
+        Error::GetSite(err) =>
             handle_get_site_error(err),
 
         Error::NoKeyProvided() =>
@@ -126,13 +126,13 @@ fn handle_error(err: Error) -> HttpResponse {
             HttpResponse::Unauthorized()
                 .json(http::Error::from_str("Invalid key")),
 
-        Error::VerifyKeyError(err) => {
+        Error::VerifyKey(err) => {
             log::error!("Failed to verify key: {:?}", err);
             HttpResponse::InternalServerError()
                 .json(http::Error::from_str("Failed to verify key"))
         },
 
-        Error::PersistSiteError(err) => {
+        Error::PersistSite(err) => {
             handle_persist_site_error(err)
         },
     }

@@ -36,10 +36,10 @@ struct ViewData {
 }
 
 enum Error {
-    ParseDomainError(domain::Error),
-    ParsePathError(url_path::Error),
+    ParseDomain(domain::Error),
+    ParsePath(url_path::Error),
     RouteDoesNotExist(),
-    GetSiteError(GetSiteError),
+    GetSite(GetSiteError),
 }
 
 pub async fn handler(state: web::Data<AppState>, session: Session, domain: web::Path<String>, query: web::Query<QueryParams>) -> HttpResponse {
@@ -57,15 +57,15 @@ pub async fn handler(state: web::Data<AppState>, session: Session, domain: web::
 fn handle(state: &AppState, request_data: &RequestData) -> Result<ViewData, Error> {
 
     let domain = Domain::from_str(&request_data.domain)
-        .map_err(Error::ParseDomainError)?;
+        .map_err(Error::ParseDomain)?;
 
     let path = UrlPath::from_str(&request_data.path)
-        .map_err(Error::ParsePathError)?;
+        .map_err(Error::ParsePath)?;
 
     let site_root = site::SiteRoot::new(&state.config.server.sites_root, domain);
 
     let site = site::get(&site_root)
-        .map_err(Error::GetSiteError)?;
+        .map_err(Error::GetSite)?;
 
     util::ensure(site.routes.contains_key(&path), Error::RouteDoesNotExist())?;
 
@@ -208,18 +208,18 @@ fn build_body(view_data: &ViewData, client_has_key: bool) -> Vec<Html> {
 
 fn handle_error(err: Error) -> HttpResponse {
     match err {
-        Error::ParseDomainError(_err) => {
+        Error::ParseDomain(_err) => {
             HttpResponse::BadRequest().finish()
         },
 
-        Error::ParsePathError(err) =>
+        Error::ParsePath(err) =>
             handle_parse_path_error(err),
 
         Error::RouteDoesNotExist() =>
             HttpResponse::NotFound()
                 .body("Path not found"),
 
-        Error::GetSiteError(err) => {
+        Error::GetSite(err) => {
             handle_get_site_error(err)
         },
     }
