@@ -70,8 +70,8 @@ fn handle(state: &AppState, request_data: &RequestData) -> Result<ViewData, Erro
     util::ensure(site.routes.contains_key(&path), Error::RouteDoesNotExist())?;
 
     Ok(ViewData{
-        site: site,
-        path: path,
+        site,
+        path,
     })
 }
 

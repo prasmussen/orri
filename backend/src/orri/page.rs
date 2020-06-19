@@ -56,7 +56,7 @@ pub struct Breadcrumb {
 pub fn breadcrumb(name: &str, route: Route) -> Breadcrumb {
     Breadcrumb{
         name: name.to_string(),
-        route: route,
+        route,
     }
 }
 

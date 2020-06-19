@@ -101,7 +101,7 @@ fn prepare_response(config: &Config, site: Site) -> HttpResponse {
     http_helper::no_cache_headers(&mut HttpResponse::Ok())
         .json(Response{
             manage_url: manage_route.to_string(),
-            site_url: site_url,
+            site_url,
         })
 }
 

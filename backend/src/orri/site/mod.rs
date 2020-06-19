@@ -63,7 +63,7 @@ impl Site {
         });
 
         self.routes.insert(path, RouteInfo{
-            file_info: file_info,
+            file_info,
         });
 
         Ok(self)
@@ -83,7 +83,7 @@ impl Site {
         });
 
         self.routes.insert(path, RouteInfo{
-            file_info: file_info,
+            file_info,
         });
 
         Ok(self)
@@ -156,7 +156,7 @@ pub fn create(config: &Config, site_root: &SiteRoot, key: SiteKey, file_info: Fi
 
     let mut site = Site{
         domain: site_root.domain.clone(),
-        key: key,
+        key,
         quota: Quota::Nano,
         routes: BTreeMap::new(),
         unwritten_files: vec![],
@@ -193,8 +193,8 @@ impl SiteRoot {
         let root = root_path.join(PathBuf::from(domain.to_string()));
 
         SiteRoot{
-            domain: domain,
-            root: root,
+            domain,
+            root,
         }
     }
 
@@ -233,14 +233,14 @@ pub struct FileInfo {
 
 impl FileInfo {
     pub fn new(data: &[u8], mime: String, time: SystemTime) -> FileInfo {
-        let file_hash = util::sha256(&data);
+        let hash = util::sha256(&data);
         let timestamp = util::unix_timestamp(time);
 
         FileInfo{
-            mime: mime,
-            hash: file_hash,
+            mime,
+            hash,
             size: data.len(),
-            timestamp: timestamp,
+            timestamp,
         }
     }
 }
@@ -258,7 +258,7 @@ pub fn read_route_file(site_root: &SiteRoot, route: &RouteInfo) -> Result<File, 
 
     Ok(File{
         metadata: route.file_info.clone(),
-        data: data,
+        data,
     })
 
 }
