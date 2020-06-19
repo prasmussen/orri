@@ -44,7 +44,7 @@ pub enum UpdateRouteError {
 }
 
 pub enum PersistSiteError {
-    FailedToCreateDomainDir(io::Error),
+    CreateDomainDir(io::Error),
     WriteFileError(file::WriteError),
     WriteSiteJsonError(file::WriteJsonError),
 }
@@ -103,7 +103,7 @@ impl Site {
 
     pub fn persist(&self, site_root: &SiteRoot) -> Result<&Site, PersistSiteError> {
         site_root.prepare_directories()
-            .map_err(PersistSiteError::FailedToCreateDomainDir)?;
+            .map_err(PersistSiteError::CreateDomainDir)?;
 
         self.unwritten_files
             .iter()
@@ -147,7 +147,7 @@ pub struct RouteInfo {
 
 pub enum CreateSiteError {
     SiteAlreadyExist(),
-    FailedToAddRoute(AddRouteError),
+    AddRoute(AddRouteError),
 }
 
 
@@ -163,7 +163,7 @@ pub fn create(config: &Config, site_root: &SiteRoot, key: SiteKey, file_info: Fi
     };
 
     site.add_route(&config, UrlPath::root(), file_info, file_data)
-        .map_err(CreateSiteError::FailedToAddRoute)?;
+        .map_err(CreateSiteError::AddRoute)?;
 
     Ok(site)
 }
@@ -171,14 +171,14 @@ pub fn create(config: &Config, site_root: &SiteRoot, key: SiteKey, file_info: Fi
 
 pub enum GetSiteError {
     SiteNotFound(),
-    FailedToReadSiteJson(file::ReadJsonError),
+    ReadSiteJson(file::ReadJsonError),
 }
 
 pub fn get(site_root: &SiteRoot) -> Result<Site, GetSiteError> {
     util::ensure(site_root.site_json_path().exists(), GetSiteError::SiteNotFound())?;
 
     file::read_json(&site_root.site_json_path())
-        .map_err(GetSiteError::FailedToReadSiteJson)
+        .map_err(GetSiteError::ReadSiteJson)
 }
 
 

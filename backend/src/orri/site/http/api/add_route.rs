@@ -33,8 +33,8 @@ pub struct Response {
 }
 
 enum Error {
-    FailedToProcessDataUrl(DataUrlError),
-    FailedToDecodeDataUrl(forgiving_base64::InvalidBase64),
+    ProcessDataUrl(DataUrlError),
+    DecodeDataUrl(forgiving_base64::InvalidBase64),
     ParseDomain(domain::Error),
     ParsePath(url_path::Error),
     NoKeyProvided(),
@@ -42,7 +42,7 @@ enum Error {
     GetSite(GetSiteError),
     RouteAlreadyExist(),
     InvalidKey(),
-    FailedToAddRoute(site::AddRouteError),
+    AddRoute(site::AddRouteError),
     PersistSite(site::PersistSiteError),
 }
 
@@ -61,10 +61,10 @@ fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<
         .map_err(Error::ParsePath)?;
 
     let url = DataUrl::process(&request_data.data_url)
-        .map_err(Error::FailedToProcessDataUrl)?;
+        .map_err(Error::ProcessDataUrl)?;
 
     let (file_data, _) = url.decode_to_vec()
-        .map_err(Error::FailedToDecodeDataUrl)?;
+        .map_err(Error::DecodeDataUrl)?;
 
     let time = SystemTime::now();
     let mime_type = format!("{}", url.mime_type());
@@ -89,7 +89,7 @@ fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<
     util::ensure(has_valid_key, Error::InvalidKey())?;
 
     site.add_route(&state.config.site, path, file_info, &file_data)
-        .map_err(Error::FailedToAddRoute)?;
+        .map_err(Error::AddRoute)?;
 
     site.persist(&site_root)
         .map_err(Error::PersistSite)?;
@@ -125,11 +125,11 @@ fn prepare_response(site: Site) -> HttpResponse {
 
 fn handle_error(err: Error) -> HttpResponse {
     match err {
-        Error::FailedToProcessDataUrl(_) =>
+        Error::ProcessDataUrl(_) =>
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("Failed to parse data url")),
 
-        Error::FailedToDecodeDataUrl(_) =>
+        Error::DecodeDataUrl(_) =>
             HttpResponse::BadRequest()
                 .json(http::Error::from_str("Failed to decode base64 in data url")),
 
@@ -160,7 +160,7 @@ fn handle_error(err: Error) -> HttpResponse {
                 .json(http::Error::from_str("Failed to verify key"))
         },
 
-        Error::FailedToAddRoute(err) => {
+        Error::AddRoute(err) => {
             handle_failed_to_add_route(err)
         },
 
@@ -232,7 +232,7 @@ fn handle_get_site_error(err: GetSiteError) -> HttpResponse {
             HttpResponse::NotFound().finish()
         },
 
-        GetSiteError::FailedToReadSiteJson(err) => {
+        GetSiteError::ReadSiteJson(err) => {
             log::error!("Failed to read site json: {}", err);
             HttpResponse::InternalServerError().finish()
         },
@@ -255,7 +255,7 @@ fn handle_failed_to_add_route(err: site::AddRouteError) -> HttpResponse {
 
 fn handle_persist_site_error(err: site::PersistSiteError) -> HttpResponse {
     match err {
-        site::PersistSiteError::FailedToCreateDomainDir(err) => {
+        site::PersistSiteError::CreateDomainDir(err) => {
             log::error!("Failed to create domain: {}", err);
             HttpResponse::InternalServerError()
                 .json(http::Error::from_str("Failed to persist site"))

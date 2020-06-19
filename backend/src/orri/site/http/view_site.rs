@@ -14,7 +14,7 @@ enum Error {
     ParsePath(url_path::Error),
     GetSite(GetSiteError),
     RouteNotFound(),
-    FailedToReadRouteData(io::Error),
+    ReadRouteData(io::Error),
 }
 
 
@@ -45,7 +45,7 @@ fn handle(req: &HttpRequest, state: &AppState) -> Result<File, Error> {
         .ok_or(Error::RouteNotFound())?;
 
     site::read_route_file(&site_root, &route)
-        .map_err(Error::FailedToReadRouteData)
+        .map_err(Error::ReadRouteData)
 }
 
 fn prepare_response(file: site::File) -> HttpResponse {
@@ -73,7 +73,7 @@ fn handle_error(err: Error) -> HttpResponse {
             HttpResponse::NotFound().finish()
         },
 
-        Error::FailedToReadRouteData(err) => {
+        Error::ReadRouteData(err) => {
             log::error!("Failed to read route data: {}", err);
             HttpResponse::NotFound().finish()
         },
@@ -87,7 +87,7 @@ fn handle_get_site_error(err: GetSiteError) -> HttpResponse {
             HttpResponse::NotFound().finish()
         },
 
-        GetSiteError::FailedToReadSiteJson(err) => {
+        GetSiteError::ReadSiteJson(err) => {
             log::error!("Failed to read site json: {}", err);
             HttpResponse::InternalServerError().finish()
         },

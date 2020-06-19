@@ -10,25 +10,25 @@ use tempfile::NamedTempFile;
 
 
 pub enum WriteError {
-    FailedToDetermineDir(),
-    FailedToCreateTempFile(io::Error),
-    FailedToWriteFile(io::Error),
-    FailedToPersist(io::Error),
+    DetermineDir(),
+    CreateTempFile(io::Error),
+    WriteFile(io::Error),
+    Persist(io::Error),
 }
 
 impl fmt::Display for WriteError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            WriteError::FailedToDetermineDir() =>
+            WriteError::DetermineDir() =>
                 write!(f, "Invalid file path"),
 
-            WriteError::FailedToCreateTempFile(err) =>
+            WriteError::CreateTempFile(err) =>
                 write!(f, "Failed to create temp file: {}", err),
 
-            WriteError::FailedToWriteFile(err) =>
+            WriteError::WriteFile(err) =>
                 write!(f, "Failed to write file: {}", err),
 
-            WriteError::FailedToPersist(err) =>
+            WriteError::Persist(err) =>
                 write!(f, "Failed to persist file: {}", err),
         }
     }
@@ -37,40 +37,40 @@ impl fmt::Display for WriteError {
 
 pub fn write(path: &Path, data: &[u8]) -> Result<(), WriteError> {
     let dir = path.parent()
-        .ok_or(WriteError::FailedToDetermineDir())?;
+        .ok_or(WriteError::DetermineDir())?;
 
     let mut file = NamedTempFile::new_in(dir)
-        .map_err(WriteError::FailedToCreateTempFile)?;
+        .map_err(WriteError::CreateTempFile)?;
 
     file.write_all(data)
-        .map_err(WriteError::FailedToWriteFile)?;
+        .map_err(WriteError::WriteFile)?;
 
     file.persist(path)
-        .map_err(|err| WriteError::FailedToPersist(err.error))?;
+        .map_err(|err| WriteError::Persist(err.error))?;
 
     Ok(())
 }
 
 pub enum WriteJsonError {
-    FailedToDetermineDir(),
-    FailedToCreateTempFile(io::Error),
-    FailedToSerialize(serde_json::error::Error),
-    FailedToPersist(io::Error),
+    DetermineDir(),
+    CreateTempFile(io::Error),
+    Serialize(serde_json::error::Error),
+    Persist(io::Error),
 }
 
 impl fmt::Display for WriteJsonError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            WriteJsonError::FailedToDetermineDir() =>
+            WriteJsonError::DetermineDir() =>
                 write!(f, "Invalid file path"),
 
-            WriteJsonError::FailedToCreateTempFile(err) =>
+            WriteJsonError::CreateTempFile(err) =>
                 write!(f, "Failed to create temp file: {}", err),
 
-            WriteJsonError::FailedToSerialize(err) =>
+            WriteJsonError::Serialize(err) =>
                 write!(f, "Failed to serialize config: {}", err),
 
-            WriteJsonError::FailedToPersist(err) =>
+            WriteJsonError::Persist(err) =>
                 write!(f, "Failed to persist file: {}", err),
         }
     }
@@ -79,16 +79,16 @@ impl fmt::Display for WriteJsonError {
 
 pub fn write_json<T: Serialize>(path: &Path, value: &T) -> Result<(), WriteJsonError> {
     let dir = path.parent()
-        .ok_or(WriteJsonError::FailedToDetermineDir())?;
+        .ok_or(WriteJsonError::DetermineDir())?;
 
     let file = NamedTempFile::new_in(dir)
-        .map_err(WriteJsonError::FailedToCreateTempFile)?;
+        .map_err(WriteJsonError::CreateTempFile)?;
 
     serde_json::to_writer_pretty(&file, value)
-        .map_err(WriteJsonError::FailedToSerialize)?;
+        .map_err(WriteJsonError::Serialize)?;
 
     file.persist(path)
-        .map_err(|err| WriteJsonError::FailedToPersist(err.error))?;
+        .map_err(|err| WriteJsonError::Persist(err.error))?;
 
     Ok(())
 }
@@ -96,17 +96,17 @@ pub fn write_json<T: Serialize>(path: &Path, value: &T) -> Result<(), WriteJsonE
 
 
 pub enum ReadJsonError {
-    FailedToOpen(io::Error),
-    FailedToDeserialize(serde_json::error::Error),
+    Open(io::Error),
+    Deserialize(serde_json::error::Error),
 }
 
 impl fmt::Display for ReadJsonError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            ReadJsonError::FailedToOpen(err) =>
+            ReadJsonError::Open(err) =>
                 write!(f, "Failed to open file: {}", err),
 
-            ReadJsonError::FailedToDeserialize(err) =>
+            ReadJsonError::Deserialize(err) =>
                 write!(f, "Failed to deserialize: {}", err),
         }
     }
@@ -114,10 +114,10 @@ impl fmt::Display for ReadJsonError {
 
 pub fn read_json<T: DeserializeOwned>(path: &Path) -> Result<T, ReadJsonError> {
     let file = File::open(path)
-        .map_err(ReadJsonError::FailedToOpen)?;
+        .map_err(ReadJsonError::Open)?;
 
     let reader = BufReader::new(file);
 
     serde_json::from_reader(reader)
-        .map_err(ReadJsonError::FailedToDeserialize)
+        .map_err(ReadJsonError::Deserialize)
 }

@@ -200,7 +200,7 @@ fn handle_get_site_error(err: GetSiteError) -> HttpResponse {
             HttpResponse::NotFound().finish()
         },
 
-        GetSiteError::FailedToReadSiteJson(err) => {
+        GetSiteError::ReadSiteJson(err) => {
             log::error!("Failed to read site json: {}", err);
             HttpResponse::InternalServerError().finish()
         },
@@ -209,7 +209,7 @@ fn handle_get_site_error(err: GetSiteError) -> HttpResponse {
 
 fn handle_persist_site_error(err: site::PersistSiteError) -> HttpResponse {
     match err {
-        site::PersistSiteError::FailedToCreateDomainDir(err) => {
+        site::PersistSiteError::CreateDomainDir(err) => {
             log::error!("Failed to create domain: {}", err);
             HttpResponse::InternalServerError()
                 .json(http::Error::from_str("Failed to persist site"))
