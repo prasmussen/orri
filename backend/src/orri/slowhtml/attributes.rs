@@ -20,6 +20,7 @@ impl fmt::Display for Attribute {
     }
 }
 
+#[allow(dead_code)]
 pub fn attribute(name: &str, value: &str) -> Attribute {
     Attribute{
         name: htmlescape::encode_attribute(name),
@@ -34,6 +35,7 @@ pub fn attribute_trusted_name(name: &'static str, value: &str) -> Attribute {
     }
 }
 
+#[allow(dead_code)]
 pub fn bool_attribute(name: &str) -> Attribute {
     Attribute{
         name: htmlescape::encode_attribute(name),

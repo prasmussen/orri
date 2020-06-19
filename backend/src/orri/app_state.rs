@@ -47,10 +47,6 @@ impl ServerConfig {
         }
     }
 
-    pub fn app_base_url(&self) -> String {
-        format!("{}://{}", self.protocol, self.app_domain_with_port())
-    }
-
     pub fn sites_base_url(&self, domain: &str) -> String {
         format!("{}://{}", self.protocol, self.sites_domain_with_port(domain))
     }
@@ -62,10 +58,6 @@ impl ServerConfig {
 
     pub fn static_path(&self) -> PathBuf {
         self.frontend_root.join(PathBuf::from("static"))
-    }
-
-    pub fn frontend_file_path(&self, name: &'static str) -> PathBuf {
-        self.frontend_root.join(PathBuf::from(name))
     }
 }
 

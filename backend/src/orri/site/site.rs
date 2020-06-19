@@ -1,8 +1,7 @@
 use serde::{Deserialize, Serialize};
-use std::fmt;
 use std::io;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::{PathBuf};
 use std::collections::BTreeMap;
 use crate::orri::file;
 use crate::orri::util;
@@ -49,7 +48,7 @@ pub enum PersistSiteError {
 
 
 impl Site {
-    pub fn add_route(&mut self, config: &Config, site_root: &SiteRoot, path: UrlPath, file_info: FileInfo, file_data: &[u8]) -> Result<&Site, AddRouteError> {
+    pub fn add_route(&mut self, config: &Config, path: UrlPath, file_info: FileInfo, file_data: &[u8]) -> Result<&Site, AddRouteError> {
         let limits = self.quota.limits(config);
 
         util::ensure(self.size() + file_info.size < limits.max_size, AddRouteError::QuotaMaxSize())?;
@@ -67,7 +66,7 @@ impl Site {
         Ok(self)
     }
 
-    pub fn update_route(&mut self, config: &Config, site_root: &SiteRoot, path: UrlPath, file_info: FileInfo, file_data: &[u8]) -> Result<&Site, UpdateRouteError> {
+    pub fn update_route(&mut self, config: &Config, path: UrlPath, file_info: FileInfo, file_data: &[u8]) -> Result<&Site, UpdateRouteError> {
         let limits = self.quota.limits(config);
 
         let old_route = self.routes.get(&path)
@@ -96,7 +95,7 @@ impl Site {
     pub fn size(&self) -> usize {
         self.routes
             .iter()
-            .fold(0, |acc, (path, route_info)| acc + route_info.file_info.size)
+            .fold(0, |acc, (_path, route_info)| acc + route_info.file_info.size)
     }
 
     pub fn persist(&self, site_root: &SiteRoot) -> Result<&Site, PersistSiteError> {
@@ -113,21 +112,21 @@ impl Site {
         file::write_json(&site_root.site_json_path(), self)
             .map_err(PersistSiteError::WriteSiteJsonError)?;
 
-        self.remove_stale_data(site_root);
+        let _ = self.remove_stale_data(site_root);
 
         Ok(self)
     }
 
     fn remove_stale_data(&self, site_root: &SiteRoot) -> Result<(), io::Error> {
         let fresh_hashes = self.routes.iter()
-            .map(|(url_path, route_info)| OsString::from(route_info.file_info.hash.clone()))
+            .map(|(_path, route_info)| OsString::from(route_info.file_info.hash.clone()))
             .collect::<Vec<OsString>>();
 
         fs::read_dir(site_root.data_path())?
             .for_each(|res| {
-                res.map(|entry| {
+                let _ = res.map(|entry| {
                     if !fresh_hashes.contains(&entry.file_name()) {
-                        fs::remove_file(entry.path());
+                        let _ = fs::remove_file(entry.path());
                     }
                 });
             });
@@ -160,7 +159,7 @@ pub fn create(config: &Config, site_root: &SiteRoot, key: SiteKey, file_info: Fi
         unwritten_files: vec![],
     };
 
-    site.add_route(&config, &site_root, UrlPath::root(), file_info, file_data)
+    site.add_route(&config, UrlPath::root(), file_info, file_data)
         .map_err(CreateSiteError::FailedToAddRoute)?;
 
     Ok(site)

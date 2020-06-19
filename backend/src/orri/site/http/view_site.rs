@@ -2,10 +2,9 @@ use actix_web::{web, HttpRequest, HttpResponse};
 use crate::orri::app_state::AppState;
 use crate::orri::domain::{self, Domain};
 use crate::orri::url_path::{self, UrlPath};
-use crate::orri::site::{self, Site, GetSiteError, File};
+use crate::orri::site::{self, GetSiteError, File};
 use crate::orri::http as http_helper;
 use http::header;
-use std::path::PathBuf;
 use std::io;
 use std::str::FromStr;
 
@@ -58,11 +57,11 @@ fn prepare_response(file: site::File) -> HttpResponse {
 
 fn handle_error(err: Error) -> HttpResponse {
     match err {
-        Error::ParseDomainError(err) => {
+        Error::ParseDomainError(_err) => {
             HttpResponse::BadRequest().finish()
         },
 
-        Error::ParsePathError(err) => {
+        Error::ParsePathError(_err) => {
             HttpResponse::BadRequest().finish()
         },
 

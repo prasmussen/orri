@@ -1,12 +1,9 @@
-// TODO: enable warnings
-#![allow(warnings)]
-
+//#![allow(warnings)]
 
 mod orri;
 
 use std::io;
 use std::path::PathBuf;
-use std::str::FromStr;
 use actix_web::{web, App, HttpServer, guard};
 use actix_files::Files;
 use actix_session::CookieSession;
@@ -15,7 +12,6 @@ use orri::app_state::{self, AppState};
 use orri::http::index;
 use orri::site::http::api as site_api;
 use orri::site::http as site_http;
-use crate::orri::encryption_key::EncryptionKey;
 use orri::site_key;
 use orri::site;
 use orri::route::Route;

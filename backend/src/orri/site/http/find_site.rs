@@ -1,23 +1,15 @@
-use actix_web::{web, HttpRequest, HttpResponse};
-use actix_session::Session;
+use actix_web::{web, HttpResponse};
 use crate::orri::app_state::{AppState, ServerConfig};
-use crate::orri::domain::Domain;
-use crate::orri::site::{self, Site, GetSiteError, File, RouteInfo};
 use crate::orri::slowhtml::html::Html;
 use crate::orri::slowhtml::html;
 use crate::orri::slowhtml::attributes as attrs;
 use crate::orri::page::{self, Page, Head};
 use crate::orri::route::Route;
-use crate::orri::session_data::SessionData;
 use crate::orri::http as http_helper;
 use http::header;
-use std::path::PathBuf;
-use std::io;
-use serde::Deserialize;
-use std::str::FromStr;
 
 
-pub async fn handler(state: web::Data<AppState>, session: Session) -> HttpResponse {
+pub async fn handler(state: web::Data<AppState>) -> HttpResponse {
     let html = build_page(&state.config.server).to_string();
 
     http_helper::no_cache_headers(&mut HttpResponse::Ok())

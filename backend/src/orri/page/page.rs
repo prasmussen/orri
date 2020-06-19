@@ -1,4 +1,3 @@
-use std::fmt;
 use crate::Route;
 use crate::orri::slowhtml::html::Html;
 use crate::orri::slowhtml::html;

@@ -1,18 +1,14 @@
-use actix_web::{web, HttpRequest, HttpResponse};
+use actix_web::{web, HttpResponse};
 use actix_session::Session;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize};
 use crate::orri::app_state::AppState;
-use crate::orri::site::{self, Site, CreateSiteError, FileInfo, GetSiteError};
+use crate::orri::site::{self, Site, GetSiteError};
 use crate::orri::http;
-use crate::orri::file;
 use crate::orri::util;
 use crate::orri::domain::{self, Domain};
-use crate::orri::site_key::{self, SiteKey};
-use crate::orri::url_path::{self, UrlPath};
+use crate::orri::site_key;
 use crate::orri::session_data::{SessionData};
-use crate::orri::route::Route;
-use data_url::{DataUrl, DataUrlError, mime, forgiving_base64};
-use std::time::SystemTime;
+use crate::orri::http as http_helper;
 use std::str::FromStr;
 use std::io;
 
@@ -63,8 +59,8 @@ fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<
     site_root.remove()
         .map_err(Error::RemoveSiteError)?;
 
-    session_data.remove_site(&site.domain);
-    session_data.update_session(&session);
+    let _ = session_data.remove_site(&site.domain);
+    let _ = session_data.update_session(&session);
 
     Ok(site)
 }
@@ -76,8 +72,9 @@ fn get_provided_key(request_data: &Request, session_data: &SessionData, domain: 
 }
 
 
-fn prepare_response(site: Site) -> HttpResponse {
-    HttpResponse::NoContent().finish()
+fn prepare_response(_site: Site) -> HttpResponse {
+    http_helper::no_cache_headers(&mut HttpResponse::NoContent())
+        .finish()
 }
 
 fn handle_error(err: Error) -> HttpResponse {

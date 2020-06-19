@@ -1,13 +1,11 @@
-use std::fmt;
-use std::str::FromStr;
 use serde::{Deserialize, Serialize};
 use serde_json;
 use crate::orri::util;
 use crate::orri::domain::Domain;
 use crate::orri::site::{self, Site};
-use crate::orri::encryption_key::EncryptionKey;
 use std::collections::BTreeMap;
 use actix_session::Session;
+use actix_web;
 
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -31,8 +29,8 @@ impl SessionData {
             .unwrap_or(None)
     }
 
-    pub fn update_session(&self, session: &Session) {
-        session.set(SESSION_KEY_NAME, self);
+    pub fn update_session(&self, session: &Session) -> Result<(), actix_web::Error> {
+        session.set(SESSION_KEY_NAME, self)
     }
 
     pub fn list_sites(&self) -> Vec<&Domain> {

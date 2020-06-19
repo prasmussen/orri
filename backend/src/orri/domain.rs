@@ -60,13 +60,13 @@ impl FromStr for Domain {
             [] =>
                 Err(Error::EmptyDomainValue()),
 
-            [tld] =>
+            [_tld] =>
                 Err(Error::MissingSecondLevelDomain()),
 
-            [tld, sld] =>
+            [_tld, _sld] =>
                 Err(Error::MissingSubDomain()),
 
-            [tld, sld, subdomain] => {
+            [_tld, _sld, subdomain] => {
                 util::ensure(subdomain.len() >= 5, Error::SubdomainTooShort())?;
                 Ok(Domain(host))
             },

@@ -1,18 +1,17 @@
-use actix_web::{web, HttpRequest, HttpResponse};
+use actix_web::{web, HttpResponse};
 use actix_session::Session;
 use serde::{Deserialize, Serialize};
 use crate::orri::app_state::AppState;
-use crate::orri::site::{self, Site, CreateSiteError, FileInfo, GetSiteError};
+use crate::orri::site::{self, Site, FileInfo, GetSiteError};
 use crate::orri::http;
-use crate::orri::file;
 use crate::orri::util;
 use crate::orri::domain::{self, Domain};
-use crate::orri::site_key::{self, SiteKey};
+use crate::orri::site_key;
 use crate::orri::url_path::{self, UrlPath};
 use crate::orri::session_data::{SessionData};
 use crate::orri::route::Route;
 use crate::orri::http as http_helper;
-use data_url::{DataUrl, DataUrlError, mime, forgiving_base64};
+use data_url::{DataUrl, DataUrlError, forgiving_base64};
 use std::time::SystemTime;
 use std::str::FromStr;
 
@@ -89,7 +88,7 @@ fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<
 
     util::ensure(has_valid_key, Error::InvalidKey())?;
 
-    site.add_route(&state.config.site, &site_root, path, file_info, &file_data)
+    site.add_route(&state.config.site, path, file_info, &file_data)
         .map_err(Error::FailedToAddRoute)?;
 
     site.persist(&site_root)
@@ -97,8 +96,8 @@ fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<
 
     match &request_data.key {
         Some(key) => {
-            session_data.add_site(&site, &state.config.site, key);
-            session_data.update_session(&session)
+            let _ = session_data.add_site(&site, &state.config.site, key);
+            let _ = session_data.update_session(&session);
         },
 
         None =>

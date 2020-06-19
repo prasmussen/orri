@@ -1,9 +1,9 @@
-use actix_web::{web, HttpRequest, HttpResponse};
+use actix_web::{web, HttpResponse};
 use actix_session::Session;
 use crate::orri::app_state::AppState;
 use crate::orri::domain::{self, Domain};
 use crate::orri::encryption_key::{EncryptionKey};
-use crate::orri::site::{self, Site, GetSiteError, File, RouteInfo};
+use crate::orri::site::{self, Site, GetSiteError};
 use crate::orri::slowhtml::html::Html;
 use crate::orri::slowhtml::html;
 use crate::orri::slowhtml::attributes as attrs;
@@ -12,9 +12,6 @@ use crate::orri::route::Route;
 use crate::orri::session_data::{SessionData};
 use crate::orri::http as http_helper;
 use http::header;
-use std::path::PathBuf;
-use std::io;
-use serde::Deserialize;
 use std::str::FromStr;
 
 
@@ -58,7 +55,7 @@ fn prepare_response(site: Site, session: &Session, encryption_key: &EncryptionKe
 
 fn handle_error(err: Error) -> HttpResponse {
     match err {
-        Error::ParseDomainError(err) => {
+        Error::ParseDomainError(_err) => {
             HttpResponse::BadRequest().finish()
         },
 

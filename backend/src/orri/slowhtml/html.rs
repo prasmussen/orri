@@ -22,7 +22,7 @@ impl fmt::Display for Html {
 
 
 #[derive(Clone, Debug)]
-struct HtmlTag {
+pub struct HtmlTag {
     name: String,
     attributes: Vec<Attribute>,
     children: Vec<Html>,
@@ -43,12 +43,12 @@ impl fmt::Display for HtmlTag {
             .collect::<Vec<String>>()
             .join("");
 
-        let attributesSpace = if attributes.is_empty() { "" } else { " " };
+        let attribute_space = if attributes.is_empty() { "" } else { " " };
 
         if self.has_end_tag {
-            write!(f, "<{}{}{}>{}</{}>", &self.name, attributesSpace, attributes, children, &self.name)
+            write!(f, "<{}{}{}>{}</{}>", &self.name, attribute_space, attributes, children, &self.name)
         } else {
-            write!(f, "<{}{}{}>", &self.name, attributesSpace, attributes)
+            write!(f, "<{}{}{}>", &self.name, attribute_space, attributes)
         }
     }
 }
@@ -58,6 +58,7 @@ pub fn text(text: &str) -> Html {
     Html::Text(htmlescape::encode_attribute(text))
 }
 
+#[allow(dead_code)]
 pub fn node(name: &str, attributes: &[Attribute], children: &[Html]) -> Html {
     Html::Tag(HtmlTag{
         name: htmlescape::encode_attribute(name),
@@ -76,6 +77,7 @@ pub fn node_trusted_name(name: &'static str, attributes: &[Attribute], children:
     })
 }
 
+#[allow(dead_code)]
 pub fn node_no_end(name: &str, attributes: &[Attribute]) -> Html {
     Html::Tag(HtmlTag{
         name: htmlescape::encode_attribute(name),
@@ -130,26 +132,32 @@ pub fn title(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("title", attributes, children)
 }
 
+#[allow(dead_code)]
 pub fn h1(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("h1", attributes, children)
 }
 
+#[allow(dead_code)]
 pub fn h2(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("h2", attributes, children)
 }
 
+#[allow(dead_code)]
 pub fn h3(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("h3", attributes, children)
 }
 
+#[allow(dead_code)]
 pub fn h4(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("h4", attributes, children)
 }
 
+#[allow(dead_code)]
 pub fn h5(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("h5", attributes, children)
 }
 
+#[allow(dead_code)]
 pub fn h6(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("h6", attributes, children)
 }
@@ -222,6 +230,7 @@ pub fn em(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("em", attributes, children)
 }
 
+#[allow(dead_code)]
 pub fn blockquote(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("blockquote", attributes, children)
 }

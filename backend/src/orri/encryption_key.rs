@@ -11,6 +11,7 @@ pub struct EncryptionKey(String);
 
 
 impl EncryptionKey {
+    #[allow(dead_code)]
     pub fn new() -> EncryptionKey {
         let s = random_string(32);
 
@@ -48,7 +49,7 @@ pub enum Error {
 }
 
 
-pub fn random_string(len: usize) -> String {
+fn random_string(len: usize) -> String {
     rand::thread_rng()
         .sample_iter(&distributions::Alphanumeric)
         .take(len)

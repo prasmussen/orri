@@ -1,8 +1,8 @@
-use actix_web::{web, HttpRequest, HttpResponse};
-use crate::orri::app_state::{AppState, ServerConfig};
+use actix_web::{web, HttpResponse};
+use crate::orri::app_state::{AppState};
 use crate::orri::domain::{self, Domain};
-use crate::orri::url_path::{self, UrlPath};
-use crate::orri::site::{self, Site, GetSiteError, File, RouteInfo};
+use crate::orri::url_path::{UrlPath};
+use crate::orri::site::{self, Site, GetSiteError, RouteInfo};
 use crate::orri::slowhtml::html::Html;
 use crate::orri::slowhtml::html;
 use crate::orri::slowhtml::attributes as attrs;
@@ -11,8 +11,6 @@ use crate::orri::route::Route;
 use crate::orri::util;
 use crate::orri::http as http_helper;
 use http::header;
-use std::path::PathBuf;
-use std::io;
 use std::str::FromStr;
 use std::time::SystemTime;
 
@@ -53,7 +51,7 @@ fn prepare_response(site: Site, base_url: &str) -> HttpResponse {
 
 fn handle_error(err: Error) -> HttpResponse {
     match err {
-        Error::ParseDomainError(err) => {
+        Error::ParseDomainError(_err) => {
             HttpResponse::BadRequest().finish()
         },
 
