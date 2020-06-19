@@ -13,7 +13,7 @@ pub struct SessionData {
     sites: BTreeMap<Domain, String>
 }
 
-const SESSION_KEY_NAME: &'static str = "data";
+const SESSION_KEY_NAME: &str = "data";
 const MAX_COOKIE_SIZE: usize = 4096;
 
 
@@ -60,7 +60,7 @@ impl SessionData {
     // Estimate encrypted cookie size
     fn estimated_cookie_size(&self) -> usize {
         serde_json::to_string(self)
-            .unwrap_or(String::new())
+            .unwrap_or_default()
             .len() * 2
     }
 }

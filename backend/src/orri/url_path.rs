@@ -34,9 +34,9 @@ impl FromStr for UrlPath {
 
     fn from_str(path: &str) -> Result<Self, Error> {
         util::ensure(path.len() < 100, Error::TooLong())?;
-        util::ensure(path.starts_with("/"), Error::MustStartWithSlash())?;
+        util::ensure(path.starts_with('/'), Error::MustStartWithSlash())?;
 
-        let parts = path.split("/").collect::<Vec<&str>>();
+        let parts = path.split('/').collect::<Vec<&str>>();
 
         let parts_has_allowed_chars = parts
             .iter()
@@ -44,7 +44,7 @@ impl FromStr for UrlPath {
             .all(std::convert::identity);
 
         util::ensure(parts_has_allowed_chars, Error::ContainsDisallowedChars())?;
-        util::ensure(path.contains("..") == false, Error::ContainsDoubleDot())?;
+        util::ensure(!path.contains(".."), Error::ContainsDoubleDot())?;
 
         Ok(UrlPath(path.to_string()))
     }

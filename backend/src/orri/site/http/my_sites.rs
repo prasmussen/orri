@@ -14,10 +14,10 @@ use http::header;
 
 pub async fn handler(state: web::Data<AppState>, session: Session) -> HttpResponse {
     let session_data = SessionData::from_session(&session)
-        .unwrap_or(SessionData::new());
+        .unwrap_or_else(SessionData::new);
 
 
-    let html = build_page(&state.config.server, session_data).to_string();
+    let html = build_page(&state.config.server, session_data).render();
 
     http_helper::no_cache_headers(&mut HttpResponse::Ok())
         .set_header(header::CONTENT_TYPE, "text/html")
@@ -27,7 +27,7 @@ pub async fn handler(state: web::Data<AppState>, session: Session) -> HttpRespon
 fn build_page(server_config: &ServerConfig, session_data: SessionData) -> Page {
     Page{
         head: Head{
-            title: format!("My sites - orri"),
+            title: "My sites - orri".to_string(),
             elements: vec![],
         },
         body: build_body(server_config, session_data)
@@ -42,7 +42,7 @@ fn build_body(server_config: &ServerConfig, session_data: SessionData) -> Vec<Ht
         .map(|domain| table_row(server_config, domain))
         .collect::<Vec<Html>>();
 
-    let have_session_sites = rows.len() > 0;
+    let have_session_sites = !rows.is_empty();
     let find_site_route = Route::FindSite();
     let new_site_route = Route::NewSite();
 

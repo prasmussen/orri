@@ -11,7 +11,7 @@ use crate::orri::http as http_helper;
 
 
 pub async fn handler(state: web::Data<AppState>) -> HttpResponse {
-    let html = build_page(&state.config.site).to_string();
+    let html = build_page(&state.config.site).render();
 
     http_helper::no_cache_headers(&mut HttpResponse::Ok())
         .set_header(header::CONTENT_TYPE, "text/html")
@@ -21,7 +21,7 @@ pub async fn handler(state: web::Data<AppState>) -> HttpResponse {
 fn build_page(site_config: &site::Config) -> Page {
     Page{
         head: Head{
-            title: format!("Home - orri"),
+            title: "Home - orri".to_string(),
             elements: vec![]
         },
         body: build_body(site_config)

@@ -46,7 +46,7 @@ fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<
         .map_err(Error::GetSiteError)?;
 
     let mut session_data = SessionData::from_session(&session)
-        .unwrap_or(SessionData::new());
+        .unwrap_or_else(SessionData::new);
 
     let provided_key = get_provided_key(&request_data, &session_data, &site.domain)
         .ok_or(Error::NoKeyProvided())?;
@@ -59,7 +59,7 @@ fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<
     site_root.remove()
         .map_err(Error::RemoveSiteError)?;
 
-    let _ = session_data.remove_site(&site.domain);
+    session_data.remove_site(&site.domain);
     let _ = session_data.update_session(&session);
 
     Ok(site)

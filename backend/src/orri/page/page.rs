@@ -10,21 +10,21 @@ pub struct Page {
 }
 
 impl Page {
-    pub fn to_html(self) -> Vec<Html> {
+    fn html(self) -> Vec<Html> {
         vec![
             html::doctype_html(),
             html::html(
                 &[attrs::lang("en")],
                 &[
-                    html::head(&[], &self.head.to_html()),
+                    html::head(&[], &self.head.html()),
                     html::body(&[], &self.body),
                 ]
             ),
         ]
     }
 
-    pub fn to_string(self) -> String {
-        self.to_html()
+    pub fn render(self) -> String {
+        self.html()
             .iter()
             .map(|html| html.to_string())
             .collect::<Vec<String>>()
@@ -81,7 +81,7 @@ pub struct Head {
 
 
 impl Head {
-    pub fn to_html(self) -> Vec<Html> {
+    pub fn html(self) -> Vec<Html> {
         let common = vec![
             html::meta(&[attrs::charset("utf-8")]),
             html::meta(&[attrs::http_equiv("X-UA-Compatible"), attrs::content("IE=edge")]),

@@ -73,7 +73,7 @@ fn handle(state: &AppState, session: &Session, request_data: &Request) -> Result
         .map_err(Error::PersistSiteError)?;
 
     let mut session_data = SessionData::from_session(&session)
-        .unwrap_or(SessionData::new());
+        .unwrap_or_else(SessionData::new);
 
     let session_data_result = session_data.add_site(&site, &state.config.site, &request_data.key)
         .map_err(Error::SessionDataError);

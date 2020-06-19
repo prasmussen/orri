@@ -35,7 +35,7 @@ impl FromStr for Domain {
 
         let host = s.to_lowercase();
 
-        let reversed_parts = host.split(".")
+        let reversed_parts = host.split('.')
             .collect::<Vec<&str>>()
             .iter()
             .cloned()
@@ -51,7 +51,7 @@ impl FromStr for Domain {
 
         let parts_has_allowed_hyphen_position = reversed_parts
             .iter()
-            .map(|part| part.starts_with("-") == false && part.ends_with("-") == false)
+            .map(|part| !part.starts_with('-') && !part.ends_with('-'))
             .all(std::convert::identity);
 
         util::ensure(parts_has_allowed_hyphen_position, Error::InvalidHyphenPosition())?;

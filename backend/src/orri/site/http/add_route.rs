@@ -46,7 +46,7 @@ fn prepare_response(site: Site, session: &Session, encryption_key: &EncryptionKe
         .and_then(|key_from_session| site.key.verify(&key_from_session, encryption_key).ok())
         .unwrap_or(false);
 
-    let html = build_page(&site, client_has_key).to_string();
+    let html = build_page(&site, client_has_key).render();
 
     http_helper::no_cache_headers(&mut HttpResponse::Ok())
         .set_header(header::CONTENT_TYPE, "text/html")
@@ -141,7 +141,7 @@ fn build_body(site: &Site, client_has_key: bool) -> Vec<Html> {
                                 ]),
                             ]),
                         ]),
-                        html::conditional(client_has_key == false,
+                        html::conditional(!client_has_key,
                             html::div(&[attrs::class("form-group")], &[
                                 html::label(&[attrs::class("form-label")], &[
                                     html::div(&[], &[html::text("Site key")]),

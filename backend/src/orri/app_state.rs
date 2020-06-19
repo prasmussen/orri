@@ -41,7 +41,7 @@ impl ServerConfig {
 
     pub fn sites_domain_with_port(&self, domain: &str) -> String {
         if self.listen_port == 80 || self.listen_port == 443 {
-            domain.to_string().clone()
+            domain.to_string()
         } else {
             format!("{}:{}", domain, self.listen_port)
         }

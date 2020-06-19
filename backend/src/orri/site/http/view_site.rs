@@ -28,7 +28,7 @@ pub async fn handler(req: HttpRequest, state: web::Data<AppState>) -> HttpRespon
 
 fn handle(req: &HttpRequest, state: &AppState) -> Result<File, Error> {
     let host = get_host_header_string(&req)
-        .unwrap_or(String::new());
+        .unwrap_or_default();
 
     let domain = Domain::from_str(&host)
         .map_err(Error::ParseDomainError)?;
@@ -110,13 +110,13 @@ fn get_host_header_string(req: &HttpRequest) -> Result<String, HostHeaderError> 
         .map(|s| s.to_string())
         .map_err(HostHeaderError::ToStrError)?;
 
-    let parts = host.split(":")
+    let parts = host.split(':')
         .collect::<Vec<&str>>();
 
-    if parts.len() > 0 {
-        Ok(parts[0].to_string())
-    } else {
+    if parts.is_empty() {
         Ok(host)
+    } else {
+        Ok(parts[0].to_string())
     }
 
 }

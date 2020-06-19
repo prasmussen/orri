@@ -42,7 +42,7 @@ fn handle(state: &AppState, domain_str: &str) -> Result<Site, Error> {
 
 
 fn prepare_response(site: Site, base_url: &str) -> HttpResponse {
-    let html = build_page(&site, base_url).to_string();
+    let html = build_page(&site, base_url).render();
 
     http_helper::no_cache_headers(&mut HttpResponse::Ok())
         .set_header(header::CONTENT_TYPE, "text/html")

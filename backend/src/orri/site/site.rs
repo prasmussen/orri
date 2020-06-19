@@ -149,7 +149,7 @@ pub enum CreateSiteError {
 
 
 pub fn create(config: &Config, site_root: &SiteRoot, key: SiteKey, file_info: FileInfo, file_data: &[u8]) -> Result<Site, CreateSiteError> {
-    util::ensure(site_root.site_json_path().exists() == false, CreateSiteError::SiteAlreadyExist())?;
+    util::ensure(!site_root.site_json_path().exists(), CreateSiteError::SiteAlreadyExist())?;
 
     let mut site = Site{
         domain: site_root.domain.clone(),

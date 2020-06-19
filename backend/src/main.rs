@@ -1,5 +1,3 @@
-//#![allow(warnings)]
-
 mod orri;
 
 use std::io;
@@ -79,6 +77,7 @@ fn sites_domain_routes(config: &mut web::ServiceConfig) {
 }
 
 
+
 #[actix_rt::main]
 async fn main() -> Result<(), io::Error> {
     env_logger::init();
@@ -97,7 +96,7 @@ async fn main() -> Result<(), io::Error> {
             },
             cookie: app_state::CookieConfig{
                 secure: false,
-                max_age: 315576000,
+                max_age: 315_576_000,
             },
             site_key: site_key::Config{
                 min_length: 20,
@@ -107,7 +106,7 @@ async fn main() -> Result<(), io::Error> {
             },
             site: site::Config{
                 quota_nano: site::QuotaLimits{
-                    max_size: 1 * 1000 * 1000,
+                    max_size: 1_000_000,
                     max_routes: 20,
                     max_sites: 10,
                 },
