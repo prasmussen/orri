@@ -175,8 +175,6 @@ async fn main() -> Result<(), io::Error> {
     env_logger::init();
 
     let state = prepare_app_state();
-
-    // TODO: This is probably ok, but is it possible to have a 'static String in the config?
     let domain = util::to_static_str(state.config.server.app_domain_with_port());
     let listen_addr = &state.config.server.listen_addr_with_port();
 
