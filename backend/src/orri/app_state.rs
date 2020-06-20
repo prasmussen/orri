@@ -3,13 +3,13 @@ use crate::orri::encryption_key::EncryptionKey;
 use crate::orri::site_key;
 use crate::orri::site;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AppState {
     pub config: Config,
 }
 
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Config {
     pub encryption_key: EncryptionKey,
     pub server: ServerConfig,
@@ -19,7 +19,7 @@ pub struct Config {
 }
 
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct ServerConfig {
     pub app_domain: String,
     pub sites_domain: String,
@@ -62,7 +62,7 @@ impl ServerConfig {
 }
 
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CookieConfig {
     pub secure: bool,
     pub max_age: i64,

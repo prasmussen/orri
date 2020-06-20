@@ -6,7 +6,7 @@ use crate::orri::util;
 
 
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct EncryptionKey(String);
 
 
@@ -46,6 +46,12 @@ impl FromStr for EncryptionKey {
 #[derive(Debug)]
 pub enum Error {
     InvalidLength()
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Invalid key length, key must be exacly 32 chars")
+    }
 }
 
 

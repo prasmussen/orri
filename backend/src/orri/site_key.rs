@@ -9,7 +9,7 @@ use argonautica::{self, Hasher, Verifier};
 pub struct SiteKey(String);
 
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Config {
     pub min_length: usize,
     pub max_length: usize,

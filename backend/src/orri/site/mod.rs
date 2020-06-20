@@ -27,7 +27,7 @@ pub struct Site {
     unwritten_files: Vec<File>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Config {
     pub quota_nano: QuotaLimits,
 }
@@ -299,7 +299,7 @@ impl FromStr for Quota {
 }
 
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct QuotaLimits {
     pub max_size: usize,
     pub max_routes: usize,

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+export ENCRYPTION_KEY="YdotmVZtV5R3PRnzfCiKBV3gtitSFg70"
+
+export SERVER_APP_DOMAIN="orri.devz"
+export SERVER_SITES_DOMAIN="orri.pagez"
+export SERVER_PROTOCOL="http"
+export SERVER_LISTEN_ADDR="127.0.0.1"
+export SERVER_LISTEN_PORT="8000"
+export SERVER_FRONTEND_ROOT="../frontend"
+export SERVER_SITES_ROOT="../sites"
+
+export SITE_KEY_MIN_LENGTH="20"
+export SITE_KEY_MAX_LENGTH="20"
+export SITE_KEY_HASH_ITERATIONS="1"
+export SITE_KEY_HASH_MEMORY_SIZE="4096"
+
+export SITE_QUOTA_NANO_MAX_SIZE="1000000"
+export SITE_QUOTA_NANO_MAX_ROUTES="20"
+export SITE_QUOTA_NANO_MAX_SITES="10"
+
+export COOKIE_SECURE="false"
+export COOKIE_MAX_AGE="315576000"
+
+export RUST_LOG=info
+
+cargo run

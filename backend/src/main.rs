@@ -1,7 +1,7 @@
 mod orri;
 
 use std::io;
-use std::path::PathBuf;
+use std::process;
 use actix_web::{web, App, HttpServer, guard};
 use actix_files::Files;
 use actix_session::CookieSession;
@@ -14,6 +14,7 @@ use orri::site_key;
 use orri::site;
 use orri::route::Route;
 use orri::util;
+use orri::environment::{self, Environment};
 use log;
 
 
@@ -77,42 +78,103 @@ fn sites_domain_routes(config: &mut web::ServiceConfig) {
 }
 
 
+fn build_server_config(env: &Environment) -> Result<app_state::ServerConfig, environment::Error> {
+    let app_domain = environment::lookup(env, "SERVER_APP_DOMAIN")?;
+    let sites_domain = environment::lookup(env, "SERVER_SITES_DOMAIN")?;
+    let protocol = environment::lookup(env, "SERVER_PROTOCOL")?;
+    let listen_addr = environment::lookup(env, "SERVER_LISTEN_ADDR")?;
+    let listen_port = environment::lookup(env, "SERVER_LISTEN_PORT")?;
+    let frontend_root = environment::lookup(env, "SERVER_FRONTEND_ROOT")?;
+    let sites_root = environment::lookup(env, "SERVER_SITES_ROOT")?;
+
+    Ok(app_state::ServerConfig{
+        app_domain,
+        sites_domain,
+        protocol,
+        listen_addr,
+        listen_port,
+        frontend_root,
+        sites_root,
+    })
+}
+
+fn build_site_key_config(env: &Environment) -> Result<site_key::Config, environment::Error> {
+    let min_length = environment::lookup(env, "SITE_KEY_MIN_LENGTH")?;
+    let max_length = environment::lookup(env, "SITE_KEY_MAX_LENGTH")?;
+    let hash_iterations = environment::lookup(env, "SITE_KEY_HASH_ITERATIONS")?;
+    let hash_memory_size = environment::lookup(env, "SITE_KEY_HASH_MEMORY_SIZE")?;
+
+    Ok(site_key::Config{
+        min_length,
+        max_length,
+        hash_iterations,
+        hash_memory_size,
+    })
+}
+
+fn build_site_quota_limits_nano(env: &Environment) -> Result<site::QuotaLimits, environment::Error> {
+    let max_size = environment::lookup(env, "SITE_QUOTA_NANO_MAX_SIZE")?;
+    let max_routes = environment::lookup(env, "SITE_QUOTA_NANO_MAX_ROUTES")?;
+    let max_sites = environment::lookup(env, "SITE_QUOTA_NANO_MAX_SITES")?;
+
+    Ok(site::QuotaLimits{
+        max_size,
+        max_routes,
+        max_sites,
+    })
+}
+
+fn build_cookie_config(env: &Environment) -> Result<app_state::CookieConfig, environment::Error> {
+    let secure = environment::lookup(env, "COOKIE_SECURE")?;
+    let max_age = environment::lookup(env, "COOKIE_MAX_AGE")?;
+
+    Ok(app_state::CookieConfig{
+        secure,
+        max_age,
+    })
+}
+
+fn build_config(env: &Environment) -> Result<app_state::Config, environment::Error> {
+    let encryption_key = environment::lookup(env, "ENCRYPTION_KEY")?;
+    let server = build_server_config(env)?;
+    let cookie = build_cookie_config(env)?;
+    let site_key = build_site_key_config(env)?;
+    let quota_nano = build_site_quota_limits_nano(env)?;
+
+    Ok(app_state::Config{
+        encryption_key,
+        server,
+        cookie,
+        site_key,
+        site: site::Config{
+            quota_nano,
+        }
+    })
+}
+
+
+fn prepare_app_state() -> app_state::AppState {
+    let env = environment::get_environment();
+
+    match build_config(&env) {
+        Ok(config) => {
+            app_state::AppState{
+                config
+            }
+        },
+
+        Err(err) => {
+            log::error!("Failed to build config: {:?}", err);
+            process::exit(1)
+        },
+    }
+}
 
 #[actix_rt::main]
 async fn main() -> Result<(), io::Error> {
     env_logger::init();
 
-    let state = app_state::AppState{
-        config: app_state::Config{
-            encryption_key: "YdotmVZtV5R3PRnzfCiKBV3gtitSFg70".parse().unwrap(),
-            server: app_state::ServerConfig{
-                app_domain: "orri.devz".to_string(),
-                sites_domain: "orri.pagez".to_string(),
-                protocol: "http".to_string(),
-                listen_addr: "127.0.0.1".to_string(),
-                listen_port: 8000,
-                frontend_root: PathBuf::from("../frontend"),
-                sites_root: PathBuf::from("../sites"),
-            },
-            cookie: app_state::CookieConfig{
-                secure: false,
-                max_age: 315_576_000,
-            },
-            site_key: site_key::Config{
-                min_length: 20,
-                max_length: 50,
-                hash_iterations: 1,
-                hash_memory_size: 4096,
-            },
-            site: site::Config{
-                quota_nano: site::QuotaLimits{
-                    max_size: 1_000_000,
-                    max_routes: 20,
-                    max_sites: 10,
-                },
-            },
-        }
-    };
+    let state = prepare_app_state();
 
     // TODO: This is probably ok, but is it possible to have a 'static String in the config?
     let domain = util::to_static_str(state.config.server.app_domain_with_port());
