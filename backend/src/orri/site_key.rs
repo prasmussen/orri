@@ -1,8 +1,8 @@
 use std::fmt;
 use serde::{Deserialize, Serialize};
 use crate::orri::util;
-use crate::orri::encryption_key::EncryptionKey;
-use argonautica::{self, Hasher, Verifier};
+use crate::orri::encryption_key::{self, EncryptionKey};
+use argon2;
 
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -22,13 +22,13 @@ pub struct Config {
 pub enum Error {
     TooShort(),
     TooLong(),
-    HashError(argonautica::Error),
+    HashError(argon2::Error),
 }
 
 
 #[derive(Debug)]
 pub enum VerifyError {
-    HashError(argonautica::Error),
+    HashError(argon2::Error),
 }
 
 impl fmt::Display for SiteKey {
@@ -39,12 +39,16 @@ impl fmt::Display for SiteKey {
 
 impl SiteKey {
     pub fn verify(&self, key: &str, secret: &EncryptionKey) -> Result<bool, VerifyError> {
-        let is_valid = Verifier::default()
-            .with_hash(&self.0)
-            .with_password(key)
-            .with_secret_key(&secret.to_string())
-            .verify()
+
+        let is_valid = argon2::verify_encoded(&self.0, key.as_bytes())
             .map_err(VerifyError::HashError)?;
+
+        //let is_valid = Verifier::default()
+        //    .with_hash(&self.0)
+        //    .with_password(key)
+        //    .with_secret_key(&secret.to_string())
+        //    .verify()
+        //    .map_err(VerifyError::HashError)?;
 
         Ok(is_valid)
     }
@@ -54,13 +58,18 @@ pub fn from_str(config: &Config, key: &str, secret: &EncryptionKey) -> Result<Si
     util::ensure(key.len() >= config.min_length, Error::TooShort())?;
     util::ensure(key.len() <= config.max_length, Error::TooLong())?;
 
-    let hash = Hasher::default()
-        .configure_iterations(config.hash_iterations)
-        .configure_memory_size(config.hash_memory_size)
-        .with_password(key)
-        .with_secret_key(&secret.to_string())
-        .hash()
+    let salt = encryption_key::random_string(16);
+    let hash_config = argon2::Config::default();
+    let hash = argon2::hash_encoded(key.as_bytes(), salt.as_bytes(), &hash_config)
         .map_err(Error::HashError)?;
+
+    //let hash = Hasher::default()
+    //    .configure_iterations(config.hash_iterations)
+    //    .configure_memory_size(config.hash_memory_size)
+    //    .with_password(key)
+    //    .with_secret_key(&secret.to_string())
+    //    .hash()
+    //    .map_err(Error::HashError)?;
 
     Ok(SiteKey(hash))
 }

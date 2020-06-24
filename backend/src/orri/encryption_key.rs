@@ -55,7 +55,7 @@ impl fmt::Display for Error {
 }
 
 
-fn random_string(len: usize) -> String {
+pub fn random_string(len: usize) -> String {
     rand::thread_rng()
         .sample_iter(&distributions::Alphanumeric)
         .take(len)
