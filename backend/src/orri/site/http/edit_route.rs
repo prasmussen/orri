@@ -2,7 +2,6 @@ use actix_web::{web, HttpResponse};
 use actix_session::Session;
 use crate::orri::app_state::AppState;
 use crate::orri::domain::{self, Domain};
-use crate::orri::encryption_key::{EncryptionKey};
 use crate::orri::site::{self, Site, GetSiteError};
 use crate::orri::slowhtml::html::Html;
 use crate::orri::slowhtml::html;
@@ -50,7 +49,7 @@ pub async fn handler(state: web::Data<AppState>, session: Session, domain: web::
     };
 
     handle(&state, &request_data)
-        .map(|view_data| prepare_response(view_data, &session, &state.config.encryption_key))
+        .map(|view_data| prepare_response(view_data, &session))
         .unwrap_or_else(handle_error)
 }
 
@@ -76,11 +75,11 @@ fn handle(state: &AppState, request_data: &RequestData) -> Result<ViewData, Erro
 }
 
 
-fn prepare_response(view_data: ViewData, session: &Session, encryption_key: &EncryptionKey) -> HttpResponse {
+fn prepare_response(view_data: ViewData, session: &Session) -> HttpResponse {
 
     let client_has_key = SessionData::from_session(session)
         .and_then(|session_data| session_data.get_site_key(&view_data.site.domain))
-        .and_then(|key_from_session| view_data.site.key.verify(&key_from_session, encryption_key).ok())
+        .and_then(|key_from_session| view_data.site.key.verify(&key_from_session).ok())
         .unwrap_or(false);
 
     let html = build_page(&view_data, client_has_key).render();

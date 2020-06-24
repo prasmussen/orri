@@ -83,7 +83,7 @@ fn handle(state: &AppState, session: Session, request_data: &Request) -> Result<
     let provided_key = get_provided_key(&request_data, &session_data, &site.domain)
         .ok_or(Error::NoKeyProvided())?;
 
-    let has_valid_key = site.key.verify(&provided_key, &state.config.encryption_key)
+    let has_valid_key = site.key.verify(&provided_key)
         .map_err(Error::VerifyKey)?;
 
     util::ensure(has_valid_key, Error::InvalidKey())?;

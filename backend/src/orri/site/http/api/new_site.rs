@@ -63,7 +63,7 @@ fn handle(state: &AppState, session: &Session, request_data: &Request) -> Result
     let file_info = FileInfo::new(&file_data, mime_type, time);
     let site_root = site::SiteRoot::new(&state.config.server.sites_root, domain);
 
-    let site_key = site_key::from_str(&state.config.site_key, &request_data.key, &state.config.encryption_key)
+    let site_key = site_key::from_str(&state.config.site_key, &request_data.key)
         .map_err(Error::SiteKey)?;
 
     let site = site::create(&state.config.site, &site_root, site_key, file_info, &file_data)

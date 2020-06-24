@@ -1,7 +1,7 @@
 use std::fmt;
 use serde::{Deserialize, Serialize};
 use crate::orri::util;
-use crate::orri::encryption_key::{self, EncryptionKey};
+use crate::orri::encryption_key;
 use argon2;
 
 
@@ -38,38 +38,24 @@ impl fmt::Display for SiteKey {
 }
 
 impl SiteKey {
-    pub fn verify(&self, key: &str, secret: &EncryptionKey) -> Result<bool, VerifyError> {
-
-        let is_valid = argon2::verify_encoded(&self.0, key.as_bytes())
-            .map_err(VerifyError::HashError)?;
-
-        //let is_valid = Verifier::default()
-        //    .with_hash(&self.0)
-        //    .with_password(key)
-        //    .with_secret_key(&secret.to_string())
-        //    .verify()
-        //    .map_err(VerifyError::HashError)?;
-
-        Ok(is_valid)
+    pub fn verify(&self, key: &str) -> Result<bool, VerifyError> {
+        argon2::verify_encoded(&self.0, key.as_bytes())
+            .map_err(VerifyError::HashError)
     }
 }
 
-pub fn from_str(config: &Config, key: &str, secret: &EncryptionKey) -> Result<SiteKey, Error> {
+pub fn from_str(config: &Config, key: &str) -> Result<SiteKey, Error> {
     util::ensure(key.len() >= config.min_length, Error::TooShort())?;
     util::ensure(key.len() <= config.max_length, Error::TooLong())?;
 
     let salt = encryption_key::random_string(16);
-    let hash_config = argon2::Config::default();
-    let hash = argon2::hash_encoded(key.as_bytes(), salt.as_bytes(), &hash_config)
-        .map_err(Error::HashError)?;
+    let hash_config = argon2::Config{
+        mem_cost: config.hash_memory_size,
+        time_cost: config.hash_iterations,
+        ..argon2::Config::default()
+    };
 
-    //let hash = Hasher::default()
-    //    .configure_iterations(config.hash_iterations)
-    //    .configure_memory_size(config.hash_memory_size)
-    //    .with_password(key)
-    //    .with_secret_key(&secret.to_string())
-    //    .hash()
-    //    .map_err(Error::HashError)?;
-
-    Ok(SiteKey(hash))
+    argon2::hash_encoded(key.as_bytes(), salt.as_bytes(), &hash_config)
+        .map(SiteKey)
+        .map_err(Error::HashError)
 }
