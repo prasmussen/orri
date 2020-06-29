@@ -40,6 +40,7 @@ in
     # Orri user
     users.extraUsers.orri = {
       createHome = true;
+      home = "/home/orri";
       description = "Orri service user";
     };
 
