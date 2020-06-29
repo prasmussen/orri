@@ -5,8 +5,8 @@ let
 
   cmd =
     ''
-    mkdir -p $out
-    cp -rf ${src}/* $out/
+    mkdir -p $out/static
+    cp -rf ${src}/* $out/static
     '';
 in
 pkgs.runCommand "orri-frontend" {} cmd
