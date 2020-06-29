@@ -52,9 +52,8 @@ in
       serviceConfig =
         {
           WorkingDirectory = "${orriBackend}";
-          Type = "notify";
           ExecStart = "${orriBackend}/bin/orri";
-          Restart = "on-failure";
+          Restart = "always";
           User = "orri";
         };
 
