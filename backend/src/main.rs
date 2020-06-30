@@ -5,6 +5,8 @@ use std::process;
 use actix_web::{web, App, HttpServer, guard};
 use actix_files::Files;
 use actix_session::CookieSession;
+use actix_http::RequestHead;
+use actix_http::http::{header};
 use actix_http::cookie::SameSite;
 use orri::app_state::{self, AppState};
 use orri::http::index;
@@ -13,14 +15,35 @@ use orri::site::http as site_http;
 use orri::site_key;
 use orri::site;
 use orri::route::Route;
-use orri::util;
 use orri::environment::{self, Environment};
 use log;
 
 
 
+pub fn host_guard(value: &str) -> HostGuard {
+    HostGuard(
+        header::HeaderValue::from_str(value).unwrap()
+    )
+}
 
-fn app_domain_routes(config: &mut web::ServiceConfig, state: &AppState, host: &'static str) {
+pub struct HostGuard(header::HeaderValue);
+
+
+impl guard::Guard for HostGuard {
+    fn check(&self, req: &RequestHead) -> bool {
+        let host = req.headers.get("Host")
+            .and_then(|value| value.to_str().ok())
+            .and_then(|value| value.split(':').next())
+            .and_then(|value| header::HeaderValue::from_str(value).ok())
+            .unwrap_or_else(|| header::HeaderValue::from_static(""));
+
+        host == self.0
+    }
+}
+
+
+
+fn app_domain_routes(config: &mut web::ServiceConfig, state: &AppState, host: &str) {
     let cookie_session = CookieSession::private(state.config.encryption_key.as_bytes())
         .http_only(true)
         .same_site(SameSite::Lax)
@@ -29,7 +52,7 @@ fn app_domain_routes(config: &mut web::ServiceConfig, state: &AppState, host: &'
 
     config.service(
         web::scope("/")
-            .guard(guard::Header("Host", host))
+            .guard(host_guard(host))
             .wrap(cookie_session)
 
             // User facing routes
@@ -175,7 +198,6 @@ async fn main() -> Result<(), io::Error> {
     env_logger::init();
 
     let state = prepare_app_state();
-    let domain = util::to_static_str(state.config.server.app_domain_with_port());
     let listen_addr = &state.config.server.listen_addr_with_port();
 
     log::info!("Starting server on {}", listen_addr);
@@ -184,7 +206,7 @@ async fn main() -> Result<(), io::Error> {
         App::new()
             .data(state.clone())
             .app_data(web::JsonConfig::default().limit(1024 * 1024 * 10))
-            .configure(|cfg| app_domain_routes(cfg, &state, domain))
+            .configure(|cfg| app_domain_routes(cfg, &state, &state.config.server.app_domain))
             .configure(sites_domain_routes)
     })
     .bind(listen_addr)?

@@ -31,14 +31,6 @@ pub struct ServerConfig {
 }
 
 impl ServerConfig {
-    pub fn app_domain_with_port(&self) -> String {
-        if self.listen_port == 80 || self.listen_port == 443 {
-            self.app_domain.clone()
-        } else {
-            format!("{}:{}", self.app_domain, self.listen_port)
-        }
-    }
-
     pub fn sites_domain_with_port(&self, domain: &str) -> String {
         if self.listen_port == 80 || self.listen_port == 443 {
             domain.to_string()
