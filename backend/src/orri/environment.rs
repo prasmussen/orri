@@ -44,7 +44,7 @@ impl fmt::Display for Error {
                 write!(f, "Environment key not found: «{0}»", key),
 
             Error::Parse { key, details } =>
-                write!(f, "Failed to parse environment key: «{0}», details: {1}", key, details),
+                write!(f, "Failed to parse value for environment key: «{0}», details: {1}", key, details),
         }
     }
 }
