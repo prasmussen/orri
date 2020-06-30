@@ -2,14 +2,13 @@ mod orri;
 
 use std::io;
 use std::process;
-use actix_web::{web, App, HttpServer, guard};
+use actix_web::{web, App, HttpServer};
 use actix_files::Files;
 use actix_session::CookieSession;
-use actix_http::RequestHead;
-use actix_http::http::{header};
 use actix_http::cookie::SameSite;
 use orri::app_state::{self, AppState};
 use orri::http::index;
+use orri::http::guard;
 use orri::site::http::api as site_api;
 use orri::site::http as site_http;
 use orri::site_key;
@@ -17,29 +16,6 @@ use orri::site;
 use orri::route::Route;
 use orri::environment::{self, Environment};
 use log;
-
-
-
-pub fn host_guard(value: &str) -> HostGuard {
-    HostGuard(
-        header::HeaderValue::from_str(value).unwrap()
-    )
-}
-
-pub struct HostGuard(header::HeaderValue);
-
-
-impl guard::Guard for HostGuard {
-    fn check(&self, req: &RequestHead) -> bool {
-        let host = req.headers.get("Host")
-            .and_then(|value| value.to_str().ok())
-            .and_then(|value| value.split(':').next())
-            .and_then(|value| header::HeaderValue::from_str(value).ok())
-            .unwrap_or_else(|| header::HeaderValue::from_static(""));
-
-        host == self.0
-    }
-}
 
 
 
@@ -52,7 +28,7 @@ fn app_domain_routes(config: &mut web::ServiceConfig, state: &AppState, host: &s
 
     config.service(
         web::scope("/")
-            .guard(host_guard(host))
+            .guard(guard::host_guard(host))
             .wrap(cookie_session)
 
             // User facing routes
