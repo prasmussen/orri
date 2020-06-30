@@ -35,7 +35,7 @@ impl fmt::Display for EnvironmentFromStrError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             EnvironmentFromStrError::UnknownEnvironment(s) =>
-                write!(f, "Unknown environment «{0}»", s),
+                write!(f, "Unknown server environment «{0}»", s),
         }
     }
 }

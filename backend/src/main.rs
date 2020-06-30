@@ -165,7 +165,7 @@ fn prepare_app_state() -> app_state::AppState {
         },
 
         Err(err) => {
-            log::error!("Failed to build config: {:?}", err);
+            log::error!("Failed to build config: {}", err);
             process::exit(1)
         },
     }
