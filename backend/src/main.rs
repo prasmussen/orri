@@ -78,6 +78,7 @@ fn sites_domain_routes(config: &mut web::ServiceConfig) {
 
 
 fn build_server_config(env: &Environment) -> Result<app_state::ServerConfig, environment::Error> {
+    let environment = environment::lookup(env, "SERVER_ENVIRONMENT")?;
     let app_domain = environment::lookup(env, "SERVER_APP_DOMAIN")?;
     let sites_domain = environment::lookup(env, "SERVER_SITES_DOMAIN")?;
     let protocol = environment::lookup(env, "SERVER_PROTOCOL")?;
@@ -87,6 +88,7 @@ fn build_server_config(env: &Environment) -> Result<app_state::ServerConfig, env
     let sites_root = environment::lookup(env, "SERVER_SITES_ROOT")?;
 
     Ok(app_state::ServerConfig{
+        environment,
         app_domain,
         sites_domain,
         protocol,

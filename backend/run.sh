@@ -2,6 +2,7 @@
 
 export ENCRYPTION_KEY="YdotmVZtV5R3PRnzfCiKBV3gtitSFg70"
 
+export SERVER_ENVIRONMENT="development"
 export SERVER_APP_DOMAIN="orri.devz"
 export SERVER_SITES_DOMAIN="orri.pagez"
 export SERVER_PROTOCOL="http"
