@@ -8,7 +8,7 @@ A hosted instance is available at [orri.dev](https://orri.dev)
 
 
 ## Data storage
-No database is used at this point. Each users site is stored in its own directory on the servers filesystem.
+No database is used at this point. Each site is stored in its own directory on the servers filesystem.
 The directory contains any uploaded files and a `site.json` with the details of the site and its routes.
 
 
