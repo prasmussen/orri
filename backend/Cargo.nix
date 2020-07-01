@@ -3155,7 +3155,7 @@ rec {
       };
       "orri" = rec {
         crateName = "orri";
-        version = "0.1.0";
+        version = "1.0.0";
         edition = "2018";
         crateBin = [
           { name = "orri"; path = "src/main.rs"; }
