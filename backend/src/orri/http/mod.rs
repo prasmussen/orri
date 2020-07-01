@@ -6,6 +6,7 @@ pub mod static_files;
 use serde::Serialize;
 use actix_web::dev::HttpResponseBuilder;
 use http::header;
+use actix_http::http as actix_http_helper;
 
 #[derive(Serialize)]
 pub struct Error {
@@ -26,4 +27,13 @@ pub fn no_cache_headers(builder: &mut HttpResponseBuilder) -> &mut HttpResponseB
         .set_header(header::CACHE_CONTROL, "no-cache, no-store, max-age=0, must-revalidate")
         .set_header(header::EXPIRES, "Mon, 01 Jan 1990 00:00:00 GMT")
         .set_header(header::PRAGMA, "no-cache")
+}
+
+
+pub fn get_host_value(headers: &actix_http_helper::header::HeaderMap) -> actix_http_helper::header::HeaderValue {
+        headers.get("Host")
+            .and_then(|value| value.to_str().ok())
+            .and_then(|value| value.split(':').next())
+            .and_then(|value| actix_http_helper::header::HeaderValue::from_str(value).ok())
+            .unwrap_or_else(|| actix_http_helper::header::HeaderValue::from_static(""))
 }
