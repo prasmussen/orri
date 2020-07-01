@@ -1,5 +1,6 @@
 pub mod index;
 pub mod guard;
+pub mod static_files;
 
 
 use serde::Serialize;

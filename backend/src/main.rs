@@ -3,12 +3,12 @@ mod orri;
 use std::io;
 use std::process;
 use actix_web::{web, App, HttpServer};
-use actix_files::Files;
 use actix_session::CookieSession;
 use actix_http::cookie::SameSite;
 use orri::app_state::{self, AppState};
 use orri::http::index;
 use orri::http::guard;
+use orri::http::static_files;
 use orri::site::http::api as site_api;
 use orri::site::http as site_http;
 use orri::site_key;
@@ -64,7 +64,7 @@ fn app_domain_routes(config: &mut web::ServiceConfig, state: &AppState, host: &s
             )
 
             // Static files
-            .service(Files::new("/static", state.config.server.static_path()))
+            .route("/static/{tail:.*}", web::get().to(static_files::handler))
     );
 }
 

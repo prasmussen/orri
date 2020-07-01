@@ -2,6 +2,7 @@ use std::fmt;
 use std::str::FromStr;
 use serde::{Deserialize, Serialize};
 use crate::orri::util;
+use std::path::{PathBuf};
 
 
 #[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
@@ -19,6 +20,10 @@ pub enum Error {
 impl UrlPath {
     pub fn root() -> UrlPath {
         UrlPath("/".to_string())
+    }
+
+    pub fn relative_path(&self) -> PathBuf {
+        PathBuf::from(self.0[1..].to_string())
     }
 }
 

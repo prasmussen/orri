@@ -79,10 +79,6 @@ impl ServerConfig {
         format!("{}:{}", self.listen_addr, self.listen_port)
     }
 
-    pub fn static_path(&self) -> PathBuf {
-        self.frontend_root.join(PathBuf::from("static"))
-    }
-
     fn sites_domain_with_port(&self, domain: &str) -> String {
         if self.environment == Environment::Production() || self.listen_port == 80 || self.listen_port == 443 {
             domain.to_string()
