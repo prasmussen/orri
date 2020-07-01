@@ -184,81 +184,6 @@ rec {
         };
         resolvedDefaultFeatures = [ "default" "http" "uri" ];
       };
-      "actix-files" = rec {
-        crateName = "actix-files";
-        version = "0.2.2";
-        edition = "2018";
-        sha256 = "0a9mkni5wdq51nrk0ng0jgm48zp435nmshdj9qmg2kvv3z5j4fqr";
-        libName = "actix_files";
-        authors = [
-          "Nikolay Kim <fafhrd91@gmail.com>"
-        ];
-        dependencies = [
-          {
-            name = "actix-http";
-            packageId = "actix-http";
-          }
-          {
-            name = "actix-service";
-            packageId = "actix-service";
-          }
-          {
-            name = "actix-web";
-            packageId = "actix-web";
-            usesDefaultFeatures = false;
-          }
-          {
-            name = "bitflags";
-            packageId = "bitflags";
-          }
-          {
-            name = "bytes";
-            packageId = "bytes";
-          }
-          {
-            name = "derive_more";
-            packageId = "derive_more";
-          }
-          {
-            name = "futures-core";
-            packageId = "futures-core";
-            usesDefaultFeatures = false;
-          }
-          {
-            name = "futures-util";
-            packageId = "futures-util";
-            usesDefaultFeatures = false;
-          }
-          {
-            name = "log";
-            packageId = "log";
-          }
-          {
-            name = "mime";
-            packageId = "mime";
-          }
-          {
-            name = "mime_guess";
-            packageId = "mime_guess";
-          }
-          {
-            name = "percent-encoding";
-            packageId = "percent-encoding";
-          }
-          {
-            name = "v_htmlescape";
-            packageId = "v_htmlescape";
-          }
-        ];
-        devDependencies = [
-          {
-            name = "actix-web";
-            packageId = "actix-web";
-            features = [ "openssl" ];
-          }
-        ];
-        
-      };
       "actix-http" = rec {
         crateName = "actix-http";
         version = "1.0.1";
@@ -3127,36 +3052,6 @@ rec {
         };
         resolvedDefaultFeatures = [ "default" "duration" ];
       };
-      "nom" = rec {
-        crateName = "nom";
-        version = "4.2.3";
-        edition = "2015";
-        sha256 = "1mkvby8b4m61p4g1px0pwr58yfkphyp1jcfbp4qfp7l6iqdaklia";
-        authors = [
-          "contact@geoffroycouprie.com"
-        ];
-        dependencies = [
-          {
-            name = "memchr";
-            packageId = "memchr";
-            usesDefaultFeatures = false;
-          }
-        ];
-        buildDependencies = [
-          {
-            name = "version_check";
-            packageId = "version_check 0.1.5";
-          }
-        ];
-        features = {
-          "default" = [ "std" ];
-          "regexp" = [ "regex" ];
-          "regexp_macros" = [ "regexp" "lazy_static" ];
-          "std" = [ "alloc" "memchr/use_std" ];
-          "verbose-errors" = [ "alloc" ];
-        };
-        resolvedDefaultFeatures = [ "alloc" "default" "std" ];
-      };
       "num-integer" = rec {
         crateName = "num-integer";
         version = "0.1.43";
@@ -3271,10 +3166,6 @@ rec {
         ];
         dependencies = [
           {
-            name = "actix-files";
-            packageId = "actix-files";
-          }
-          {
             name = "actix-http";
             packageId = "actix-http";
           }
@@ -3313,6 +3204,10 @@ rec {
           {
             name = "log";
             packageId = "log";
+          }
+          {
+            name = "mime_guess";
+            packageId = "mime_guess";
           }
           {
             name = "rand";
@@ -4774,7 +4669,7 @@ rec {
         buildDependencies = [
           {
             name = "version_check";
-            packageId = "version_check 0.9.2";
+            packageId = "version_check";
           }
         ];
         features = {
@@ -4881,83 +4776,7 @@ rec {
         ];
         
       };
-      "v_escape" = rec {
-        crateName = "v_escape";
-        version = "0.7.4";
-        edition = "2018";
-        sha256 = "19kdgk3iqzd295h9x7x7sbb5is3phw9v6zwyxcyqdl5m0wf102v6";
-        authors = [
-          "Juan Aguilar Santillana <mhpoin@gmail.com>"
-        ];
-        dependencies = [
-          {
-            name = "v_escape_derive";
-            packageId = "v_escape_derive";
-          }
-        ];
-        
-      };
-      "v_escape_derive" = rec {
-        crateName = "v_escape_derive";
-        version = "0.5.6";
-        edition = "2018";
-        sha256 = "1bk7qhh2wrv6pk7ir51f2mxzhzcj79ypl24b316vdi9zpha2mjn2";
-        procMacro = true;
-        authors = [
-          "Juan Aguilar Santillana <mhpoin@gmail.com>"
-        ];
-        dependencies = [
-          {
-            name = "nom";
-            packageId = "nom";
-          }
-          {
-            name = "proc-macro2";
-            packageId = "proc-macro2";
-          }
-          {
-            name = "quote";
-            packageId = "quote";
-          }
-          {
-            name = "syn";
-            packageId = "syn";
-            features = [ "visit" ];
-          }
-        ];
-        
-      };
-      "v_htmlescape" = rec {
-        crateName = "v_htmlescape";
-        version = "0.4.5";
-        edition = "2018";
-        sha256 = "0hbyx7r922q0czpb4f39g9kmdg3qmid7vfmn9x8lgw4c1nf96gp3";
-        authors = [
-          "Juan Aguilar Santillana <mhpoin@gmail.com>"
-        ];
-        dependencies = [
-          {
-            name = "cfg-if";
-            packageId = "cfg-if";
-          }
-          {
-            name = "v_escape";
-            packageId = "v_escape";
-          }
-        ];
-        
-      };
-      "version_check 0.1.5" = rec {
-        crateName = "version_check";
-        version = "0.1.5";
-        edition = "2015";
-        sha256 = "1pf91pvj8n6akh7w6j5ypka6aqz08b3qpzgs0ak2kjf4frkiljwi";
-        authors = [
-          "Sergio Benitez <sb@sergio.bz>"
-        ];
-        
-      };
-      "version_check 0.9.2" = rec {
+      "version_check" = rec {
         crateName = "version_check";
         version = "0.9.2";
         edition = "2015";
