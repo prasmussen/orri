@@ -47,7 +47,7 @@ fn build_body(site_config: &site::Config) -> Vec<Html> {
                     html::div(&[attrs::class("hero-body")], &[
                         html::div(&[attrs::class("column col-12")], &[
                             html::h1(&[], &[html::text("Get started")]),
-                            html::p(&[], &[html::text("Publish your website in seconds, no account required!")]),
+                            html::p(&[], &[html::text("Publish a website in seconds, no account required")]),
                             html::a(&[attrs::class("btn btn-lg btn-primary"), attrs::href(&new_site_route.to_string())], &[html::text("New site")]),
                             html::a(&[attrs::class("btn btn-lg"), attrs::href(&my_sites_route.to_string())], &[html::text("Manage site")]),
                         ]),
@@ -87,6 +87,23 @@ fn build_body(site_config: &site::Config) -> Vec<Html> {
                         ]),
                         html::div(&[attrs::class("card-header")], &[
                             html::text(&format!("Up to {} routes per site", max_routes))
+                        ]),
+                    ]),
+                ]),
+            ]),
+            html::div(&[attrs::class("columns margin-top-100")], &[
+                html::div(&[attrs::class("column col-12")], &[
+                    html::h3(&[], &[html::text("Frequently asked questions")]),
+                ]),
+            ]),
+            html::div(&[attrs::class("columns")], &[
+                html::div(&[attrs::class("column col-12 col-xs-12")], &[
+                    html::dl(&[], &[
+                        html::dt(&[], &[
+                            html::span(&[], &[html::text("Who is this for?")]),
+                        ]),
+                        html::dd(&[], &[
+                            html::text("People who are just starting making websites and don't want to be distracted by fancy features, but also experienced developers that want a place to host an experiment without needing to create an account somewhere.")
                         ]),
                     ]),
                 ]),

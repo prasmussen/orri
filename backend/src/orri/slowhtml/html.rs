@@ -258,3 +258,15 @@ pub fn header(attributes: &[Attribute], children: &[Html]) -> Html {
 pub fn section(attributes: &[Attribute], children: &[Html]) -> Html {
     node_trusted_name("section", attributes, children)
 }
+
+pub fn dl(attributes: &[Attribute], children: &[Html]) -> Html {
+    node_trusted_name("dl", attributes, children)
+}
+
+pub fn dt(attributes: &[Attribute], children: &[Html]) -> Html {
+    node_trusted_name("dt", attributes, children)
+}
+
+pub fn dd(attributes: &[Attribute], children: &[Html]) -> Html {
+    node_trusted_name("dd", attributes, children)
+}
