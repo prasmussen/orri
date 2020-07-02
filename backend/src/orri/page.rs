@@ -86,7 +86,7 @@ impl Head {
             html::meta(&[attrs::charset("utf-8")]),
             html::meta(&[attrs::http_equiv("X-UA-Compatible"), attrs::content("IE=edge")]),
             html::meta(&[attrs::name("viewport"), attrs::content("width=device-width, initial-scale=1")]),
-            html::meta(&[attrs::name("description"), attrs::content("Create websites, no account required")]),
+            html::meta(&[attrs::name("description"), attrs::content("Publish a website in seconds, no account required")]),
             html::title(&[], &[html::text(&self.title)]),
             html::link(&[attrs::rel("stylesheet"), attrs::href("/static/vendor/spectre.min.css")]),
             html::link(&[attrs::rel("stylesheet"), attrs::href("/static/orri.css")]),
