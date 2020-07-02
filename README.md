@@ -12,10 +12,6 @@ No database is used at this point. Each site is stored in its own directory on t
 The directory contains any uploaded files and a `site.json` with the details of the site and its routes.
 
 
-## SSL certificates
-A wildcard Let's Encrypt certificate is used to provide SSL to all created subdomains.
-
-
 ## Maintainability
 Vanilla js and a css framework without a build step was deliberately choosen
 to avoid having to change the frontend build system every 6 months.
