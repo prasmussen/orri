@@ -66,7 +66,7 @@ fn build_body(site_config: &site::Config) -> Vec<Html> {
                             html::span(&[attrs::class("card-title")], &[html::text("Subdomain")]),
                         ]),
                         html::div(&[attrs::class("card-header")], &[
-                            html::text("Custom subdomain with SSL certificate from Let's Encrypt")
+                            html::text("Custom subdomain with SSL")
                         ]),
                     ]),
                 ]),
