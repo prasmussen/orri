@@ -105,6 +105,12 @@ fn build_body(site_config: &site::Config) -> Vec<Html> {
                         html::dd(&[], &[
                             html::text("People who are just starting making websites and don't want to be distracted by fancy features, but also experienced developers that want a place to host an experiment without needing to create an account somewhere.")
                         ]),
+                        html::dt(&[], &[
+                            html::span(&[], &[html::text("Can I implement backend logic?")]),
+                        ]),
+                        html::dd(&[], &[
+                            html::text("No backend logic is supported at this time, but you can do CORS request with JavaScript to 3rd party services.")
+                        ]),
                     ]),
                 ]),
             ]),
