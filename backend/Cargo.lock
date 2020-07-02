@@ -1139,6 +1139,7 @@ version = "1.0.0"
 dependencies = [
  "actix-http",
  "actix-rt",
+ "actix-service",
  "actix-session",
  "actix-web",
  "data-url",

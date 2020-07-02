@@ -4,6 +4,7 @@ use crate::orri::domain::{self, Domain};
 use crate::orri::url_path::{self, UrlPath};
 use crate::orri::site::{self, GetSiteError, File};
 use crate::orri::http as http_helper;
+use crate::orri::http::{Host};
 use actix_http::http::{header};
 use std::io;
 use std::str::FromStr;
@@ -27,11 +28,15 @@ pub async fn handler(req: HttpRequest, state: web::Data<AppState>) -> HttpRespon
 
 
 fn handle(req: &HttpRequest, state: &AppState) -> Result<File, Error> {
-    let host = http_helper::get_host_value(req.headers());
-    let host_str = host.to_str().unwrap_or_default();
+    let extensions = req.extensions();
+    let maybe_host: Option<&Host> = extensions.get();
+    let host_str = maybe_host
+        .map(|host| host.0.to_str().unwrap_or_default())
+        .unwrap_or("");
 
     let domain = Domain::from_str(host_str)
         .map_err(Error::ParseDomain)?;
+
 
     let path = UrlPath::from_str(req.uri().path())
         .map_err(Error::ParsePath)?;

@@ -30,10 +30,16 @@ pub fn no_cache_headers(builder: &mut HttpResponseBuilder) -> &mut HttpResponseB
 }
 
 
-pub fn get_host_value(headers: &actix_http_helper::header::HeaderMap) -> actix_http_helper::header::HeaderValue {
-        headers.get("Host")
-            .and_then(|value| value.to_str().ok())
-            .and_then(|value| value.split(':').next())
-            .and_then(|value| actix_http_helper::header::HeaderValue::from_str(value).ok())
-            .unwrap_or_else(|| actix_http_helper::header::HeaderValue::from_static(""))
+#[derive(Debug)]
+pub struct Host(pub actix_http_helper::header::HeaderValue);
+
+
+pub fn get_host(headers: &actix_http_helper::header::HeaderMap) -> Host {
+    let host = headers.get("Host")
+        .and_then(|value| value.to_str().ok())
+        .and_then(|value| value.split(':').next())
+        .and_then(|value| actix_http_helper::header::HeaderValue::from_str(value).ok())
+        .unwrap_or_else(|| actix_http_helper::header::HeaderValue::from_static(""));
+
+    Host(host)
 }

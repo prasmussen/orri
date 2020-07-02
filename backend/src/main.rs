@@ -5,6 +5,8 @@ use std::process;
 use actix_web::{web, App, HttpServer};
 use actix_session::CookieSession;
 use actix_http::cookie::SameSite;
+use actix_http::httpmessage::HttpMessage;
+use actix_service::Service;
 use orri::app_state::{self, AppState};
 use orri::http::index;
 use orri::http::guard;
@@ -15,6 +17,7 @@ use orri::site_key;
 use orri::site;
 use orri::route::Route;
 use orri::environment::{self, Environment};
+use crate::orri::http as http_helper;
 use log;
 
 
@@ -65,6 +68,15 @@ fn app_domain_routes(config: &mut web::ServiceConfig, state: &AppState, host: &s
 
             // Static files
             .route("/static/{tail:.*}", web::get().to(static_files::handler))
+    );
+}
+
+fn sites_domain_root(config: &mut web::ServiceConfig, host: &str) {
+    config.service(
+        web::scope("/")
+            .guard(guard::host_guard(host))
+            .route("", web::get().to(site_http::app_redirect::handler))
+            .route("{tail:.*}", web::get().to(site_http::app_redirect::handler))
     );
 }
 
@@ -182,9 +194,15 @@ async fn main() -> Result<(), io::Error> {
 
     HttpServer::new(move || {
         App::new()
+            .wrap_fn(|req, srv| {
+                let host = http_helper::get_host(req.headers());
+                req.extensions_mut().insert(host);
+                srv.call(req)
+            })
             .data(state.clone())
             .app_data(web::JsonConfig::default().limit(1024 * 1024 * 10))
             .configure(|cfg| app_domain_routes(cfg, &state, &state.config.server.app_domain))
+            .configure(|cfg| sites_domain_root(cfg, &state.config.server.sites_domain))
             .configure(sites_domain_routes)
     })
     .bind(listen_addr)?
