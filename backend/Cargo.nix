@@ -3155,7 +3155,7 @@ rec {
       };
       "orri" = rec {
         crateName = "orri";
-        version = "1.0.0";
+        version = "1.1.0";
         edition = "2018";
         crateBin = [
           { name = "orri"; path = "src/main.rs"; }
@@ -3172,6 +3172,10 @@ rec {
           {
             name = "actix-rt";
             packageId = "actix-rt";
+          }
+          {
+            name = "actix-service";
+            packageId = "actix-service";
           }
           {
             name = "actix-session";
